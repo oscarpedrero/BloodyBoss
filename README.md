@@ -59,6 +59,14 @@ prefix: `.bb`.
   - Example: `.bbs set location "Alpha Wolf"`
 
 ```ansi
+.bb set hour <NameOfBoss> <Hour>
+```
+- Specifies the time when a specific boss will appear.
+  - **NameOfBoss**: The Boss name you want to specify the spawn location of.
+  - **Hour**:  The format must be in 24 hours and HH:MM. 01:00 for 1 AM and 13:00 for 1 PM.
+  - Example: `.bbs set hour "Alpha Wolf" 18:30`
+
+```ansi
 .bb items add <NameOfBoss> <ItemName> <ItemPrefabID> <Stack> <Chance>
 ```
 - Adds items/rewards to the randomized pool that the player will receive from defeating a particular Boss.
