@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Bloodstone.API;
-using Bloody.Command;
 using BloodyBoss.Configuration;
 using BloodyBoss.DB;
 using BloodyBoss.DB.Models;
@@ -14,6 +13,8 @@ using Unity.Collections;
 using ProjectM.Network;
 using Bloody.Core.Helper;
 using Bloody.Core.Patch.Server;
+using System.Collections.Concurrent;
+using System.Threading;
 
 
 namespace BloodyBoss.Systems
@@ -29,6 +30,8 @@ namespace BloodyBoss.Systems
         private static Dictionary<string, DateTime> lastKillerUpdate = new();
         private static EntityManager _entityManager = Plugin.SystemsCore.EntityManager;
         private static PrefabCollectionSystem _prefabCollectionSystem = Plugin.SystemsCore.PrefabCollectionSystem;
+
+        
 
         public static void OnDetahVblood(VBloodSystem sender, NativeList<VBloodConsumed> deathEvents)
         {
@@ -180,8 +183,8 @@ namespace BloodyBoss.Systems
 
         public static void StartTimer()
         {
-            Plugin.Logger.LogInfo("Start Timner");
-            var action = () =>
+            Plugin.Logger.LogInfo("Start Timner for BloodyBoss");
+            var actionBoss = () =>
             {
                 var date = DateTime.Now;
                 if (lastDateMinute.ToString("HH:mm") != date.ToString("HH:mm"))
@@ -206,44 +209,10 @@ namespace BloodyBoss.Systems
                         {
                             spawnBoss.CheckSpawnDespawn();
                         }
-
                     }
                 }
             };
-            ActionSchedulerPatch.RunActionEveryInterval(action, 1);
-            /*
-            var date = DateTime.Now;
-            if(lastDateSecond.ToString("HH:mm:ss") != date.ToString("HH:mm:ss"))
-            {
-                lastDateMinute = date;
-                var spawnsBoss = Database.BOSSES.Where(x => x.Hour == date.ToString("HH:mm") || x.HourDespawn == date.ToString("HH:mm:ss") ).ToList();
-                if(spawnsBoss.Count > 0)
-                {
-                    foreach (var spawnBoss in spawnsBoss)
-                    {
-                        BossCommand._lastBossSpawnModel = spawnBoss;
-                        spawnBoss.CheckSpawnDespawn();
-                    }
-                }
-            }
-            
-            if (lastDateSecond.ToString("HH:mm:ss") != date.ToString("HH:mm:ss"))
-            {
-                lastDateSecond = date;
-                var despawnsBoss = Database.BOSSES.Where(x => x.HourDespawn == date.ToString("HH:mm:ss") && x.bossSpawn == true).ToList();
-                if (despawnsBoss != null)
-                {
-                    foreach (var spawnBoss in despawnsBoss)
-                    {
-                        var _message = PluginConfig.DespawnMessageBossTemplate.Value;
-                        _message = _message.Replace("#worldbossname#", FontColorChatSystem.Yellow($"{BossCommand._lastBossSpawnModel.name}"));
-                        ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, FontColorChatSystem.Green($"{_message}"));
-                        BossCommand._lastBossSpawnModel = null;
-                        spawnBoss.CheckSpawnDespawn();
-                    }
-
-                }
-            }*/
+            TimerSystem.RunActionEveryInterval(actionBoss, 3);
 
         }
     }

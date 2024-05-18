@@ -184,7 +184,7 @@ namespace BloodyBoss.DB.Models
                     e.Write(_nameableInteractable);
                 });
             };
-            ActionSchedulerPatch.RunActionOnceAfterFrames(action, 10);
+            TimerSystem.RunActionOnceAfterFrames(action, 10);
             
         }
 

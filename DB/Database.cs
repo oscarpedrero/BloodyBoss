@@ -105,7 +105,7 @@ namespace BloodyBoss.DB
                 throw new BossExistException();
             }
 
-            var assetName = VWorld.Server.GetExistingSystemManaged<PrefabCollectionSystem>()._PrefabDataLookup[new PrefabGUID(prefabGUIDOfNPC)].AssetName.ToString();
+            var assetName = Plugin.SystemsCore.PrefabCollectionSystem._PrefabDataLookup[new PrefabGUID(prefabGUIDOfNPC)].AssetName.ToString();
             boss = new BossEncounterModel();
             boss.name = NPCName;
             boss.nameHash = NPCName.GetHashCode().ToString();

@@ -9,7 +9,6 @@ using BloodyBoss.DB;
 using Bloody.Core;
 using Bloodstone.API;
 using BloodyBoss.Systems;
-using Bloodstone.Hooks;
 using Bloody.Core.API;
 
 namespace BloodyBoss;
@@ -34,7 +33,7 @@ public class Plugin : BasePlugin, IRunOnInitialized
         _harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
         _harmony.PatchAll(System.Reflection.Assembly.GetExecutingAssembly());
 
-        Bloody.Core.API.EventsHandlerSystem.OnInitialize += GameDataOnInitialize;
+        EventsHandlerSystem.OnInitialize += GameDataOnInitialize;
 
         Logger = new(Log);
         
@@ -60,6 +59,8 @@ public class Plugin : BasePlugin, IRunOnInitialized
         Database.Initialize();
         Logger.LogInfo("Binding configuration");
         PluginConfig.Initialize();
+
+        EventsHandlerSystem.OnGameFrameUpdate += TimerSystem.OnGameFrame;
 
         BossSystem.StartTimer();
 
