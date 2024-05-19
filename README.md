@@ -7,6 +7,12 @@
 <details>
 <summary>Changelog</summary>
 
+`1.0.5`
+- Addeed clearicon command
+
+`1.0.4`
+- Added the PlayersOnlineMultiplier option in the general configuration of the mod to activate or deactivate the online player multiplier.
+
 `1.0.3`
 - Fixed the error where the Boss's life multiplier used the total number of users registered on the server and not the number of users online on the server.
 - Fixed the bug that the boss autospawn had. A new spawn system has been generated to avoid incompatibilities with other mods
