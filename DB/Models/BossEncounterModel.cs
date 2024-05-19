@@ -156,7 +156,14 @@ namespace BloodyBoss.DB.Models
             unit.Level = new ModifiableInt(level);
             boss.Write(unit);
             var health = boss.Read<Health>();
-            health.MaxHealth._Value = (health.MaxHealth * (players * multiplier));
+            if (PluginConfig.PlayersMultiplier.Value)
+            {
+                health.MaxHealth._Value = (health.MaxHealth * (players * multiplier));
+            } else
+            {
+                health.MaxHealth._Value = health.MaxHealth * multiplier;
+            }
+            
             health.Value = health.MaxHealth.Value;
             boss.Write(health);
             BuffSystem.BuffNPC(boss, user, new PrefabGUID(PluginConfig.BuffForWorldBoss.Value), 0);

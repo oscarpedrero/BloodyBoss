@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Text.RegularExpressions;
 using BepInEx.Configuration;
+using Unity.DebugDisplay;
 
 
 namespace BloodyBoss.Configuration
@@ -15,6 +16,7 @@ namespace BloodyBoss.Configuration
         public static ConfigEntry<string> DespawnMessageBossTemplate { get; private set; }
         public static ConfigEntry<string> KillMessageBossTemplate { get; private set; }
         public static ConfigEntry<string> VBloodFinalConcatCharacters { get; private set; }
+        public static ConfigEntry<bool> PlayersMultiplier { get; private set; }
 
         public static void Initialize()
         {
@@ -33,6 +35,7 @@ namespace BloodyBoss.Configuration
             DespawnMessageBossTemplate = _mainConfig.Bind("Main", "DespawnMessageBossTemplate", "You failed to kill the Boss #worldbossname# in time.", "The message that will appear globally if the players failed to kill the boss.");
             BuffForWorldBoss = _mainConfig.Bind("Main", "BuffForWorldBoss", 1163490655, "Buff that applies to each of the Bosses that we create with our mod.");
             VBloodFinalConcatCharacters = _mainConfig.Bind("Main", "WorldBossFinalConcatCharacters", "and", "Final string for concat two or more players kill a WorldBoss Boss.");
+            PlayersMultiplier = _mainConfig.Bind("Main", "PlayersOnlineMultiplier", false, "If you activate this option, the boss life formula changes from \"bosslife * multiplier\" to \"bosslife * multiplier * numberofonlineplayers\".");
         }
         public static void Destroy()
         {
