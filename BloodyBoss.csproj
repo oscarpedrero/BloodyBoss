@@ -4,7 +4,7 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<AssemblyName>BloodyBoss</AssemblyName>
 		<Description>BloodyBoss mod for VRising</Description>
-		<Version>1.0.0</Version>
+		<Version>1.0.3</Version>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
@@ -13,17 +13,17 @@
 		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.668" IncludeAssets="compile" />
 		<PackageReference Include="BepInEx.Core" Version="6.0.0-be.668" IncludeAssets="compile" />
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
-		<PackageReference Include="Costura.Fody" Version="5.7.0">
-			<!--<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>-->
-		  <PrivateAssets>all</PrivateAssets>
-		</PackageReference>
-		<PackageReference Include="Fody" Version="6.8.0">
-		  <!-- <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets> -->
-		  <PrivateAssets>all</PrivateAssets>
-		</PackageReference>
 		<PackageReference Include="VRising.Unhollowed.Client" Version="1.0.0.*" />
 		<PackageReference Include="VRising.VampireCommandFramework" Version="0.8.*" />
 		<PackageReference Include="VRising.Bloodstone" Version="0.1.*" />
+		<PackageReference Include="Costura.Fody" Version="5.7.0">
+			<!--<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>-->
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="Fody" Version="6.8.0">
+			<!-- <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets> -->
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
 	</ItemGroup>
 
 	<ItemGroup>
