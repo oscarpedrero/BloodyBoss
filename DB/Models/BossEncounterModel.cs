@@ -231,7 +231,7 @@ namespace BloodyBoss.DB.Models
             return false;
         }
 
-        internal void RemoveIcon(Entity user)
+        public void RemoveIcon(Entity user)
         {
             if (GetIcon())
             {

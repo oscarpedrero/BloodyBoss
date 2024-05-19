@@ -1,4 +1,6 @@
-﻿using BloodyBoss;
+﻿using Bloody.Core.Models;
+using Bloody.Core;
+using BloodyBoss;
 using BloodyBoss.DB;
 using BloodyBoss.DB.Models;
 using BloodyBoss.Exceptions;
@@ -6,14 +8,14 @@ using System;
 using Unity.Transforms;
 using VampireCommandFramework;
 
-namespace Bloody.Command
+namespace BloodyBoss.Command
 {
     [CommandGroup("bb")]
-    internal class BossCommand
+    public static class BossCommand
     {
 
         [Command("list", usage: "", description: "List of Boss", adminOnly: true)]
-        public void ListBoss(ChatCommandContext ctx)
+        public static void ListBoss(ChatCommandContext ctx)
         {
 
             var Boss = Database.BOSSES;
@@ -34,7 +36,7 @@ namespace Bloody.Command
         }
 
         [Command("test", usage: "", description: "Test Boss", adminOnly: true)]
-        public void Test(ChatCommandContext ctx, string bossName)
+        public static void Test(ChatCommandContext ctx, string bossName)
         {
 
             SetLocation(ctx,bossName);
@@ -58,7 +60,7 @@ namespace Bloody.Command
         //
         // 
         [Command("create", usage: "<NameOfBOSS> <PrefabGUIDOfBOSS> <Level> <Multiplier> <LifeTimeSeconds>", description: "Create a Boss", adminOnly: true)]
-        public void CreateBOSS(ChatCommandContext ctx, string bossName, int prefabGUID, int level, int multiplier, int lifeTime)
+        public static void CreateBOSS(ChatCommandContext ctx, string bossName, int prefabGUID, int level, int multiplier, int lifeTime)
         {
             try
             {
@@ -79,7 +81,7 @@ namespace Bloody.Command
         }
 
         [Command("remove", usage: "", description: "Remove a Boss", adminOnly: true)]
-        public void RemoveBoss(ChatCommandContext ctx, string bossName)
+        public static void RemoveBoss(ChatCommandContext ctx, string bossName)
         {
 
             try
@@ -130,7 +132,7 @@ namespace Bloody.Command
         }
 
         [Command("set hour", usage: "<NameOfBoss> <Hour>", description: "Adds the hour and minutes in which the Boss spawn.", adminOnly: true)]
-        public void SetHour(ChatCommandContext ctx, string BossName, string hour)
+        public static void SetHour(ChatCommandContext ctx, string BossName, string hour)
         {
             try
             {
@@ -158,7 +160,7 @@ namespace Bloody.Command
         }
 
         [Command("start", usage: "<NameOfBoss>", description: "The confrontation with a Boss begins.", adminOnly: true)]
-        public void start(ChatCommandContext ctx, string BossName)
+        public static void start(ChatCommandContext ctx, string BossName)
         {
             try
             {
@@ -168,6 +170,34 @@ namespace Bloody.Command
                     Boss.SetHourDespawn();
                     Boss.Spawn(user);
                     
+                }
+                else
+                {
+                    throw new BossDontExistException();
+                }
+            }
+            catch (BossDontExistException)
+            {
+                throw ctx.Error($"Boss with name '{BossName}' does not exist.");
+            }
+            catch (Exception e)
+            {
+                throw ctx.Error($"Error: {e.Message}");
+            }
+
+
+        }
+
+        [Command("clearicon", usage: "<NameOfBoss>", description: "The confrontation with a Boss begins.", adminOnly: true)]
+        public static void ClearIcon(ChatCommandContext ctx, string BossName)
+        {
+            try
+            {
+                var user = ctx.Event.SenderUserEntity;
+                if (Database.GetBoss(BossName, out BossEncounterModel Boss))
+                {
+                    UserModel userModel = Core.Users.GetUserByCharacterName(ctx.Event.User.CharacterName.Value);
+                    Boss.RemoveIcon(userModel.Entity);
                 }
                 else
                 {
