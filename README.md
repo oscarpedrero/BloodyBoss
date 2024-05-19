@@ -104,6 +104,13 @@ prefix: `.bb`.
   - **NameOfBoss**: The Boss name you want to start.
   - Example: `.bb start "Alpha Wolf"`
 
+```ansi
+.bb clearicon <NameOfBoss>
+```
+- If at any time you have an icon left on the minimap due to some error, with this command you can delete it.
+  - **NameOfBoss**: The Boss name you want to start.
+  - Example: `.bb clearicon "Alpha Wolf"`
+
 # Resources
 
 [Complete items list of prefabs/GUID](https://discord.com/channels/978094827830915092/1117273637024714862/1117273642817044571)
