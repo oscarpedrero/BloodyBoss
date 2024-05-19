@@ -31,8 +31,9 @@ namespace BloodyBoss.Systems
         private static Dictionary<string, DateTime> lastKillerUpdate = new();
         private static EntityManager _entityManager = Plugin.SystemsCore.EntityManager;
         private static PrefabCollectionSystem _prefabCollectionSystem = Plugin.SystemsCore.PrefabCollectionSystem;
+        public static Action bossAction;
 
-        
+
 
         public static void OnDetahVblood(VBloodSystem sender, NativeList<VBloodConsumed> deathEvents)
         {
@@ -185,7 +186,7 @@ namespace BloodyBoss.Systems
         public static void StartTimer()
         {
             Plugin.Logger.LogInfo("Start Timner for BloodyBoss");
-            var actionBoss = () =>
+            bossAction = () =>
             {
                 var date = DateTime.Now;
                 if (lastDateMinute.ToString("HH:mm") != date.ToString("HH:mm"))
@@ -212,8 +213,9 @@ namespace BloodyBoss.Systems
                         }
                     }
                 }
+                ActionSchedulerPatch.RunActionOnceAfterFrames(bossAction, 30);
             };
-            ActionSchedulerPatch.RunActionEveryInterval(actionBoss, 3);
+            ActionSchedulerPatch.RunActionOnceAfterFrames(bossAction, 30);
 
         }
     }

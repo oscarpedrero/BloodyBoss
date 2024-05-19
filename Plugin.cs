@@ -11,6 +11,8 @@ using Bloodstone.API;
 using BloodyBoss.Systems;
 using Bloody.Core.API;
 using BloodyBoss.Patch;
+using Bloodstone.Hooks;
+using System;
 
 namespace BloodyBoss;
 
@@ -63,8 +65,15 @@ public class Plugin : BasePlugin, IRunOnInitialized
 
         BossSystem.StartTimer();
 
+        
+
         EventsHandlerSystem.OnDeathVBlood += BossSystem.OnDetahVblood;
 
+    }
+
+    private static void GameFrame_OnUpdate()
+    {
+        Logger.LogInfo("GameFrame");
     }
 
     public void OnGameInitialized()
