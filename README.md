@@ -2,10 +2,15 @@
 
 **BloodyBoss** is a mod for V Rising that allows you to create VBlood world bosses with random rewards that can be set for each of the world bosses.
 
-![BloodyEncounters](https://github.com/oscarpedrero/BloodyEncounters/blob/master/Images/BloodyEncounters.png?raw=true)
+![BloodyBoss](https://github.com/oscarpedrero/BloodyBoss/blob/master/Images/BloodyBoss.png?raw=true)
 
 <details>
 <summary>Changelog</summary>
+
+`1.0.3`
+- Fixed the error where the Boss's life multiplier used the total number of users registered on the server and not the number of users online on the server.
+- Fixed the bug that the boss autospawn had. A new spawn system has been generated to avoid incompatibilities with other mods
+- Fixed bug that caused the BloodyBoss reward system and death message to also affect the game's default Vblood if the VBlood Prefab was configured as BloodyBoss.
 
 `1.0.0`
 - Initial public release of the mod
@@ -113,4 +118,4 @@ prefix: `.bb`.
 
 - @Vex, owner & founder of [Vexor RPG](https://discord.gg/JpVsKVvKNR) server, a tester and great supporter who provided his server as a test platform and took care of all the graphics and documentation.
 
-![Bloody](https://github.com/oscarpedrero/BloodyMerchant/blob/master/Images/Bloody.png?raw=true)
+![Bloody](https://github.com/oscarpedrero/BloodyBoss/blob/master/Images/Bloody.png?raw=true)

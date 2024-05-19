@@ -15,6 +15,7 @@ using Bloody.Core.Helper;
 using Bloody.Core.Patch.Server;
 using System.Collections.Concurrent;
 using System.Threading;
+using BloodyBoss.Patch;
 
 
 namespace BloodyBoss.Systems
@@ -47,7 +48,7 @@ namespace BloodyBoss.Systems
 
                         var modelBoss = Database.BOSSES.Where(x => x.AssetName == vblood.ToString() && x.bossSpawn == true).FirstOrDefault();
 
-                        if (modelBoss != null)
+                        if (modelBoss != null && modelBoss.GetBossEntity())
                         {
                             AddKiller(vblood.ToString(), user.CharacterName.ToString());
                             AddKillerEntity(vblood.ToString(), event_vblood.Target);
@@ -212,7 +213,7 @@ namespace BloodyBoss.Systems
                     }
                 }
             };
-            TimerSystem.RunActionEveryInterval(actionBoss, 3);
+            ActionSchedulerPatch.RunActionEveryInterval(actionBoss, 3);
 
         }
     }

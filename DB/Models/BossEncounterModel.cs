@@ -14,6 +14,8 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Bloody.Core.Patch.Server;
+using Bloody.Core;
+using BloodyBoss.Patch;
 
 namespace BloodyBoss.DB.Models
 {
@@ -149,7 +151,7 @@ namespace BloodyBoss.DB.Models
 
         public void ModifyBoss(Entity user, Entity boss)
         {
-            var players = UserSystem.GetAllUsers().Length;
+            var players = Core.Users.Online.ToList().Count;
             var unit = boss.Read<UnitLevel>();
             unit.Level = new ModifiableInt(level);
             boss.Write(unit);
@@ -184,7 +186,7 @@ namespace BloodyBoss.DB.Models
                     e.Write(_nameableInteractable);
                 });
             };
-            TimerSystem.RunActionOnceAfterFrames(action, 10);
+            ActionSchedulerPatch.RunActionOnceAfterFrames(action, 10);
             
         }
 
@@ -205,7 +207,7 @@ namespace BloodyBoss.DB.Models
             return false;
         }
 
-        private bool GetBossEntity()
+        public bool GetBossEntity()
         {
             var entities = QueryComponents.GetEntitiesByComponentTypes<NameableInteractable, VBloodUnit>(EntityQueryOptions.IncludeDisabledEntities);
             foreach (var entity in entities)
