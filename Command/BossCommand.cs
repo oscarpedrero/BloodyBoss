@@ -1,4 +1,4 @@
-﻿using Bloody.Core.Models;
+﻿using Bloody.Core.Models.v1;
 using Bloody.Core;
 using BloodyBoss;
 using BloodyBoss.DB;
@@ -7,6 +7,7 @@ using BloodyBoss.Exceptions;
 using System;
 using Unity.Transforms;
 using VampireCommandFramework;
+using Bloody.Core.GameData.v1;
 
 namespace BloodyBoss.Command
 {
@@ -196,7 +197,7 @@ namespace BloodyBoss.Command
                 var user = ctx.Event.SenderUserEntity;
                 if (Database.GetBoss(BossName, out BossEncounterModel Boss))
                 {
-                    UserModel userModel = Core.Users.GetUserByCharacterName(ctx.Event.User.CharacterName.Value);
+                    UserModel userModel = GameData.Users.GetUserByCharacterName(ctx.Event.User.CharacterName.Value);
                     Boss.RemoveIcon(userModel.Entity);
                 }
                 else

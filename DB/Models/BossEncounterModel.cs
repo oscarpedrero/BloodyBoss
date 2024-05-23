@@ -2,8 +2,8 @@
 using BloodyBoss.Configuration;
 using BloodyBoss.Exceptions;
 using BloodyBoss.Systems;
-using Bloody.Core.API;
-using Bloody.Core.Helper;
+using Bloody.Core.API.v1;
+using Bloody.Core.Helper.v1;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
@@ -13,9 +13,10 @@ using System.Linq;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Bloody.Core.Patch.Server;
+using Bloody.Core.Patch.v1.Server;
 using Bloody.Core;
 using BloodyBoss.Patch;
+using Bloody.Core.GameData.v1;
 
 namespace BloodyBoss.DB.Models
 {
@@ -141,7 +142,7 @@ namespace BloodyBoss.DB.Models
         {
             var number = new System.Random().Next(1, 100);
 
-            if (number <= (percentage * 100))
+            if (number <= (percentage * 1))
             {
                 return true;
             }
@@ -151,7 +152,7 @@ namespace BloodyBoss.DB.Models
 
         public void ModifyBoss(Entity user, Entity boss)
         {
-            var players = Core.Users.Online.ToList().Count;
+            var players = GameData.Users.Online.ToList().Count;
             var unit = boss.Read<UnitLevel>();
             unit.Level = new ModifiableInt(level);
             boss.Write(unit);

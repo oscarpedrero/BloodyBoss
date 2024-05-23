@@ -7,6 +7,10 @@
 <details>
 <summary>Changelog</summary>
 
+`1.0.6`
+- Bloody.Core dependency removed as dll and added as framework
+- The drop calculation formula has been solved, now it is not 100% as it used to be
+
 `1.0.5`
 - Addeed clearicon command
 
@@ -28,6 +32,7 @@ Ensure the following mods are installed for seamless integration:
 1. [BepInEx](https://github.com/BepInEx/BepInEx)
 2. [VampireCommandFramework](https://github.com/decaprime/VampireCommandFramework)
 3. [Bloodstone](https://github.com/decaprime/Bloodstone)
+3. [Bloody.Core](https://github.com/oscarpedrero/BloodyCore)
 
 ## Installation
 1. Copy `BloodyBoss.dll` to your `BepInEx/Plugins` directory.
@@ -85,8 +90,8 @@ prefix: `.bb`.
   - **ItemName**: The name of the item/reward appearing in the chat once the player defeats the Boss.
   - **ItemPrefabID**: The GUID for the item you want to add.
   - **Stack**: The quantity of items the player will gain upon winning the encounter (e.g., x25 Blood Potions).
-  - **Chance**: The chance of that item to get upon defeating the Boss (while 1 is equal to 100% and 0.9 is 90%... etc).
-  - Example: `.bb items add "Alpha Wolf" "Blood Rose Potion" 429052660 25 1`
+  - **Chance**: The chance of that item to get upon defeating the Boss from 1 to 100.
+  - Example: `.bb items add "Alpha Wolf" "Blood Rose Potion" 429052660 25 10`
 
 ```ansi
 .bb items remove <NameOfBoss> <ItemName>

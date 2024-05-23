@@ -9,26 +9,33 @@ using BloodyBoss.DB;
 using Bloody.Core;
 using Bloodstone.API;
 using BloodyBoss.Systems;
-using Bloody.Core.API;
+using Bloody.Core.API.v1;
 using BloodyBoss.Patch;
-using Bloodstone.Hooks;
-using System;
 
 namespace BloodyBoss;
 
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
 [BepInDependency("gg.deca.VampireCommandFramework")]
 [BepInDependency("gg.deca.Bloodstone")]
+[BepInDependency("trodi.Bloody.Core")]
+[Bloodstone.API.Reloadable]
 public class Plugin : BasePlugin, IRunOnInitialized
 {
     Harmony _harmony;
 
-    public static Bloody.Core.Helper.Logger Logger;
+    public static Bloody.Core.Helper.v1.Logger Logger;
     public static SystemsCore SystemsCore;
 
     public override void Load()
     {
-        
+
+
+        if (!Core.IsServer)
+        {
+            Log.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is only for server!");
+            return;
+        }
+
         // Plugin startup logic
         Log.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} version {MyPluginInfo.PLUGIN_VERSION} is loaded!");
 

@@ -4,7 +4,7 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<AssemblyName>BloodyBoss</AssemblyName>
 		<Description>BloodyBoss mod for VRising</Description>
-		<Version>1.0.5</Version>
+		<Version>1.0.6</Version>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
@@ -16,21 +16,7 @@
 		<PackageReference Include="VRising.Unhollowed.Client" Version="1.0.0.*" />
 		<PackageReference Include="VRising.VampireCommandFramework" Version="0.8.*" />
 		<PackageReference Include="VRising.Bloodstone" Version="0.1.*" />
-		<PackageReference Include="Costura.Fody" Version="5.7.0">
-			<!--<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>-->
-			<PrivateAssets>all</PrivateAssets>
-		</PackageReference>
-		<PackageReference Include="Fody" Version="6.8.0">
-			<!-- <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets> -->
-			<PrivateAssets>all</PrivateAssets>
-		</PackageReference>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Reference Include="Bloody.Core">
-			<HintPath>Bloody.Core.dll</HintPath>
-			<Private>true</Private>
-		</Reference>
+		<PackageReference Include="Bloody.Core" Version="1.2.*" />
 	</ItemGroup>
 	<Target Name="CopyDLLsServer" AfterTargets="Build">
 		<Message Text="DLL to V Rising Server" Importance="High" />
