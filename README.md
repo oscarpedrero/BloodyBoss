@@ -7,6 +7,9 @@
 <details>
 <summary>Changelog</summary>
 
+`1.0.7`
+- Fixed bug that caused the BloodyBoss reward system and death message to also affect the game's default Vblood if the VBlood Prefab was set to BloodyBoss and BloodyBoss was active at that time.
+
 `1.0.6`
 - Bloody.Core dependency removed as dll and added as framework
 - The drop calculation formula has been solved, now it is not 100% as it used to be

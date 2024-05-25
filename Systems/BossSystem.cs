@@ -10,7 +10,6 @@ using ProjectM;
 using Unity.Entities;
 using Unity.Collections;
 using ProjectM.Network;
-using Bloody.Core.Patch.v1.Server;
 using BloodyBoss.Patch;
 using Bloody.Core.Helper.v1;
 using Bloody.Core.API.v1;
@@ -41,12 +40,15 @@ namespace BloodyBoss.Systems
                 {
                     if (_entityManager.HasComponent<PlayerCharacter>(event_vblood.Target))
                     {
+                        
                         var player = _entityManager.GetComponentData<PlayerCharacter>(event_vblood.Target);
                         var user = _entityManager.GetComponentData<User>(player.UserEntity);
                         var vblood = _prefabCollectionSystem._PrefabDataLookup[event_vblood.Source].AssetName;
 
                         var modelBoss = Database.BOSSES.Where(x => x.AssetName == vblood.ToString() && x.bossSpawn == true).FirstOrDefault();
 
+                        //Entity entity = _prefabCollectionSystem._PrefabLookupMap[event_vblood.Source];
+                        
                         if (modelBoss != null && modelBoss.GetBossEntity())
                         {
                             AddKiller(vblood.ToString(), user.CharacterName.ToString());
@@ -54,6 +56,7 @@ namespace BloodyBoss.Systems
                             lastKillerUpdate[vblood.ToString()] = DateTime.Now;
                             checkKiller = true;
                         }
+                      
                     }
                 }
             }
@@ -78,11 +81,22 @@ namespace BloodyBoss.Systems
                         {
                             if (entity.Equals(modelBoss.bossEntity))
                             {
-                                Entity user = UserSystem.GetOneUserOnline();
-                                modelBoss.RemoveIcon(user);
-                                modelBoss.bossSpawn = false;
-                                SendAnnouncementMessage(kvp.Key, modelBoss);
-                                break;
+
+                                var health = entity.Read<Health>();
+                                
+                                if (health.IsDead)
+                                {
+                                    Entity user = UserSystem.GetOneUserOnline();
+                                    modelBoss.RemoveIcon(user);
+                                    modelBoss.bossSpawn = false;
+                                    SendAnnouncementMessage(kvp.Key, modelBoss);
+                                    break;
+                                } else
+                                {
+                                    RemoveKillers(kvp.Key);
+                                    RemoveKillersEntity(kvp.Key);
+                                    break;
+                                }
                             }
                         }
                     }
