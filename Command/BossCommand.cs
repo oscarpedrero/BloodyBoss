@@ -8,6 +8,8 @@ using System;
 using Unity.Transforms;
 using VampireCommandFramework;
 using Bloody.Core.GameData.v1;
+using Stunlock.Core;
+using ProjectM;
 
 namespace BloodyBoss.Command
 {
@@ -46,6 +48,20 @@ namespace BloodyBoss.Command
             SetHour(ctx,bossName, x1MinLater.ToString("HH:mm"));
         }
 
+        [Command("reload", usage: "", description: "Reload Database Boss", adminOnly: true)]
+        public static void ReloadDatabase(ChatCommandContext ctx)
+        {
+            try
+            {
+                Database.loadDatabase();
+                ctx.Reply($"Boss database reload successfully");
+            } catch(Exception e)
+            {
+                throw ctx.Error($"Error: {e.Message}");
+            }
+            
+        }
+
         // .bb Test -1391546313 200 2 60 
         // .bb Boss items add Test ItemName -257494203 20 1
         // 
@@ -65,6 +81,10 @@ namespace BloodyBoss.Command
         {
             try
             {
+                var entityUnit = Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap[new PrefabGUID(prefabGUID)];
+
+                if(!entityUnit.Has<VBloodUnit>()) throw ctx.Error($"The PrefabGUID entered does not correspond to a VBlood Unit.");
+
                 if (Database.AddBoss(bossName, prefabGUID, level, multiplier, lifeTime))
                 {
                     ctx.Reply($"Boss '{bossName}' created successfully");

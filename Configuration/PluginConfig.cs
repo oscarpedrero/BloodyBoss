@@ -17,6 +17,7 @@ namespace BloodyBoss.Configuration
         public static ConfigEntry<string> KillMessageBossTemplate { get; private set; }
         public static ConfigEntry<string> VBloodFinalConcatCharacters { get; private set; }
         public static ConfigEntry<bool> PlayersMultiplier { get; private set; }
+        public static ConfigEntry<bool> ClearDropTable { get; private set; }
 
         public static void Initialize()
         {
@@ -36,6 +37,7 @@ namespace BloodyBoss.Configuration
             BuffForWorldBoss = _mainConfig.Bind("Main", "BuffForWorldBoss", 1163490655, "Buff that applies to each of the Bosses that we create with our mod.");
             VBloodFinalConcatCharacters = _mainConfig.Bind("Main", "WorldBossFinalConcatCharacters", "and", "Final string for concat two or more players kill a WorldBoss Boss.");
             PlayersMultiplier = _mainConfig.Bind("Main", "PlayersOnlineMultiplier", false, "If you activate this option, the boss life formula changes from \"bosslife * multiplier\" to \"bosslife * multiplier * numberofonlineplayers\".");
+            ClearDropTable = _mainConfig.Bind("Main", "ClearDropTable", false, "If you activate this option it will remove the original vblood droptable.");
         }
         public static void Destroy()
         {

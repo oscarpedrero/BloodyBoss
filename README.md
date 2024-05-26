@@ -7,6 +7,11 @@
 <details>
 <summary>Changelog</summary>
 
+`1.0.8`
+- Added protection against being able to include a drive other than VBlood.
+- Added command to reload the vblood database in case the json is changed by hand.
+- Added option in the BloodyBoss.cfg configuration file a section to prevent the boss from doing its original drop
+
 `1.0.7`
 - Fixed bug that caused the BloodyBoss reward system and death message to also affect the game's default Vblood if the VBlood Prefab was set to BloodyBoss and BloodyBoss was active at that time.
 
@@ -41,10 +46,64 @@ Ensure the following mods are installed for seamless integration:
 1. Copy `BloodyBoss.dll` to your `BepInEx/Plugins` directory.
 2. Launch the server once to generate the config file; configurations will be located in the `BepInEx/Config` directory.
 
+## Configuration
+
+**BloodyBoss.cfg** In the configuration file **BloodyBoss.cfg** you have several options to configure the mod to your liking
+
+```
+[Main]
+
+## Determines whether the random encounter timer is enabled or not.
+# Setting type: Boolean
+# Default value: true
+Enabled = true
+
+## The message that will appear globally once the boss gets killed.
+# Setting type: String
+# Default value: The Boss has been defeated. Congratulations to #user# for beating #vblood#!
+KillMessageBossTemplate = The Boss has been defeated. Congratulations to #user# for beating #vblood#!
+
+## The message that will appear globally one the boss gets spawned.
+# Setting type: String
+# Default value: A Boss #worldbossname# has been summon you got #time# minutes to defeat it!.
+SpawnMessageBossTemplate = A Boss #worldbossname# has been summon you got #time# minutes to defeat it!.
+
+## The message that will appear globally if the players failed to kill the boss.
+# Setting type: String
+# Default value: You failed to kill the Boss #worldbossname# in time.
+DespawnMessageBossTemplate = You failed to kill the Boss #worldbossname# in time.
+
+## Buff that applies to each of the Bosses that we create with our mod.
+# Setting type: Int32
+# Default value: 1163490655
+BuffForWorldBoss = 1163490655
+
+## Final string for concat two or more players kill a WorldBoss Boss.
+# Setting type: String
+# Default value: and
+WorldBossFinalConcatCharacters = and
+
+## If you activate this option, the boss life formula changes from "bosslife * multiplier" to "bosslife * multiplier * numberofonlineplayers".
+# Setting type: Boolean
+# Default value: false
+PlayersOnlineMultiplier = false
+
+## If you activate this option it will remove the original vblood droptable.
+# Setting type: Boolean
+# Default value: false
+ClearDropTable = false
+```
+
 ## Commands
 It's crucial to note that for any command containing a name argument such as `<NameOfBoss>` or `<ItemName>`, if your name consists of more than one word, include it inside `""` to ensure proper functionality (e.g., "Alpha Wolf" or "Blood Rose Potion").
 
 prefix: `.bb`.
+
+```ansi
+.bb reload
+```
+- Reload boss database in case the json is changed by hand
+  - Example: `.bb reload`
 
 ```ansi
 .bb create <NameOfBoss> <PrefabGUIDOfBOSS> <Level> <Multiplier> <LifeTimeSeconds>

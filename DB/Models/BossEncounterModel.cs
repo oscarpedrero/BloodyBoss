@@ -16,6 +16,7 @@ using Unity.Mathematics;
 using Bloody.Core;
 using BloodyBoss.Patch;
 using Bloody.Core.GameData.v1;
+using ProjectM.Shared;
 
 namespace BloodyBoss.DB.Models
 {
@@ -99,6 +100,14 @@ namespace BloodyBoss.DB.Models
         {
             SpawnSystem.SpawnUnitWithCallback(sender, new PrefabGUID(PrefabGUID), new(x, z), Lifetime+5, (Entity e) => {
                 ModifyBoss(sender, e);
+                if (PluginConfig.ClearDropTable.Value)
+                {
+                    var action = () =>
+                    {
+                        ClearDropTable(e);
+                    };
+                    ActionSchedulerPatch.RunActionOnceAfterFrames(action, 10);
+                }
             });
             var _message = PluginConfig.SpawnMessageBossTemplate.Value;
             _message = _message.Replace("#time#", FontColorChatSystem.Yellow($"{Lifetime / 60}"));
@@ -106,6 +115,12 @@ namespace BloodyBoss.DB.Models
             ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, FontColorChatSystem.Green($"{_message}"));
 
             return true;
+        }
+
+        private void ClearDropTable(Entity boss)
+        {
+            var dropTableBuffer = boss.ReadBuffer<DropTableBuffer>();
+            dropTableBuffer.Clear();
         }
 
         public bool DropItems(string vblood)
@@ -163,6 +178,9 @@ namespace BloodyBoss.DB.Models
             {
                 health.MaxHealth._Value = health.MaxHealth * multiplier;
             }
+
+
+            
             
             health.Value = health.MaxHealth.Value;
             boss.Write(health);
