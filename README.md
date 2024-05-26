@@ -102,7 +102,7 @@ prefix: `.bb`.
 ```ansi
 .bb reload
 ```
-- Reload boss database in case the json is changed by hand
+- Reload boss database in case the json is changed by hand (It only reloads bosses, it does not reload mod settings)
   - Example: `.bb reload`
 
 ```ansi
