@@ -13,6 +13,7 @@ using ProjectM.Network;
 using BloodyBoss.Patch;
 using Bloody.Core.Helper.v1;
 using Bloody.Core.API.v1;
+using Stunlock.Core;
 
 
 namespace BloodyBoss.Systems
@@ -207,9 +208,18 @@ namespace BloodyBoss.Systems
                     var spawnsBoss = Database.BOSSES.Where(x => x.Hour == date.ToString("HH:mm")).ToList();
                     if (spawnsBoss.Count > 0)
                     {
+                        
                         foreach (var spawnBoss in spawnsBoss)
                         {
-                            spawnBoss.CheckSpawnDespawn();
+                            var entityUnit = Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap[new PrefabGUID(spawnBoss.PrefabGUID)];
+
+                            if (entityUnit.Has<VBloodUnit>())
+                            {
+                                spawnBoss.CheckSpawnDespawn();
+                            } else
+                            {
+                                Plugin.Logger.LogError($"The PrefabGUID does not correspond to a VBlood Unit. Ignore Spawn");
+                            }
                         }
                     }
                 }
@@ -219,9 +229,18 @@ namespace BloodyBoss.Systems
                     var despawnsBoss = Database.BOSSES.Where(x => x.HourDespawn == date.ToString("HH:mm:ss") && x.bossSpawn == true).ToList();
                     if (despawnsBoss != null)
                     {
-                        foreach (var spawnBoss in despawnsBoss)
+                        foreach (var deSpawnBoss in despawnsBoss)
                         {
-                            spawnBoss.CheckSpawnDespawn();
+                            var entityUnit = Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap[new PrefabGUID(deSpawnBoss.PrefabGUID)];
+
+                            if (entityUnit.Has<VBloodUnit>())
+                            {
+                                deSpawnBoss.CheckSpawnDespawn();
+                            }
+                            else
+                            {
+                                Plugin.Logger.LogError($"The PrefabGUID does not correspond to a VBlood Unit. Ignore Spawn");
+                            }
                         }
                     }
                 }
