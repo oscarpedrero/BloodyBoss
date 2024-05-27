@@ -1,10 +1,6 @@
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/K3K8ENRQY)
-
 # BloodyBoss
 
 **BloodyBoss** is a mod for V Rising that allows you to create VBlood world bosses with random rewards that can be set for each of the world bosses.
-
-![BloodyBoss](https://github.com/oscarpedrero/BloodyBoss/blob/master/Images/BloodyBoss.png?raw=true)
 
 <details>
 <summary>Changelog</summary>
@@ -36,13 +32,17 @@
 - Initial public release of the mod
 </details>
 
+# Support this project
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/K3K8ENRQY)
+
 ## Requirements
 Ensure the following mods are installed for seamless integration:
 
-1. [BepInEx](https://github.com/BepInEx/BepInEx)
-2. [VampireCommandFramework](https://github.com/decaprime/VampireCommandFramework)
-3. [Bloodstone](https://github.com/decaprime/Bloodstone)
-3. [Bloody.Core](https://github.com/oscarpedrero/BloodyCore)
+1. [BepInEx](https://thunderstore.io/c/v-rising/p/BepInEx/BepInExPack_V_Rising/)
+2. [Bloodstone](https://thunderstore.io/c/v-rising/p/deca/Bloodstone/)
+3. [VampireCommandFramework](https://thunderstore.io/c/v-rising/p/deca/VampireCommandFramework/)
+4. [Bloody.Core](https://thunderstore.io/c/v-rising/p/Trodi/BloodyCore/)
 
 ## Installation
 1. Copy `BloodyBoss.dll` to your `BepInEx/Plugins` directory.
@@ -199,5 +199,3 @@ prefix: `.bb`.
 **Special thanks to the testers and supporters of the project:**
 
 - @Vex, owner & founder of [Vexor RPG](https://discord.gg/JpVsKVvKNR) server, a tester and great supporter who provided his server as a test platform and took care of all the graphics and documentation.
-
-![Bloody](https://github.com/oscarpedrero/BloodyBoss/blob/master/Images/Bloody.png?raw=true)
