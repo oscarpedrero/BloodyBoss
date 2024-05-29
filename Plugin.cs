@@ -54,6 +54,7 @@ public class Plugin : BasePlugin, IRunOnInitialized
 
     public override bool Unload()
     {
+        EventsHandlerSystem.OnInitialize -= GameDataOnInitialize;
         CommandRegistry.UnregisterAssembly();
         _harmony?.UnpatchSelf();
         return true;
@@ -71,7 +72,6 @@ public class Plugin : BasePlugin, IRunOnInitialized
         PluginConfig.Initialize();
 
         BossSystem.StartTimer();
-
         
 
         EventsHandlerSystem.OnDeathVBlood += BossSystem.OnDetahVblood;

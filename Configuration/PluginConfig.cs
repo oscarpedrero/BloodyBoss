@@ -27,11 +27,11 @@ namespace BloodyBoss.Configuration
             {
                 Directory.CreateDirectory(configFolder);
             }
-            var mainConfigFilePath = Path.Combine(configFolder, "BloodyBoss.cfg");
+            var mainConfigFilePath = Path.Combine(bepInExConfigFolder, "BloodyBoss.cfg");
             _mainConfig = File.Exists(mainConfigFilePath) ? new ConfigFile(mainConfigFilePath, false) : new ConfigFile(mainConfigFilePath, true);
 
             Enabled = _mainConfig.Bind("Main", "Enabled", true, "Determines whether the random encounter timer is enabled or not.");
-            KillMessageBossTemplate = _mainConfig.Bind("Main", "KillMessageBossTemplate", "The Boss has been defeated. Congratulations to #user# for beating #vblood#!", "The message that will appear globally once the boss gets killed.");
+            KillMessageBossTemplate = _mainConfig.Bind("Main", "KillMessageBossTemplate", "The #vblood# boss has been defeated by the following brave warriors:", "The message that will appear globally once the boss gets killed.");
             SpawnMessageBossTemplate = _mainConfig.Bind("Main", "SpawnMessageBossTemplate", "A Boss #worldbossname# has been summon you got #time# minutes to defeat it!.", "The message that will appear globally one the boss gets spawned.");
             DespawnMessageBossTemplate = _mainConfig.Bind("Main", "DespawnMessageBossTemplate", "You failed to kill the Boss #worldbossname# in time.", "The message that will appear globally if the players failed to kill the boss.");
             BuffForWorldBoss = _mainConfig.Bind("Main", "BuffForWorldBoss", 1163490655, "Buff that applies to each of the Bosses that we create with our mod.");

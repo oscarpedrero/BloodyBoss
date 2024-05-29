@@ -2,8 +2,14 @@
 
 **BloodyBoss** is a mod for V Rising that allows you to create VBlood world bosses with random rewards that can be set for each of the world bosses.
 
+**NEW INN 1.1.0** The location of the configuration file has been changed to the root config folder.
+
 <details>
 <summary>Changelog</summary>
+
+`1.1.1`
+- Fixed bug that occurred when too many players consumed the blood of a world boss.
+- The location of the configuration file has been changed to the root config folder.
 
 `1.0.8`
 - Added protection against being able to include a drive other than VBlood.

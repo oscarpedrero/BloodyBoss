@@ -14,6 +14,7 @@ using BloodyBoss.Patch;
 using Bloody.Core.Helper.v1;
 using Bloody.Core.API.v1;
 using Stunlock.Core;
+using Unity.Entities.UniversalDelegates;
 
 
 namespace BloodyBoss.Systems
@@ -149,10 +150,16 @@ namespace BloodyBoss.Systems
             var message = GetAnnouncementMessage(vblood, bossModel.name);
             if (message != null)
             {
-
+                var killers = GetKillers(vblood);
                 bossModel.DropItems(vblood);
 
                 ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, message);
+
+                foreach (var killer in killers)
+                {
+                    ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, $"{FontColorChatSystem.Yellow($"- {killer}")}, ");
+                }
+                
 
                 RemoveKillers(vblood);
                 RemoveKillersEntity(vblood);
@@ -166,7 +173,7 @@ namespace BloodyBoss.Systems
             var vbloodLabel = name;
             var sbKillersLabel = new StringBuilder();
             
-            if (killers.Count == 0) return null;
+            /*if (killers.Count == 0) return null;
             if (killers.Count == 1)
             {
                 sbKillersLabel.Append(FontColorChatSystem.Yellow(killers[0]));
@@ -188,7 +195,7 @@ namespace BloodyBoss.Systems
                         sbKillersLabel.Append($"{FontColorChatSystem.Yellow(killers[i])}, ");
                     }
                 }
-            }
+            }*/
 
             var _message = PluginConfig.KillMessageBossTemplate.Value;
             _message = _message.Replace("#user#", $"{sbKillersLabel}");
