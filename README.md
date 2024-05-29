@@ -4,7 +4,7 @@
 
 ## NEW IN 1.1.0
 
- - The location of the configuration file has been changed to the root config folder.
+ - The configuration file path changes from **BepInEx\config\BloodyBoss** to **BepInEx\config\BloodyBoss**. The previous configuration file is maintained so that the previous options that you had configured can be copied.
  - Now players who have killed a world boss will exit after the world boss death message, review the configuration file to adapt it to your liking.
 
 
