@@ -1,6 +1,6 @@
 ﻿{
   "name": "BloodyBoss",
-  "version_number": "1.0.9",
+  "version_number": "1.1.0",
   "website_url": "https://github.com/oscarpedrero/BloodyBoss",
   "description": "BloodyBoss is a mod for V Rising that allows you to create VBlood world bosses with random rewards that can be set for each of the world bosses.",
   "dependencies": [
