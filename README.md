@@ -7,7 +7,7 @@
 <details>
 <summary>Changelog</summary>
 
-`1.1.1`
+`1.1.0`
 - Fixed bug that occurred when too many players consumed the blood of a world boss.
 - The location of the configuration file has been changed to the root config folder.
 
