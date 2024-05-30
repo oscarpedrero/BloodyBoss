@@ -32,7 +32,7 @@ namespace BloodyBoss.DB.Models
         public int PrefabGUID { get; set; }
         public int level { get; set; }
         public int multiplier { get; set; }
-        public List<ItemEncounterModel> items { get; set; } = [];
+        public List<ItemEncounterModel> items { get; set; } = new();
         public bool bossSpawn = false;
 
         public Entity bossEntity;

@@ -13,7 +13,7 @@ namespace BloodyBoss.Patch
 
         public static int CurrentFrameCount = 0;
         public static ConcurrentQueue<Action> actionsToExecuteOnMainThread = new ConcurrentQueue<Action>();
-        public static List<Timer> activeTimers = [];
+        public static List<Timer> activeTimers = new();
 
         [HarmonyPatch(typeof(RandomizedSpawnChainUpdateSystem), nameof(RandomizedSpawnChainUpdateSystem.OnUpdate))]
         [HarmonyPostfix]
