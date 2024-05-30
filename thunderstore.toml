@@ -6,7 +6,7 @@ namespace = "Trodi"
 name = "BloodyBoss"
 versionNumber = "1.1.0"
 description = "BloodyBoss is a mod for V Rising that allows you to create VBlood world bosses with random rewards that can be set for each of the world bosses."
-websiteUrl = "https://github.com/oscarpedrero/BloodyNotify"
+websiteUrl = "https://github.com/oscarpedrero/BloodyBoss"
 containsNsfwContent = false
 
 [package.dependencies]
