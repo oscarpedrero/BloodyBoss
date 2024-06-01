@@ -75,6 +75,8 @@ public class Plugin : BasePlugin, IRunOnInitialized
         
 
         EventsHandlerSystem.OnDeathVBlood += BossSystem.OnDetahVblood;
+        EventsHandlerSystem.OnDamage += BossSystem.OnDamageNpc;
+        EventsHandlerSystem.OnDeath += BossSystem.OnDeathNpc;
 
     }
 

@@ -15,6 +15,10 @@ using Bloody.Core.Helper.v1;
 using Bloody.Core.API.v1;
 using Stunlock.Core;
 using Unity.Entities.UniversalDelegates;
+using ProjectM.Gameplay.Systems;
+using Bloody.Core.Models.v1;
+using Bloody.Core.GameData.v1;
+using UnityEngine.Rendering.HighDefinition;
 
 
 namespace BloodyBoss.Systems
@@ -172,33 +176,7 @@ namespace BloodyBoss.Systems
             var killers = GetKillers(vblood);
             var vbloodLabel = name;
             var sbKillersLabel = new StringBuilder();
-            
-            /*if (killers.Count == 0) return null;
-            if (killers.Count == 1)
-            {
-                sbKillersLabel.Append(FontColorChatSystem.Yellow(killers[0]));
-            }
-            if (killers.Count == 2)
-            {
-                sbKillersLabel.Append($"{FontColorChatSystem.Yellow(killers[0])} {PluginConfig.VBloodFinalConcatCharacters.Value} {FontColorChatSystem.Yellow(killers[1])}");
-            }
-            if (killers.Count > 2)
-            {
-                for (int i = 0; i < killers.Count; i++)
-                {
-                    if (i == killers.Count - 1)
-                    {
-                        sbKillersLabel.Append($"{PluginConfig.VBloodFinalConcatCharacters.Value} {FontColorChatSystem.Yellow(killers[i])}");
-                    }
-                    else
-                    {
-                        sbKillersLabel.Append($"{FontColorChatSystem.Yellow(killers[i])}, ");
-                    }
-                }
-            }*/
-
             var _message = PluginConfig.KillMessageBossTemplate.Value;
-            _message = _message.Replace("#user#", $"{sbKillersLabel}");
             _message = _message.Replace("#vblood#", $"{FontColorChatSystem.Red(vbloodLabel)}");
             return FontColorChatSystem.Green($"{_message}");
         }
@@ -218,15 +196,15 @@ namespace BloodyBoss.Systems
                         
                         foreach (var spawnBoss in spawnsBoss)
                         {
-                            var entityUnit = Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap[new PrefabGUID(spawnBoss.PrefabGUID)];
+                            //var entityUnit = Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap[new PrefabGUID(spawnBoss.PrefabGUID)];
 
-                            if (entityUnit.Has<VBloodUnit>())
-                            {
+                            //if (entityUnit.Has<VBloodUnit>())
+                            //{
                                 spawnBoss.CheckSpawnDespawn();
-                            } else
+                            /*} else
                             {
                                 Plugin.Logger.LogError($"The PrefabGUID does not correspond to a VBlood Unit. Ignore Spawn");
-                            }
+                            }*/
                         }
                     }
                 }
@@ -255,6 +233,110 @@ namespace BloodyBoss.Systems
             };
             ActionSchedulerPatch.RunActionOnceAfterFrames(bossAction, 30);
 
+        }
+
+        internal static void OnDamageNpc(DealDamageSystem sender, NativeArray<DealDamageEvent> damageEvents)
+        {
+            foreach (var event_damage in damageEvents)
+            {
+                if (_entityManager.HasComponent<PlayerCharacter>(event_damage.SpellSource.Read<EntityOwner>().Owner))
+                {
+                    
+                    var player = _entityManager.GetComponentData<PlayerCharacter>(event_damage.SpellSource.Read<EntityOwner>().Owner);
+                    var user = _entityManager.GetComponentData<User>(player.UserEntity);
+                    Plugin.Logger.LogInfo($"{user.CharacterName}");
+                    try
+                    {
+                        NpcModel npc = GameData.Npcs.FromEntity(event_damage.Target);
+                        var npcAssetName = _prefabCollectionSystem._PrefabDataLookup[npc.PrefabGUID].AssetName;
+                        Plugin.Logger.LogInfo($"{npcAssetName}");
+                        Plugin.Logger.LogInfo($"{npc.PrefabGUID}");
+                        var modelBoss = Database.BOSSES.Where(x => x.AssetName == npcAssetName.ToString() && x.bossSpawn == true).FirstOrDefault();
+
+                        if (modelBoss != null && modelBoss.GetBossNpcEntity())
+                        {
+                            AddKiller(npcAssetName.ToString(), user.CharacterName.ToString());
+                            AddKillerEntity(npcAssetName.ToString(), event_damage.Target);
+                            lastKillerUpdate[npcAssetName.ToString()] = DateTime.Now;
+                        }
+                    } catch
+                    {
+                        continue;
+                    }
+                    
+                    /*var modelBoss = Database.BOSSES.Where(x => x.AssetName == vblood.ToString() && x.bossSpawn == true).FirstOrDefault();
+
+                    //Entity entity = _prefabCollectionSystem._PrefabLookupMap[event_damage.Source];
+
+                    if (modelBoss != null && modelBoss.GetBossEntity())
+                    {
+                        AddKiller(vblood.ToString(), user.CharacterName.ToString());
+                        AddKillerEntity(vblood.ToString(), event_damage.Target);
+                        lastKillerUpdate[vblood.ToString()] = DateTime.Now;
+                        checkKiller = true;
+                    }*/
+
+                }
+            }
+        }
+
+        internal static void OnDeathNpc(DeathEventListenerSystem sender, NativeArray<DeathEvent> deathEvents)
+        {
+            foreach (var deathEvent in deathEvents)
+            {
+                Plugin.Logger.LogInfo($"deathEvents");
+                var npcGUID = deathEvent.Died.Read<PrefabGUID>();
+                var npc = _prefabCollectionSystem._PrefabDataLookup[npcGUID].AssetName;
+                var modelBoss = Database.BOSSES.Where(x => x.AssetName == npc.ToString() && x.bossSpawn == true).FirstOrDefault();
+                Plugin.Logger.LogInfo($"deathEvents 2");
+                if (modelBoss != null)
+                {
+                    Plugin.Logger.LogInfo($"Kill {npcGUID}");
+                    Plugin.Logger.LogInfo($"Kill {npc}");
+                    Plugin.Logger.LogInfo($"deathEvents 3");
+                    foreach (KeyValuePair<string, DateTime> kvp in lastKillerUpdate)
+                    {
+                        var lastUpdateTime = kvp.Value;
+                        /*if (DateTime.Now - lastUpdateTime < TimeSpan.FromSeconds(SendMessageDelay))
+                        {
+                            Plugin.Logger.LogInfo($"deathEvents 5");
+                            continue;
+                        }*/
+                        var npcs = QueryComponents.GetEntitiesByComponentTypes<UnitLevel, NameableInteractable, LifeTime>(default, true);
+                        foreach (var entity in npcs)
+                        {
+                            if (entity.Equals(modelBoss.bossEntity))
+                            {
+                          
+                                NameableInteractable _nameableInteractable = entity.Read<NameableInteractable>();
+                                if (_nameableInteractable.Name.Value.Contains("bb"))
+                                {
+                                  
+                                    var health = entity.Read<Health>();
+
+                                    if (health.IsDead)
+                                    {
+                                       
+                                        Entity user = UserSystem.GetOneUserOnline();
+                                        modelBoss.RemoveIcon(user);
+                                        modelBoss.bossSpawn = false;
+                                        SendAnnouncementMessage(kvp.Key, modelBoss);
+                                        break;
+                                    }
+                                    else
+                                    {
+                                      
+                                        RemoveKillers(kvp.Key);
+                                        RemoveKillersEntity(kvp.Key);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        
+                    }
+                }
+            }
         }
     }
 }

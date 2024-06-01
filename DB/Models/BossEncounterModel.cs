@@ -249,6 +249,23 @@ namespace BloodyBoss.DB.Models
             return false;
         }
 
+        public bool GetBossNpcEntity()
+        {
+            var entities = QueryComponents.GetEntitiesByComponentTypes<NameableInteractable, UnitLevel>(EntityQueryOptions.IncludeDisabledEntities);
+            foreach (var entity in entities)
+            {
+                NameableInteractable _nameableInteractable = entity.Read<NameableInteractable>();
+                if (_nameableInteractable.Name.Value == nameHash + "bb")
+                {
+                    bossEntity = entity;
+                    entities.Dispose();
+                    return true;
+                }
+            }
+            entities.Dispose();
+            return false;
+        }
+
         public void RemoveIcon(Entity user)
         {
             if (GetIcon())

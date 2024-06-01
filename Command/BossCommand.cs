@@ -83,7 +83,7 @@ namespace BloodyBoss.Command
             {
                 var entityUnit = Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap[new PrefabGUID(prefabGUID)];
 
-                if(!entityUnit.Has<VBloodUnit>()) throw ctx.Error($"The PrefabGUID entered does not correspond to a VBlood Unit.");
+                //if(!entityUnit.Has<VBloodUnit>()) throw ctx.Error($"The PrefabGUID entered does not correspond to a VBlood Unit.");
 
                 if (Database.AddBoss(bossName, prefabGUID, level, multiplier, lifeTime))
                 {
