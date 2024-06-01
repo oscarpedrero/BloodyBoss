@@ -244,13 +244,10 @@ namespace BloodyBoss.Systems
                     
                     var player = _entityManager.GetComponentData<PlayerCharacter>(event_damage.SpellSource.Read<EntityOwner>().Owner);
                     var user = _entityManager.GetComponentData<User>(player.UserEntity);
-                    Plugin.Logger.LogInfo($"{user.CharacterName}");
                     try
                     {
                         NpcModel npc = GameData.Npcs.FromEntity(event_damage.Target);
                         var npcAssetName = _prefabCollectionSystem._PrefabDataLookup[npc.PrefabGUID].AssetName;
-                        Plugin.Logger.LogInfo($"{npcAssetName}");
-                        Plugin.Logger.LogInfo($"{npc.PrefabGUID}");
                         var modelBoss = Database.BOSSES.Where(x => x.AssetName == npcAssetName.ToString() && x.bossSpawn == true).FirstOrDefault();
 
                         if (modelBoss != null && modelBoss.GetBossNpcEntity())
@@ -263,18 +260,6 @@ namespace BloodyBoss.Systems
                     {
                         continue;
                     }
-                    
-                    /*var modelBoss = Database.BOSSES.Where(x => x.AssetName == vblood.ToString() && x.bossSpawn == true).FirstOrDefault();
-
-                    //Entity entity = _prefabCollectionSystem._PrefabLookupMap[event_damage.Source];
-
-                    if (modelBoss != null && modelBoss.GetBossEntity())
-                    {
-                        AddKiller(vblood.ToString(), user.CharacterName.ToString());
-                        AddKillerEntity(vblood.ToString(), event_damage.Target);
-                        lastKillerUpdate[vblood.ToString()] = DateTime.Now;
-                        checkKiller = true;
-                    }*/
 
                 }
             }
@@ -284,24 +269,14 @@ namespace BloodyBoss.Systems
         {
             foreach (var deathEvent in deathEvents)
             {
-                Plugin.Logger.LogInfo($"deathEvents");
                 var npcGUID = deathEvent.Died.Read<PrefabGUID>();
                 var npc = _prefabCollectionSystem._PrefabDataLookup[npcGUID].AssetName;
                 var modelBoss = Database.BOSSES.Where(x => x.AssetName == npc.ToString() && x.bossSpawn == true).FirstOrDefault();
-                Plugin.Logger.LogInfo($"deathEvents 2");
                 if (modelBoss != null)
                 {
-                    Plugin.Logger.LogInfo($"Kill {npcGUID}");
-                    Plugin.Logger.LogInfo($"Kill {npc}");
-                    Plugin.Logger.LogInfo($"deathEvents 3");
                     foreach (KeyValuePair<string, DateTime> kvp in lastKillerUpdate)
                     {
                         var lastUpdateTime = kvp.Value;
-                        /*if (DateTime.Now - lastUpdateTime < TimeSpan.FromSeconds(SendMessageDelay))
-                        {
-                            Plugin.Logger.LogInfo($"deathEvents 5");
-                            continue;
-                        }*/
                         var npcs = QueryComponents.GetEntitiesByComponentTypes<UnitLevel, NameableInteractable, LifeTime>(default, true);
                         foreach (var entity in npcs)
                         {
@@ -321,6 +296,8 @@ namespace BloodyBoss.Systems
                                         modelBoss.RemoveIcon(user);
                                         modelBoss.bossSpawn = false;
                                         SendAnnouncementMessage(kvp.Key, modelBoss);
+                                        RemoveKillers(kvp.Key);
+                                        RemoveKillersEntity(kvp.Key);
                                         break;
                                     }
                                     else

@@ -2,7 +2,7 @@
 
 **BloodyBoss** is a mod for V Rising that allows you to create VBlood world bosses with random rewards that can be set for each of the world bosses.
 
-## NEW IN 1.1.1
+## NEW IN 1.1.2
 
 ### For the mod to work correctly you need Bloody.Core version 1.2.3 or higher. This is very important because otherwise the mod will not work. Updating this library does not break any of your other mods.
 
@@ -16,6 +16,10 @@
 
 <details>
 <summary>Changelog</summary>
+
+`1.1.2`
+- Fixed error with duplicate messages when killing an NPCS boss
+- Performance improvements
 
 `1.1.1`
 - Added that any NPC can be used to act as a boss
