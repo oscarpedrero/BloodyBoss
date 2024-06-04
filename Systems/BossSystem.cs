@@ -38,7 +38,7 @@ namespace BloodyBoss.Systems
 
 
 
-        public static void OnDetahVblood(VBloodSystem sender, NativeList<VBloodConsumed> deathEvents)
+        public static void OnDeathVblood(VBloodSystem sender, NativeList<VBloodConsumed> deathEvents)
         {
             if (deathEvents.Length > 0)
             {
@@ -95,6 +95,7 @@ namespace BloodyBoss.Systems
                                     Entity user = UserSystem.GetOneUserOnline();
                                     modelBoss.RemoveIcon(user);
                                     modelBoss.bossSpawn = false;
+                                    Plugin.Logger.LogInfo("PUTAAAAAAAAAAAAAAAAAA");
                                     SendAnnouncementMessage(kvp.Key, modelBoss);
                                     break;
                                 } else
@@ -175,7 +176,6 @@ namespace BloodyBoss.Systems
         {
             var killers = GetKillers(vblood);
             var vbloodLabel = name;
-            var sbKillersLabel = new StringBuilder();
             var _message = PluginConfig.KillMessageBossTemplate.Value;
             _message = _message.Replace("#vblood#", $"{FontColorChatSystem.Red(vbloodLabel)}");
             return FontColorChatSystem.Green($"{_message}");
@@ -235,85 +235,5 @@ namespace BloodyBoss.Systems
 
         }
 
-        internal static void OnDamageNpc(DealDamageSystem sender, NativeArray<DealDamageEvent> damageEvents)
-        {
-            foreach (var event_damage in damageEvents)
-            {
-                if (_entityManager.HasComponent<PlayerCharacter>(event_damage.SpellSource.Read<EntityOwner>().Owner))
-                {
-                    
-                    var player = _entityManager.GetComponentData<PlayerCharacter>(event_damage.SpellSource.Read<EntityOwner>().Owner);
-                    var user = _entityManager.GetComponentData<User>(player.UserEntity);
-                    try
-                    {
-                        NpcModel npc = GameData.Npcs.FromEntity(event_damage.Target);
-                        var npcAssetName = _prefabCollectionSystem._PrefabDataLookup[npc.PrefabGUID].AssetName;
-                        var modelBoss = Database.BOSSES.Where(x => x.AssetName == npcAssetName.ToString() && x.bossSpawn == true).FirstOrDefault();
-
-                        if (modelBoss != null && modelBoss.GetBossNpcEntity())
-                        {
-                            AddKiller(npcAssetName.ToString(), user.CharacterName.ToString());
-                            AddKillerEntity(npcAssetName.ToString(), event_damage.Target);
-                            lastKillerUpdate[npcAssetName.ToString()] = DateTime.Now;
-                        }
-                    } catch
-                    {
-                        continue;
-                    }
-
-                }
-            }
-        }
-
-        internal static void OnDeathNpc(DeathEventListenerSystem sender, NativeArray<DeathEvent> deathEvents)
-        {
-            foreach (var deathEvent in deathEvents)
-            {
-                var npcGUID = deathEvent.Died.Read<PrefabGUID>();
-                var npc = _prefabCollectionSystem._PrefabDataLookup[npcGUID].AssetName;
-                var modelBoss = Database.BOSSES.Where(x => x.AssetName == npc.ToString() && x.bossSpawn == true).FirstOrDefault();
-                if (modelBoss != null)
-                {
-                    foreach (KeyValuePair<string, DateTime> kvp in lastKillerUpdate)
-                    {
-                        var lastUpdateTime = kvp.Value;
-                        var npcs = QueryComponents.GetEntitiesByComponentTypes<UnitLevel, NameableInteractable, LifeTime>(default, true);
-                        foreach (var entity in npcs)
-                        {
-                            if (entity.Equals(modelBoss.bossEntity))
-                            {
-                          
-                                NameableInteractable _nameableInteractable = entity.Read<NameableInteractable>();
-                                if (_nameableInteractable.Name.Value.Contains("bb"))
-                                {
-                                  
-                                    var health = entity.Read<Health>();
-
-                                    if (health.IsDead)
-                                    {
-                                       
-                                        Entity user = UserSystem.GetOneUserOnline();
-                                        modelBoss.RemoveIcon(user);
-                                        modelBoss.bossSpawn = false;
-                                        SendAnnouncementMessage(kvp.Key, modelBoss);
-                                        RemoveKillers(kvp.Key);
-                                        RemoveKillersEntity(kvp.Key);
-                                        break;
-                                    }
-                                    else
-                                    {
-                                      
-                                        RemoveKillers(kvp.Key);
-                                        RemoveKillersEntity(kvp.Key);
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        
-                    }
-                }
-            }
-        }
     }
 }

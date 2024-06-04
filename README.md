@@ -4,7 +4,7 @@
 
 ## NEW IN 1.1.2
 
-### For the mod to work correctly you need Bloody.Core version 1.2.3 or higher. This is very important because otherwise the mod will not work. Updating this library does not break any of your other mods.
+## For the mod to work correctly you need Bloody.Core version 1.2.3 or higher. This is very important because otherwise the mod will not work. Updating this library does not break any of your other mods.
 
  - Removed the restriction that bosses must be VBloods, you can now set any NPC as a boss and their drop preferences.
 
@@ -17,8 +17,10 @@
 <details>
 <summary>Changelog</summary>
 
-`1.1.2`
+`1.1.3`
 - Fixed error with duplicate messages when killing an NPCS boss
+
+`1.1.2`
 - Performance improvements
 
 `1.1.1`
