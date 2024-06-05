@@ -10,15 +10,10 @@ using ProjectM;
 using Unity.Entities;
 using Unity.Collections;
 using ProjectM.Network;
-using BloodyBoss.Patch;
 using Bloody.Core.Helper.v1;
 using Bloody.Core.API.v1;
 using Stunlock.Core;
-using Unity.Entities.UniversalDelegates;
-using ProjectM.Gameplay.Systems;
-using Bloody.Core.Models.v1;
-using Bloody.Core.GameData.v1;
-using UnityEngine.Rendering.HighDefinition;
+using UnityEngine;
 
 
 namespace BloodyBoss.Systems
@@ -35,7 +30,7 @@ namespace BloodyBoss.Systems
         private static EntityManager _entityManager = Plugin.SystemsCore.EntityManager;
         private static PrefabCollectionSystem _prefabCollectionSystem = Plugin.SystemsCore.PrefabCollectionSystem;
         public static Action bossAction;
-
+        public static Coroutine BoosSpawnCoroutine;
 
 
         public static void OnDeathVblood(VBloodSystem sender, NativeList<VBloodConsumed> deathEvents)
@@ -229,9 +224,8 @@ namespace BloodyBoss.Systems
                         }
                     }
                 }
-                ActionSchedulerPatch.RunActionOnceAfterFrames(bossAction, 30);
             };
-            ActionSchedulerPatch.RunActionOnceAfterFrames(bossAction, 30);
+            BoosSpawnCoroutine = CoroutineHandler.StartRepeatingCoroutine(bossAction, 1);
 
         }
 

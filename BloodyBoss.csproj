@@ -4,7 +4,7 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<AssemblyName>BloodyBoss</AssemblyName>
 		<Description>BloodyBoss mod for VRising</Description>
-		<Version>1.1.3</Version>
+		<Version>1.1.4</Version>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
@@ -16,7 +16,7 @@
 		<PackageReference Include="VRising.Unhollowed.Client" Version="1.0.*" />
 		<PackageReference Include="VRising.VampireCommandFramework" Version="0.9.*" />
 		<PackageReference Include="VRising.Bloodstone" Version="0.2.*" />
-		<PackageReference Include="Bloody.Core" Version="1.2.3" />
+		<PackageReference Include="Bloody.Core" Version="1.2.4" />
 	</ItemGroup>
 	<Target Name="Thunderstore Copy to Dist" AfterTargets="AfterBuild" Condition=" '$(Configuration' == 'Release'">
 		<Copy SourceFiles="$(OutDir)\$(ProjectName).dll" DestinationFolder="$(SolutionDir)/dist" />

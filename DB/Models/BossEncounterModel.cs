@@ -13,8 +13,6 @@ using System.Linq;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Bloody.Core;
-using BloodyBoss.Patch;
 using Bloody.Core.GameData.v1;
 using ProjectM.Shared;
 
@@ -106,7 +104,7 @@ namespace BloodyBoss.DB.Models
                     {
                         ClearDropTable(e);
                     };
-                    ActionSchedulerPatch.RunActionOnceAfterFrames(action, 10);
+                    CoroutineHandler.StartFrameCoroutine(action, 10);
                 }
             });
             var _message = PluginConfig.SpawnMessageBossTemplate.Value;
@@ -211,7 +209,7 @@ namespace BloodyBoss.DB.Models
                     e.Write(_nameableInteractable);
                 });
             };
-            ActionSchedulerPatch.RunActionOnceAfterFrames(action, 10);
+            CoroutineHandler.StartFrameCoroutine(action, 10);
             
         }
 

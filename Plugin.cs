@@ -10,7 +10,6 @@ using Bloody.Core;
 using Bloodstone.API;
 using BloodyBoss.Systems;
 using Bloody.Core.API.v1;
-using BloodyBoss.Patch;
 
 namespace BloodyBoss;
 
@@ -41,7 +40,6 @@ public class Plugin : BasePlugin, IRunOnInitialized
 
         // Harmony patching
         _harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
-        _harmony.PatchAll(typeof(ActionSchedulerPatch));
 
         EventsHandlerSystem.OnInitialize += GameDataOnInitialize;
 
