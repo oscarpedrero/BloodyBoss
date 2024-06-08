@@ -111,13 +111,14 @@ namespace BloodyBoss.DB.Models
                     };
                     CoroutineHandler.StartFrameCoroutine(action, 10, 1);
                 }
+                var actionIcon = () =>
+                {
+                    AddIcon(bossEntity);
+                };
+                ActionScheduler.RunActionOnceAfterDelay(actionIcon, 3);
             });
 
-            var action = () =>
-            {
-                AddIcon(bossEntity);
-            };
-            ActionScheduler.RunActionOnceAfterDelay(action, 3);
+            
 
             var _message = PluginConfig.SpawnMessageBossTemplate.Value;
             _message = _message.Replace("#time#", FontColorChatSystem.Yellow($"{Lifetime / 60}"));
@@ -216,8 +217,6 @@ namespace BloodyBoss.DB.Models
             BuffSystem.BuffNPC(boss, user, new PrefabGUID(PluginConfig.BuffForWorldBoss.Value), 0);
             RenameBoss(boss);
             bossSpawn = true;
-            
-            AddIcon(boss);
 
         }
 
