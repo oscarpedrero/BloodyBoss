@@ -2,9 +2,20 @@
 
 **BloodyBoss** is a mod for V Rising that allows you to create VBlood world bosses with random rewards that can be set for each of the world bosses.
 
+## IMPORTANT NOTE
+
+You must have version 1.2.4 of Bloody.Core installed to be able to use version 1.1.4 or higher of this mod
+
+# Sponsor this project
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/K3K8ENRQY)
+
 ## NEW IN 1.1.4
 
-## For the mod to work correctly you need Bloody.Core version 1.2.4 or higher. This is very important because otherwise the mod will not work. Updating this library does not break any of your other mods.
+- Minions summoned by players do not harm the NPC.
+- Removed the ability to bite a non-vBlood NPC boss
+
+**If with this version you have problems with messages or drops, I recommend that you make a copy of your boss configuration and create them again. Some problems have been reported with previous versions.**
 
 ## NEW IN 1.1.2
 
@@ -20,7 +31,12 @@
 <summary>Changelog</summary>
 
 `1.1.4`
-- Updated the timer system through Coroutine that brings the new version of Bloody.Core
+- Updated the timer system through CoroutineHandler.
+- Minions summoned by players do not harm the NPC.
+- Removed the ability to bite a non-vBlood NPC boss.
+- Fixed errors that existed with messages from VBlood and non-VBlood NPCS.
+- Fixed reward item duplication bug.
+- Fixed the error that did not deliver the items in the inventory and always threw them on the ground.
 
 `1.1.3`
 - Fixed error with duplicate messages when killing an NPCS boss
@@ -62,10 +78,6 @@
 `1.0.0`
 - Initial public release of the mod
 </details>
-
-# Support this project
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/K3K8ENRQY)
 
 ## Requirements
 Ensure the following mods are installed for seamless integration:
@@ -131,6 +143,12 @@ ClearDropTable = false
 It's crucial to note that for any command containing a name argument such as `<NameOfBoss>` or `<ItemName>`, if your name consists of more than one word, include it inside `""` to ensure proper functionality (e.g., "Alpha Wolf" or "Blood Rose Potion").
 
 prefix: `.bb`.
+
+```ansi
+.bb test <NameOfBoss>
+```
+- This command spawns the boss you want at your position and sets it to spawn within one minute. This is useful to see what time your server has set and to know what time to add to each boss.
+  - Example: `.bb test "Alpha Wolf"`
 
 ```ansi
 .bb reload
@@ -230,3 +248,4 @@ prefix: `.bb`.
 **Special thanks to the testers and supporters of the project:**
 
 - @Vex, owner & founder of [Vexor RPG](https://discord.gg/JpVsKVvKNR) server, a tester and great supporter who provided his server as a test platform and took care of all the graphics and documentation.
+- @Bromelda & Wolfyowns, owners & founders of [BloodCraft- Modded Xprising server](https://discord.gg/aDh98KtEWZ) server, for their great work giving me feedback and thoroughly testing the mod.

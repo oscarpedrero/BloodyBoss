@@ -10,12 +10,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.691" IncludeAssets="compile" />
 		<PackageReference Include="BepInEx.Core" Version="6.0.0-be.691" IncludeAssets="compile" />
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
+		<PackageReference Include="BepInEx.Unity.Common" Version="6.0.0-be.691" />
+		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.691" />
 		<PackageReference Include="VRising.Unhollowed.Client" Version="1.0.*" />
 		<PackageReference Include="VRising.VampireCommandFramework" Version="0.9.*" />
 		<PackageReference Include="VRising.Bloodstone" Version="0.2.*" />
+		<PackageReference Include="HarmonyX" Version="2.10.1" />
 		<PackageReference Include="Bloody.Core" Version="1.2.4" />
 	</ItemGroup>
 	<Target Name="Thunderstore Copy to Dist" AfterTargets="AfterBuild" Condition=" '$(Configuration' == 'Release'">

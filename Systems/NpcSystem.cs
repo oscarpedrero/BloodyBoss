@@ -16,9 +16,12 @@ using Bloodstone.API;
 using BloodyBoss.Configuration;
 using BloodyBoss.DB.Models;
 using System.Text;
+using Bloody.Core;
+using HarmonyLib;
 
 namespace BloodyBoss.Systems
 {
+    [HarmonyPatch]
     internal class NpcSystem
     {
 
@@ -28,34 +31,46 @@ namespace BloodyBoss.Systems
         private static EntityManager _entityManager = Plugin.SystemsCore.EntityManager;
         private static PrefabCollectionSystem _prefabCollectionSystem = Plugin.SystemsCore.PrefabCollectionSystem;
 
-
-        internal static void OnDamageNpc(DealDamageSystem sender, NativeArray<DealDamageEvent> damageEvents)
+        [HarmonyPatch(typeof(DealDamageSystem), nameof(DealDamageSystem.DealDamage))]
+        [HarmonyPrefix]
+        internal static bool Prefix(DealDamageSystem __instance)
         {
-            foreach (var event_damage in damageEvents)
-            {
-                if (_entityManager.HasComponent<PlayerCharacter>(event_damage.SpellSource.Read<EntityOwner>().Owner))
-                {
-                    var player = _entityManager.GetComponentData<PlayerCharacter>(event_damage.SpellSource.Read<EntityOwner>().Owner);
-                    var user = _entityManager.GetComponentData<User>(player.UserEntity);
-                    try
-                    {
-                        NpcModel npc = GameData.Npcs.FromEntity(event_damage.Target);
-                        var npcAssetName = _prefabCollectionSystem._PrefabDataLookup[npc.PrefabGUID].AssetName;
-                        var modelBoss = Database.BOSSES.Where(x => x.AssetName == npcAssetName.ToString() && x.bossSpawn == true).FirstOrDefault();
 
-                        if (modelBoss != null && modelBoss.GetBossNpcEntity())
+            var damageTakenEvent = __instance._Query.ToComponentDataArray<DealDamageEvent>(Allocator.Temp);
+            foreach (var event_damage in damageTakenEvent)
+            {
+                try
+                {
+                    NpcModel npc = GameData.Npcs.FromEntity(event_damage.Target);
+                    var npcAssetName = _prefabCollectionSystem._PrefabDataLookup[npc.PrefabGUID].AssetName;
+                    var modelBoss = Database.BOSSES.Where(x => x.AssetName == npcAssetName.ToString() && x.bossSpawn == true).FirstOrDefault();
+                    if (modelBoss != null && !modelBoss.IsVBlood())
+                    {
+                        if (_entityManager.HasComponent<PlayerCharacter>(event_damage.SpellSource.Read<EntityOwner>().Owner))
                         {
+                            var owner = event_damage.SpellSource.Read<EntityOwner>().Owner;
+                           
+                            var player = _entityManager.GetComponentData<PlayerCharacter>(event_damage.SpellSource.Read<EntityOwner>().Owner);
+                            var user = _entityManager.GetComponentData<User>(player.UserEntity);
+
                             AddKiller(npcAssetName.ToString(), user.CharacterName.ToString());
-                            AddKillerEntity(npcAssetName.ToString(), event_damage.Target);
+                            AddKillerEntity(npcAssetName.ToString(), owner);
                             lastKillerUpdate[npcAssetName.ToString()] = DateTime.Now;
+                        } else
+                        {
+                            return false;
                         }
                     }
-                    catch
-                    {
-                        continue;
-                    }
+
+                }
+                catch(Exception e)
+                {
+                    
+                    continue;
                 }
             }
+
+            return true;
         }
 
 
@@ -91,9 +106,9 @@ namespace BloodyBoss.Systems
                             {
                                 if (entity.Has<VBloodUnit>())
                                 {
-                                    break;
+                                    continue;
                                 }
-
+                                
                                 NameableInteractable _nameableInteractable = entity.Read<NameableInteractable>();
                                 if (_nameableInteractable.Name.Value.Contains("bb"))
                                 {
@@ -144,7 +159,7 @@ namespace BloodyBoss.Systems
             if (message != null)
             {
                 var killers = GetKillers(vblood);
-                bossModel.DropItems(vblood);
+                bossModel.DropItems(vblood, false);
 
                 ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, message);
 
@@ -161,84 +176,11 @@ namespace BloodyBoss.Systems
 
         public static string GetAnnouncementMessage(string vblood, string name)
         {
-            var killers = GetKillers(vblood);
             var vbloodLabel = name;
             var _message = PluginConfig.KillMessageBossTemplate.Value;
             _message = _message.Replace("#vblood#", $"{FontColorChatSystem.Red(vbloodLabel)}");
             return FontColorChatSystem.Green($"{_message}");
         }
-
-
-
-
-        /*
-        internal static void OnDeathNpc(DeathEventListenerSystem sender, NativeArray<DeathEvent> deathEvents)
-        {
-            var didSkip = false;
-            var showmessage = false;
-            foreach (var deathEvent in deathEvents)
-            {
-                var npcGUID = deathEvent.Died.Read<PrefabGUID>();
-                var npc = _prefabCollectionSystem._PrefabDataLookup[npcGUID].AssetName;
-                var modelBoss = Database.BOSSES.Where(x => x.AssetName == npc.ToString() && x.bossSpawn == true).FirstOrDefault();
-                if (modelBoss != null)
-                {
-                    foreach (KeyValuePair<string, DateTime> kvp in lastKillerUpdate)
-                    {
-
-                        var lastUpdateTime = kvp.Value;
-                        if (DateTime.Now - lastUpdateTime < TimeSpan.FromSeconds(2))
-                        {
-                            didSkip = true;
-                            continue;
-                        }
-                        var npcs = QueryComponents.GetEntitiesByComponentTypes<UnitLevel, NameableInteractable, LifeTime>(default, true);
-                        foreach (var entity in npcs)
-                        {
-                            if (entity.Equals(modelBoss.bossEntity))
-                            {
-                                if(entity.Has<VBloodUnit>())
-                                {
-                                    break;
-                                }
-                                NameableInteractable _nameableInteractable = entity.Read<NameableInteractable>();
-                                if (_nameableInteractable.Name.Value.Contains("bb"))
-                                {
-
-                                    var health = entity.Read<Health>();
-
-                                    if (health.IsDead)
-                                    {
-                                        Entity user = UserSystem.GetOneUserOnline();
-                                        modelBoss.RemoveIcon(user);
-                                        modelBoss.bossSpawn = false;
-                                        Plugin.Logger.LogInfo("MIERDAAAAAAAAAAAAAAA");
-                                        SendAnnouncementMessage(kvp.Key, modelBoss);
-                                        RemoveKillers(kvp.Key);
-                                        RemoveKillersEntity(kvp.Key);
-                                        showmessage = true;
-                                        break;
-                                    }
-                                    else
-                                    {
-
-                                        RemoveKillers(kvp.Key);
-                                        RemoveKillersEntity(kvp.Key);
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-
-                        if (showmessage)
-                        {
-                            break;
-                        }
-
-                    }
-                }
-            }
-        }*/
 
 
         public static void AddKiller(string vblood, string killerCharacterName)

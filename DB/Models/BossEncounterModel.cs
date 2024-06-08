@@ -2,8 +2,6 @@
 using BloodyBoss.Configuration;
 using BloodyBoss.Exceptions;
 using BloodyBoss.Systems;
-using Bloody.Core.API.v1;
-using Bloody.Core.Helper.v1;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
@@ -13,8 +11,14 @@ using System.Linq;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Bloody.Core.GameData.v1;
 using ProjectM.Shared;
+using Bloody.Core;
+using Bloody.Core.API.v1;
+using Bloody.Core.Helper.v1;
+using Bloody.Core.GameData.v1;
+using Bloody.Core.Patch.Server;
+using Bloody.Core.Methods;
+using Bloody.Core.Models.v1;
 
 namespace BloodyBoss.DB.Models
 {
@@ -97,6 +101,7 @@ namespace BloodyBoss.DB.Models
         public bool Spawn(Entity sender)
         {
             SpawnSystem.SpawnUnitWithCallback(sender, new PrefabGUID(PrefabGUID), new(x, z), Lifetime+5, (Entity e) => {
+                bossEntity = e;
                 ModifyBoss(sender, e);
                 if (PluginConfig.ClearDropTable.Value)
                 {
@@ -104,9 +109,16 @@ namespace BloodyBoss.DB.Models
                     {
                         ClearDropTable(e);
                     };
-                    CoroutineHandler.StartFrameCoroutine(action, 10);
+                    CoroutineHandler.StartFrameCoroutine(action, 10, 1);
                 }
             });
+
+            var action = () =>
+            {
+                AddIcon(bossEntity);
+            };
+            ActionScheduler.RunActionOnceAfterDelay(action, 3);
+
             var _message = PluginConfig.SpawnMessageBossTemplate.Value;
             _message = _message.Replace("#time#", FontColorChatSystem.Yellow($"{Lifetime / 60}"));
             _message = _message.Replace("#worldbossname#", FontColorChatSystem.Yellow($"{name}"));
@@ -121,22 +133,35 @@ namespace BloodyBoss.DB.Models
             dropTableBuffer.Clear();
         }
 
-        public bool DropItems(string vblood)
+        public bool DropItems(string vblood, bool isvblood = true)
         {
 
             foreach (var item in items)
             {
                 if (probabilityGeneratingReward(item.Chance))
                 {
+                    List<Entity> users = new();
 
-                    var users = BossSystem.GetKillersEntity(vblood);
-                    foreach (var user in users)
+                    if(isvblood)
                     {
-
+                        users = BossSystem.GetKillersEntity(vblood);
+                    } else
+                    {
+                        users = NpcSystem.GetKillersEntity(vblood);
+                    }
+                    
+                    foreach (var entity in users)
+                    {
                         var itemGuid = new PrefabGUID(item.ItemID);
                         var stacks = item.Stack;
 
-                        UserSystem.TryAddInventoryItemOrDrop(user, itemGuid, stacks);
+                        var playerCharacter = entity.Read<PlayerCharacter>();
+
+                        var player = GameData.Users.FromEntity(playerCharacter.UserEntity);
+
+                        if(!player.TryGiveItem(itemGuid, stacks, out Entity itemEntity)){
+                            player.DropItemNearby(itemGuid, stacks);
+                        }
 
                     }
                 }
@@ -164,6 +189,8 @@ namespace BloodyBoss.DB.Models
 
         public void ModifyBoss(Entity user, Entity boss)
         {
+            NpcModel npc = GameData.Npcs.FromEntity(boss);
+            AssetName = Plugin.SystemsCore.PrefabCollectionSystem._PrefabDataLookup[npc.PrefabGUID].AssetName.ToString();
             var players = GameData.Users.Online.ToList().Count;
             var unit = boss.Read<UnitLevel>();
             unit.Level = new ModifiableInt(level);
@@ -177,15 +204,19 @@ namespace BloodyBoss.DB.Models
                 health.MaxHealth._Value = health.MaxHealth * multiplier;
             }
 
+            if (!IsVBlood())
+            {
+                var blood = boss.Read<BloodConsumeSource>();
+                blood.CanBeConsumed = false;
+                boss.Write(blood);
+            }
 
-            
-            
             health.Value = health.MaxHealth.Value;
             boss.Write(health);
             BuffSystem.BuffNPC(boss, user, new PrefabGUID(PluginConfig.BuffForWorldBoss.Value), 0);
             RenameBoss(boss);
-            bossEntity = boss;
             bossSpawn = true;
+            
             AddIcon(boss);
 
         }
@@ -193,23 +224,19 @@ namespace BloodyBoss.DB.Models
         private void AddIcon(Entity boss)
         {
 
-            var action = () =>
-            {
-                SpawnSystem.SpawnUnitWithCallback(boss, Prefabs.MapIcon_POI_VBloodSource, new float2(x, z), Lifetime + 5, (Entity e) => {
-                    icontEntity = e;
-                    e.Add<MapIconData>();
-                    e.Add<MapIconTargetEntity>();
-                    var mapIconTargetEntity = e.Read<MapIconTargetEntity>();
-                    mapIconTargetEntity.TargetEntity = NetworkedEntity.ServerEntity(boss);
-                    mapIconTargetEntity.TargetNetworkId = boss.Read<NetworkId>();
-                    e.Write(mapIconTargetEntity);
-                    e.Add<NameableInteractable>();
-                    NameableInteractable _nameableInteractable = e.Read<NameableInteractable>();
-                    _nameableInteractable.Name = new FixedString64Bytes(nameHash + "ibb");
-                    e.Write(_nameableInteractable);
-                });
-            };
-            CoroutineHandler.StartFrameCoroutine(action, 10);
+            SpawnSystem.SpawnUnitWithCallback(boss, Prefabs.MapIcon_POI_VBloodSource, new float2(x, z), Lifetime + 5, (Entity e) => {
+                icontEntity = e;
+                e.Add<MapIconData>();
+                e.Add<MapIconTargetEntity>();
+                var mapIconTargetEntity = e.Read<MapIconTargetEntity>();
+                mapIconTargetEntity.TargetEntity = NetworkedEntity.ServerEntity(boss);
+                mapIconTargetEntity.TargetNetworkId = boss.Read<NetworkId>();
+                e.Write(mapIconTargetEntity);
+                e.Add<NameableInteractable>();
+                NameableInteractable _nameableInteractable = e.Read<NameableInteractable>();
+                _nameableInteractable.Name = new FixedString64Bytes(nameHash + "ibb");
+                e.Write(_nameableInteractable);
+            });
             
         }
 
@@ -247,21 +274,15 @@ namespace BloodyBoss.DB.Models
             return false;
         }
 
-        public bool GetBossNpcEntity()
+        public bool IsVBlood()
         {
-            var entities = QueryComponents.GetEntitiesByComponentTypes<NameableInteractable, UnitLevel>(EntityQueryOptions.IncludeDisabledEntities);
-            foreach (var entity in entities)
+            if (bossEntity.Has<VBloodUnit>())
             {
-                NameableInteractable _nameableInteractable = entity.Read<NameableInteractable>();
-                if (_nameableInteractable.Name.Value == nameHash + "bb")
-                {
-                    bossEntity = entity;
-                    entities.Dispose();
-                    return true;
-                }
+                return true;
+            } else
+            {
+                return false;
             }
-            entities.Dispose();
-            return false;
         }
 
         public void RemoveIcon(Entity user)
@@ -311,6 +332,11 @@ namespace BloodyBoss.DB.Models
 
         internal void KillBoss(Entity user)
         {
+
+            if (GetIcon())
+            {
+                StatChangeUtility.KillOrDestroyEntity(Plugin.SystemsCore.EntityManager, bossEntity, user, user, 0, StatChangeReason.Any, true);
+            }
 
             if (GetBossEntity())
             {

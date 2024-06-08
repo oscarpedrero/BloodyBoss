@@ -13,7 +13,9 @@ using ProjectM.Network;
 using Bloody.Core.Helper.v1;
 using Bloody.Core.API.v1;
 using Stunlock.Core;
+using Bloody.Core;
 using UnityEngine;
+using Bloody.Core.Patch.Server;
 
 
 namespace BloodyBoss.Systems
@@ -30,7 +32,6 @@ namespace BloodyBoss.Systems
         private static EntityManager _entityManager = Plugin.SystemsCore.EntityManager;
         private static PrefabCollectionSystem _prefabCollectionSystem = Plugin.SystemsCore.PrefabCollectionSystem;
         public static Action bossAction;
-        public static Coroutine BoosSpawnCoroutine;
 
 
         public static void OnDeathVblood(VBloodSystem sender, NativeList<VBloodConsumed> deathEvents)
@@ -85,12 +86,11 @@ namespace BloodyBoss.Systems
 
                                 var health = entity.Read<Health>();
                                 
-                                if (health.IsDead)
+                                if (health.IsDead && modelBoss.bossEntity.Has<VBloodUnit>())
                                 {
                                     Entity user = UserSystem.GetOneUserOnline();
                                     modelBoss.RemoveIcon(user);
                                     modelBoss.bossSpawn = false;
-                                    Plugin.Logger.LogInfo("PUTAAAAAAAAAAAAAAAAAA");
                                     SendAnnouncementMessage(kvp.Key, modelBoss);
                                     break;
                                 } else
@@ -169,7 +169,6 @@ namespace BloodyBoss.Systems
 
         public static string GetAnnouncementMessage(string vblood, string name)
         {
-            var killers = GetKillers(vblood);
             var vbloodLabel = name;
             var _message = PluginConfig.KillMessageBossTemplate.Value;
             _message = _message.Replace("#vblood#", $"{FontColorChatSystem.Red(vbloodLabel)}");
@@ -195,7 +194,13 @@ namespace BloodyBoss.Systems
 
                             //if (entityUnit.Has<VBloodUnit>())
                             //{
+                            Action actionSpawnDespawn = () =>
+                            {
                                 spawnBoss.CheckSpawnDespawn();
+                            };
+
+                            ActionScheduler.RunActionOnMainThread(actionSpawnDespawn);
+                           
                             /*} else
                             {
                                 Plugin.Logger.LogError($"The PrefabGUID does not correspond to a VBlood Unit. Ignore Spawn");
@@ -215,7 +220,12 @@ namespace BloodyBoss.Systems
 
                             if (entityUnit.Has<VBloodUnit>())
                             {
-                                deSpawnBoss.CheckSpawnDespawn();
+                                Action actionSpawnDespawn = () =>
+                                {
+                                    deSpawnBoss.CheckSpawnDespawn();
+                                };
+                                
+                                ActionScheduler.RunActionOnMainThread(actionSpawnDespawn);
                             }
                             else
                             {
@@ -225,7 +235,7 @@ namespace BloodyBoss.Systems
                     }
                 }
             };
-            BoosSpawnCoroutine = CoroutineHandler.StartRepeatingCoroutine(bossAction, 1);
+            CoroutineHandler.StartRepeatingCoroutine(bossAction, 5);
 
         }
 

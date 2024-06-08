@@ -41,6 +41,8 @@ public class Plugin : BasePlugin, IRunOnInitialized
         // Harmony patching
         _harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
 
+        _harmony.PatchAll(typeof(NpcSystem));
+
         EventsHandlerSystem.OnInitialize += GameDataOnInitialize;
 
         Logger = new(Log);
@@ -73,7 +75,7 @@ public class Plugin : BasePlugin, IRunOnInitialized
         
 
         EventsHandlerSystem.OnDeathVBlood += BossSystem.OnDeathVblood;
-        EventsHandlerSystem.OnDamage += NpcSystem.OnDamageNpc;
+        //EventsHandlerSystem.OnDamage += NpcSystem.OnDamageNpc;
         EventsHandlerSystem.OnDeath += NpcSystem.OnDeathNpc;
 
     }
