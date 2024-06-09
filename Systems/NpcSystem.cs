@@ -156,7 +156,7 @@ namespace BloodyBoss.Systems
         public static void SendAnnouncementMessage(string vblood, BossEncounterModel bossModel)
         {
             var message = GetAnnouncementMessage(vblood, bossModel.name);
-            if (message != null)
+            if (message != null && PluginConfig.KillingMessage.Value)
             {
                 var killers = GetKillers(vblood);
                 bossModel.DropItems(vblood, false);

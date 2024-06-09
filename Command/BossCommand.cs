@@ -244,7 +244,7 @@ namespace BloodyBoss.Command
                 foreach (BossEncounterModel Boss in _bossList)
                 {
                         Boss.SetHourDespawn();
-                        Boss.Spawn(user);
+                        Boss.Spawn(user, true);
                         _counter++;
                 }
 

@@ -98,7 +98,7 @@ namespace BloodyBoss.DB.Models
             throw new ProductDontExistException();
         }
 
-        public bool Spawn(Entity sender)
+        public bool Spawn(Entity sender, bool multispawn = false)
         {
             SpawnSystem.SpawnUnitWithCallback(sender, new PrefabGUID(PrefabGUID), new(x, y, z), Lifetime+5, (Entity e) => {
                 bossEntity = e;
@@ -118,12 +118,14 @@ namespace BloodyBoss.DB.Models
                 ActionScheduler.RunActionOnceAfterDelay(actionIcon, 3);
             });
 
-            
-
-            var _message = Database.LOCALIZATIONS["MSG_Spawn_Boss_Template"];
-            _message = _message.Replace("#time#", FontColorChatSystem.Yellow($"{Lifetime / 60}"));
-            _message = _message.Replace("#worldbossname#", FontColorChatSystem.Yellow($"{name}"));
-            ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, FontColorChatSystem.Green($"{_message}"));
+            if (!multispawn)
+            {
+                User _user = UserSystem.getUserComponente(sender);
+                var _message = Database.LOCALIZATIONS["MSG_Spawn_Boss_Template"];
+                _message = _message.Replace("#time#", FontColorChatSystem.Yellow($"{Lifetime / 60}"));
+                _message = _message.Replace("#worldbossname#", FontColorChatSystem.Yellow($"{name}"));
+                ServerChatUtils.SendSystemMessageToClient(VWorld.Server.EntityManager, _user, FontColorChatSystem.Green($"{_message}"));
+            }
 
             return true;
         }
