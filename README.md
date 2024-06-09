@@ -30,6 +30,12 @@ You must have version 1.2.4 of Bloody.Core installed to be able to use version 1
 <details>
 <summary>Changelog</summary>
 
+`1.1.6`
+- Fixed doble icon
+
+`1.1.5`
+- Fixed doble icon
+
 `1.1.4`
 - Updated the timer system through CoroutineHandler.
 - Minions summoned by players do not harm the NPC.
@@ -98,7 +104,7 @@ Ensure the following mods are installed for seamless integration:
 ```
 [Main]
 
-## Determines whether the random encounter timer is enabled or not.
+## Determines whether the boss spawn timer is enabled or not.
 # Setting type: Boolean
 # Default value: true
 Enabled = true

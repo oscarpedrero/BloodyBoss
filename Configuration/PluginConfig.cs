@@ -18,6 +18,7 @@ namespace BloodyBoss.Configuration
         public static ConfigEntry<string> VBloodFinalConcatCharacters { get; private set; }
         public static ConfigEntry<bool> PlayersMultiplier { get; private set; }
         public static ConfigEntry<bool> ClearDropTable { get; private set; }
+        public static ConfigEntry<bool> MinionDamage { get; private set; }
 
         public static void Initialize()
         {
@@ -30,7 +31,7 @@ namespace BloodyBoss.Configuration
             var mainConfigFilePath = Path.Combine(bepInExConfigFolder, "BloodyBoss.cfg");
             _mainConfig = File.Exists(mainConfigFilePath) ? new ConfigFile(mainConfigFilePath, false) : new ConfigFile(mainConfigFilePath, true);
 
-            Enabled = _mainConfig.Bind("Main", "Enabled", true, "Determines whether the random encounter timer is enabled or not.");
+            Enabled = _mainConfig.Bind("Main", "Enabled", true, "Determines whether the boss spawn timer is enabled or not.");
             KillMessageBossTemplate = _mainConfig.Bind("Main", "KillMessageBossTemplate", "The #vblood# boss has been defeated by the following brave warriors:", "The message that will appear globally once the boss gets killed.");
             SpawnMessageBossTemplate = _mainConfig.Bind("Main", "SpawnMessageBossTemplate", "A Boss #worldbossname# has been summon you got #time# minutes to defeat it!.", "The message that will appear globally one the boss gets spawned.");
             DespawnMessageBossTemplate = _mainConfig.Bind("Main", "DespawnMessageBossTemplate", "You failed to kill the Boss #worldbossname# in time.", "The message that will appear globally if the players failed to kill the boss.");
@@ -38,6 +39,7 @@ namespace BloodyBoss.Configuration
             VBloodFinalConcatCharacters = _mainConfig.Bind("Main", "WorldBossFinalConcatCharacters", "and", "Final string for concat two or more players kill a WorldBoss Boss.");
             PlayersMultiplier = _mainConfig.Bind("Main", "PlayersOnlineMultiplier", false, "If you activate this option, the boss life formula changes from \"bosslife * multiplier\" to \"bosslife * multiplier * numberofonlineplayers\".");
             ClearDropTable = _mainConfig.Bind("Main", "ClearDropTable", false, "If you activate this option it will remove the original vblood droptable.");
+            MinionDamage = _mainConfig.Bind("Main", "MinionDamage", true, "Disable minion damage to bosses.");
         }
         public static void Destroy()
         {

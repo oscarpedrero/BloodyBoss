@@ -46,6 +46,7 @@ namespace BloodyBoss.Systems
                     var modelBoss = Database.BOSSES.Where(x => x.AssetName == npcAssetName.ToString() && x.bossSpawn == true).FirstOrDefault();
                     if (modelBoss != null && !modelBoss.IsVBlood())
                     {
+
                         if (_entityManager.HasComponent<PlayerCharacter>(event_damage.SpellSource.Read<EntityOwner>().Owner))
                         {
                             var owner = event_damage.SpellSource.Read<EntityOwner>().Owner;
@@ -58,7 +59,14 @@ namespace BloodyBoss.Systems
                             lastKillerUpdate[npcAssetName.ToString()] = DateTime.Now;
                         } else
                         {
-                            return false;
+                            if (PluginConfig.MinionDamage.Value)
+                            {
+                                return false;
+                            } else
+                            {
+                                return true;
+                            }
+                            
                         }
                     }
 
