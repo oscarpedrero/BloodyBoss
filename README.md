@@ -103,30 +103,10 @@ Ensure the following mods are installed for seamless integration:
 # Default value: true
 Enabled = true
 
-## The message that will appear globally once the boss gets killed.
-# Setting type: String
-# Default value: The Boss has been defeated. Congratulations to #user# for beating #vblood#!
-KillMessageBossTemplate = The Boss has been defeated. Congratulations to #user# for beating #vblood#!
-
-## The message that will appear globally one the boss gets spawned.
-# Setting type: String
-# Default value: A Boss #worldbossname# has been summon you got #time# minutes to defeat it!.
-SpawnMessageBossTemplate = A Boss #worldbossname# has been summon you got #time# minutes to defeat it!.
-
-## The message that will appear globally if the players failed to kill the boss.
-# Setting type: String
-# Default value: You failed to kill the Boss #worldbossname# in time.
-DespawnMessageBossTemplate = You failed to kill the Boss #worldbossname# in time.
-
 ## Buff that applies to each of the Bosses that we create with our mod.
 # Setting type: Int32
 # Default value: 1163490655
 BuffForWorldBoss = 1163490655
-
-## Final string for concat two or more players kill a WorldBoss Boss.
-# Setting type: String
-# Default value: and
-WorldBossFinalConcatCharacters = and
 
 ## If you activate this option, the boss life formula changes from "bosslife * multiplier" to "bosslife * multiplier * numberofonlineplayers".
 # Setting type: Boolean
@@ -137,6 +117,11 @@ PlayersOnlineMultiplier = false
 # Setting type: Boolean
 # Default value: false
 ClearDropTable = false
+
+## If you activate this option it will add message if player kill a boss.
+# Setting type: Boolean
+# Default value: false
+EnableKillMessage = false
 ```
 
 ## Commands
@@ -227,6 +212,12 @@ prefix: `.bb`.
 - Manually spawn the Boss in its specified location.
   - **NameOfBoss**: The Boss name you want to start.
   - Example: `.bb start "Alpha Wolf"`
+
+```ansi
+.bb startset
+```
+- Manually spawn all Boss in its specified location.
+  - Example: `.bb startset
 
 ```ansi
 .bb clearicon <NameOfBoss>
