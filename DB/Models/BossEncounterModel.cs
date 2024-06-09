@@ -100,7 +100,7 @@ namespace BloodyBoss.DB.Models
 
         public bool Spawn(Entity sender)
         {
-            SpawnSystem.SpawnUnitWithCallback(sender, new PrefabGUID(PrefabGUID), new(x, z), Lifetime+5, (Entity e) => {
+            SpawnSystem.SpawnUnitWithCallback(sender, new PrefabGUID(PrefabGUID), new(x, y, z), Lifetime+5, (Entity e) => {
                 bossEntity = e;
                 ModifyBoss(sender, e);
                 if (PluginConfig.ClearDropTable.Value)
@@ -120,7 +120,7 @@ namespace BloodyBoss.DB.Models
 
             
 
-            var _message = PluginConfig.SpawnMessageBossTemplate.Value;
+            var _message = Database.LOCALIZATIONS["MSG_Spawn_Boss_Template"];
             _message = _message.Replace("#time#", FontColorChatSystem.Yellow($"{Lifetime / 60}"));
             _message = _message.Replace("#worldbossname#", FontColorChatSystem.Yellow($"{name}"));
             ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, FontColorChatSystem.Green($"{_message}"));
@@ -223,7 +223,7 @@ namespace BloodyBoss.DB.Models
         private void AddIcon(Entity boss)
         {
 
-            SpawnSystem.SpawnUnitWithCallback(boss, Prefabs.MapIcon_POI_VBloodSource, new float2(x, z), Lifetime + 5, (Entity e) => {
+            SpawnSystem.SpawnUnitWithCallback(boss, Prefabs.MapIcon_POI_VBloodSource, new float3(x, y, z), Lifetime + 5, (Entity e) => {
                 icontEntity = e;
                 e.Add<MapIconData>();
                 e.Add<MapIconTargetEntity>();
@@ -368,7 +368,7 @@ namespace BloodyBoss.DB.Models
                 {
                     Entity user = UserSystem.GetOneUserOnline();
                     Plugin.Logger.LogInfo("Despawn Boss");
-                    var _message = PluginConfig.DespawnMessageBossTemplate.Value;
+                    var _message = Database.LOCALIZATIONS["MSG_Despawn_Boss_Template"];
                     _message = _message.Replace("#worldbossname#", FontColorChatSystem.Yellow($"{name}"));
                     ServerChatUtils.SendSystemMessageToAllClients(Plugin.SystemsCore.EntityManager, FontColorChatSystem.Green($"{_message}"));
                     DespawnBoss(user);

@@ -8,6 +8,7 @@ using System;
 using Unity.Transforms;
 using VampireCommandFramework;
 using Bloody.Core.GameData.v1;
+using Bloody.Core.API.v1;
 using Stunlock.Core;
 using ProjectM;
 
@@ -25,7 +26,7 @@ namespace BloodyBoss.Command
 
             if (Boss.Count == 0)
             {
-                throw ctx.Error($"There are no boss created");
+                throw ctx.Error(Database.LOCALIZATIONS["MSG_No_Boss_Created"]);
             }
             ctx.Reply($"Boss List");
             ctx.Reply($"----------------------------");
@@ -54,7 +55,7 @@ namespace BloodyBoss.Command
             try
             {
                 Database.loadDatabase();
-                ctx.Reply($"Boss database reload successfully");
+                ctx.Reply(Database.LOCALIZATIONS["MSG_Boss_Database_Reload"]);
             } catch(Exception e)
             {
                 throw ctx.Error($"Error: {e.Message}");
@@ -87,12 +88,16 @@ namespace BloodyBoss.Command
 
                 if (Database.AddBoss(bossName, prefabGUID, level, multiplier, lifeTime))
                 {
-                    ctx.Reply($"Boss '{bossName}' created successfully");
+                    var _message = Database.LOCALIZATIONS["MSG_Boss_Create_Succesfully"];
+                    _message = _message.Replace("#boss#", FontColorChatSystem.Yellow(bossName));
+                    ctx.Reply(_message);
                 }
             }
             catch (BossExistException)
             {
-                throw ctx.Error($"Boss with name '{bossName}' exist.");
+                var _message = Database.LOCALIZATIONS["MSG_Boss_Does_Not_Exist"];
+                _message = _message.Replace("#boss#", FontColorChatSystem.Yellow(bossName));
+                throw ctx.Error(_message);
             }
             catch (Exception e)
             {
@@ -109,12 +114,16 @@ namespace BloodyBoss.Command
             {
                 if (Database.RemoveBoss(bossName))
                 {
-                    ctx.Reply($"Boss '{bossName}' remove successfully");
+                    var _message = Database.LOCALIZATIONS["MSG_Boss_Remove_Succesfully"];
+                    _message = _message.Replace("#boss#", FontColorChatSystem.Yellow(bossName));
+                    ctx.Reply(_message);
                 }
             }
             catch (NPCDontExistException)
             {
-                throw ctx.Error($"Boss with name '{bossName}' does not exist.");
+                var _message = Database.LOCALIZATIONS["MSG_Boss_Does_Not_Exist"];
+                _message = _message.Replace("#boss#", FontColorChatSystem.Yellow(bossName));
+                throw ctx.Error(_message);
             }
             catch (Exception e)
             {
@@ -133,7 +142,12 @@ namespace BloodyBoss.Command
                 if (Database.GetBoss(BossName, out BossEncounterModel Boss))
                 {
                     Boss.SetLocation(pos);
-                    ctx.Reply($"Position {pos.x},{pos.y},{pos.z} successfully set to Boss '{BossName}'");
+                    var _message = Database.LOCALIZATIONS["MSG_Boss_Set_Position_Successfully"];
+                    _message = _message.Replace("#posx#", FontColorChatSystem.Green(Convert.ToString(pos.x)));
+                    _message = _message.Replace("#posy#", FontColorChatSystem.Yellow(Convert.ToString(pos.y)));
+                    _message = _message.Replace("#posz#", FontColorChatSystem.Yellow(Convert.ToString(pos.z)));
+                    _message = _message.Replace("#boss#", FontColorChatSystem.Yellow(BossName));
+                    ctx.Reply(_message);
                 }
                 else
                 {
@@ -142,7 +156,9 @@ namespace BloodyBoss.Command
             }
             catch (BossDontExistException)
             {
-                throw ctx.Error($"Boss with name '{BossName}' does not exist.");
+                var _message = Database.LOCALIZATIONS["MSG_Boss_Does_Not_Exist"];
+                _message = _message.Replace("#boss#", FontColorChatSystem.Yellow(BossName));
+                throw ctx.Error(_message);
             }
             catch (Exception e)
             {
@@ -161,7 +177,10 @@ namespace BloodyBoss.Command
                 if (Database.GetBoss(BossName, out BossEncounterModel Boss))
                 {
                     Boss.SetHour(hour);
-                    ctx.Reply($"Hour {hour} successfully set to Boss '{BossName}'");
+                    var _message = Database.LOCALIZATIONS["MSG_Boss_Set_Hour_Succesfully"];
+                    _message = _message.Replace("#hour#", FontColorChatSystem.Green(hour));
+                    _message = _message.Replace("#boss#", FontColorChatSystem.Yellow(BossName));
+                    ctx.Reply(_message);
                 }
                 else
                 {
@@ -170,7 +189,9 @@ namespace BloodyBoss.Command
             }
             catch (BossDontExistException)
             {
-                throw ctx.Error($"Boss with name '{BossName}' does not exist.");
+                var _message = Database.LOCALIZATIONS["MSG_Boss_Does_Not_Exist"];
+                _message = _message.Replace("#boss#", FontColorChatSystem.Yellow(BossName));
+                throw ctx.Error(_message);
             }
             catch (Exception e)
             {
@@ -199,7 +220,9 @@ namespace BloodyBoss.Command
             }
             catch (BossDontExistException)
             {
-                throw ctx.Error($"Boss with name '{BossName}' does not exist.");
+                var _message = Database.LOCALIZATIONS["MSG_Boss_Does_Not_Exist"];
+                _message = _message.Replace("#boss#", FontColorChatSystem.Yellow(BossName));
+                throw ctx.Error(_message);
             }
             catch (Exception e)
             {
@@ -207,6 +230,32 @@ namespace BloodyBoss.Command
             }
 
 
+        }
+
+        // Create new command for launch all boss with command
+        [Command("startset", description: "The confrontation with all Boss begins.", adminOnly: true)]
+        public static void startSet(ChatCommandContext ctx)
+        {
+            try
+            {
+                var user = ctx.Event.SenderUserEntity;
+                var _bossList = Database.BOSSES;
+                int _counter = 0;
+                foreach (BossEncounterModel Boss in _bossList)
+                {
+                        Boss.SetHourDespawn();
+                        Boss.Spawn(user);
+                        _counter++;
+                }
+
+                var _message = Database.LOCALIZATIONS["MSG_Boss_Counter"];
+                _message = _message.Replace("#counter#", FontColorChatSystem.Yellow(Convert.ToString(_counter)));
+                ctx.Reply(_message);
+            }
+            catch (Exception e)
+            {
+                throw ctx.Error($"Error: {e.Message}");
+            }
         }
 
         [Command("clearicon", usage: "<NameOfBoss>", description: "The confrontation with a Boss begins.", adminOnly: true)]
@@ -227,7 +276,9 @@ namespace BloodyBoss.Command
             }
             catch (BossDontExistException)
             {
-                throw ctx.Error($"Boss with name '{BossName}' does not exist.");
+                var _message = Database.LOCALIZATIONS["MSG_Boss_Does_Not_Exist"];
+                _message = _message.Replace("#boss#", FontColorChatSystem.Yellow(BossName));
+                throw ctx.Error(_message);
             }
             catch (Exception e)
             {

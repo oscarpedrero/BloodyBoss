@@ -177,7 +177,7 @@ namespace BloodyBoss.Systems
         public static string GetAnnouncementMessage(string vblood, string name)
         {
             var vbloodLabel = name;
-            var _message = PluginConfig.KillMessageBossTemplate.Value;
+            var _message = Database.LOCALIZATIONS["MSG_Kill_Boss_Template"];
             _message = _message.Replace("#vblood#", $"{FontColorChatSystem.Red(vbloodLabel)}");
             return FontColorChatSystem.Green($"{_message}");
         }

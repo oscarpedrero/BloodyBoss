@@ -19,8 +19,10 @@ namespace BloodyBoss.DB
 
         public static readonly string ConfigPath = Path.Combine(Paths.ConfigPath, "BloodyBoss");
         public static string BOSSESListFile = Path.Combine(ConfigPath, "Bosses.json");
+        public static string LocalizationsFile = Path.Combine(ConfigPath, "Localization.json"); // Add localization file
 
         public static List<BossEncounterModel> BOSSES { get; set; } = new();
+        public static Dictionary<string,string> LOCALIZATIONS { get; set; } = new();
 
         public static void Initialize()
         {
@@ -41,8 +43,31 @@ namespace BloodyBoss.DB
         {
             if (!Directory.Exists(ConfigPath)) Directory.CreateDirectory(ConfigPath);
             if (!File.Exists(BOSSESListFile)) File.WriteAllText(BOSSESListFile, "[]");
+                        if (!File.Exists(LocalizationsFile))
+            {
+                File.WriteAllText(LocalizationsFile, "{}"); // Add localization file
+                saveLocalizationDatabase();
+            }
+
             Plugin.Logger.LogDebug($"Create Database: OK");
             return true;
+        }
+
+                // Save Localization in file
+        public static bool saveLocalizationDatabase()
+        {
+            try
+            {
+                var _jsonOutPut = JsonSerializer.Serialize(Config.Localization, new JsonSerializerOptions { WriteIndented = true});
+                File.WriteAllText(LocalizationsFile, _jsonOutPut);
+                Plugin.Logger.LogDebug($"Save Localization Database: OK");
+                return true;
+            }
+            catch(Exception error)
+            {
+                Plugin.Logger.LogError($"Error Saving Localization Database: {error.Message}");
+                return false;
+            }
         }
 
         public static bool saveDatabase()
@@ -66,7 +91,11 @@ namespace BloodyBoss.DB
             try
             {
                 string json = File.ReadAllText(BOSSESListFile);
+                string localizationJson = File.ReadAllText(LocalizationsFile);
+
                 BOSSES = JsonSerializer.Deserialize<List<BossEncounterModel>>(json);
+                LOCALIZATIONS = JsonSerializer.Deserialize<Dictionary<string,string>>(localizationJson);
+
                 Plugin.Logger.LogDebug($"Load Database: OK");
                 return true;
             }
