@@ -31,7 +31,7 @@ You must have version 1.2.4 of Bloody.Core installed to be able to use version 1
 <summary>Changelog</summary>
 
 `1.1.6`
-- Fixed doble icon
+- Added option to enable or disable damage from players' minions to the boss
 
 `1.1.5`
 - Fixed doble icon
@@ -143,6 +143,11 @@ PlayersOnlineMultiplier = false
 # Setting type: Boolean
 # Default value: false
 ClearDropTable = false
+
+## Disable minion damage to bosses.
+# Setting type: Boolean
+# Default value: false
+MinionDamage = false
 ```
 
 ## Commands
