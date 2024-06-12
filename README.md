@@ -225,6 +225,11 @@ BuffAfterKillingEnabled = true
 # Setting type: Int32
 # Default value: -2061047741
 BuffAfterKillingPrefabGUID = -2061047741
+
+## If you activate this option, the bosses will not attack each other and will team up if two bosses are summoned together.
+# Setting type: Boolean
+# Default value: false
+TeamBossEnable = true
 ```
 
 ## Commands
