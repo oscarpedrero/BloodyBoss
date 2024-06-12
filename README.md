@@ -10,6 +10,70 @@ You must have version 1.2.4 of Bloody.Core installed to be able to use version 1
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/K3K8ENRQY)
 
+## NEW IN 1.1.7
+
+- Added a configuration that makes the two bosses the same team and although they hit each other they do not take life and their preference is to attack the player and not each other
+- Added the ability to modify boss statistics.
+
+When you start the server the mod itself generates the statistics of the original boss if you don't have them filled out in the configuration file.
+Then just modify the ones you want in your Bosses.json configuration file and execute chatcommand `.bb reload` to reload Bosses.json file.
+
+
+```json
+[
+  {
+    "name": "Test Boss",
+    "nameHash": "292216611",
+    "AssetName": "CHAR_ChurchOfLight_Cardinal_VBlood",
+    "Hour": "00:30",
+    "HourDespawn": "00:55:00",
+    "PrefabGUID": 114912615,
+    "level": 105,
+    "multiplier": 1,
+    "unitStats": {
+      "PhysicalCriticalStrikeChance": 0,
+      "PhysicalCriticalStrikeDamage": 2,
+      "SpellCriticalStrikeChance": 0,
+      "SpellCriticalStrikeDamage": 2,
+      "PhysicalPower": 90.64623,
+      "SpellPower": 90.64623,
+      "ResourcePower": 48.96,
+      "SiegePower": 19.4,
+      "ResourceYieldModifier": 1,
+      "ReducedResourceDurabilityLoss": 1,
+      "PhysicalResistance": 0,
+      "SpellResistance": 0,
+      "SunResistance": 0,
+      "FireResistance": 0,
+      "HolyResistance": 0,
+      "SilverResistance": 0,
+      "SilverCoinResistance": 0,
+      "GarlicResistance": 0,
+      "PassiveHealthRegen": 1,
+      "CCReduction": 0,
+      "HealthRecovery": 1,
+      "DamageReduction": 0,
+      "HealingReceived": 0,
+      "ShieldAbsorbModifier": 1,
+      "BloodEfficiency": 1
+    },
+    "items": [
+      {
+        "name": "Brew of Ferocity",
+        "ItemID": -269326085,
+        "Stack": 12,
+        "Chance": 100,
+        "Color": "#daa520"
+      }
+    ],
+    "Lifetime": 1500,
+    "x": -2012.1184,
+    "y": 5.000004,
+    "z": -2792.9685,
+  }
+]
+```
+
 ## NEW IN 1.1.4
 
 - Minions summoned by players do not harm the NPC.
@@ -17,18 +81,16 @@ You must have version 1.2.4 of Bloody.Core installed to be able to use version 1
 
 **If with this version you have problems with messages or drops, I recommend that you make a copy of your boss configuration and create them again. Some problems have been reported with previous versions.**
 
-## NEW IN 1.1.2
-
- - Removed the restriction that bosses must be VBloods, you can now set any NPC as a boss and their drop preferences.
-
-## NEW IN 1.1.0
-
- - The configuration file path changes from **BepInEx\config\BloodyBoss** to **BepInEx\config**. The previous configuration file is maintained so that the previous options that you had configured can be copied.
- - Now players who have killed a world boss will exit after the world boss death message, review the configuration file to adapt it to your liking.
-
 
 <details>
 <summary>Changelog</summary>
+
+`1.1.7`
+- Fixed an error that occurred when you turned off the server with a boss in the world that did not change its statistics once you restarted the server.
+- Fixed the bug that did not eliminate a world boss if you turned off the server before its spawn and turned it on after its spawn.
+- Fixed a bug that did not spawn the boss when there was no one online on the server.
+- Added animation when you kill a boss for all players who participated in the battle.
+- Added a configuration that makes the two bosses the same team and although they hit each other they do not take life and their preference is to attack the player and not each other
 
 `1.1.6`
 - Added option to enable or disable damage from players' minions to the boss
@@ -111,8 +173,8 @@ Enabled = true
 
 ## The message that will appear globally once the boss gets killed.
 # Setting type: String
-# Default value: The Boss has been defeated. Congratulations to #user# for beating #vblood#!
-KillMessageBossTemplate = The Boss has been defeated. Congratulations to #user# for beating #vblood#!
+# Default value: The #vblood# boss has been defeated by the following brave warriors:
+KillMessageBossTemplate = The #vblood# boss has been defeated by the following brave warriors:
 
 ## The message that will appear globally one the boss gets spawned.
 # Setting type: String
@@ -146,8 +208,23 @@ ClearDropTable = false
 
 ## Disable minion damage to bosses.
 # Setting type: Boolean
+# Default value: true
+MinionDamage = true
+
+## If you activate this option instead of spawning a specific boss at a specific time, the system will search for a random boss and spawn the random boss instead of the original boss at the original boss's specific time..
+# Setting type: Boolean
 # Default value: false
-MinionDamage = false
+RandomBoss = true
+
+## Deactivates the buff animation received by players who have participated in the battle for three seconds.
+# Setting type: Boolean
+# Default value: true
+BuffAfterKillingEnabled = true
+
+## PrefabGUID of the buff received by players who have participated in the battle for three seconds.
+# Setting type: Int32
+# Default value: -2061047741
+BuffAfterKillingPrefabGUID = -2061047741
 ```
 
 ## Commands

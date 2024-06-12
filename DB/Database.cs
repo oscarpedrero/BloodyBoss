@@ -1,5 +1,6 @@
 ﻿using BepInEx;
 using Bloodstone.API;
+using Bloody.Core;
 using BloodyBoss.DB.Models;
 using BloodyBoss.Exceptions;
 using ProjectM;
@@ -9,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using Unity.Collections;
 using Unity.Entities;
 
 namespace BloodyBoss.DB
@@ -19,6 +21,9 @@ namespace BloodyBoss.DB
 
         public static readonly string ConfigPath = Path.Combine(Paths.ConfigPath, "BloodyBoss");
         public static string BOSSESListFile = Path.Combine(ConfigPath, "Bosses.json");
+
+        public static Team? TeamDefault { get; set; } = null;
+        public static TeamReference? TeamReferenceDefault { get; set; } = null;
 
         public static List<BossEncounterModel> BOSSES { get; set; } = new();
 
@@ -106,6 +111,7 @@ namespace BloodyBoss.DB
             }
 
             var assetName = Plugin.SystemsCore.PrefabCollectionSystem._PrefabDataLookup[new PrefabGUID(prefabGUIDOfNPC)].AssetName.ToString();
+            Entity bossEntity = Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap[new PrefabGUID(prefabGUIDOfNPC)];
             boss = new BossEncounterModel();
             boss.name = NPCName;
             boss.nameHash = NPCName.GetHashCode().ToString();
@@ -114,6 +120,10 @@ namespace BloodyBoss.DB
             boss.level = level;
             boss.multiplier = multiplier;
             boss.Lifetime = lifetime;
+
+            var BossUnitStats = bossEntity.Read<UnitStats>();
+            boss.unitStats = new UnitStatsModel();
+            boss.unitStats.SetStats(BossUnitStats);
 
 
             BOSSES.Add(boss);

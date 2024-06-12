@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Text.RegularExpressions;
 using BepInEx.Configuration;
+using ProjectM;
 using Unity.DebugDisplay;
 
 
@@ -19,9 +20,14 @@ namespace BloodyBoss.Configuration
         public static ConfigEntry<bool> PlayersMultiplier { get; private set; }
         public static ConfigEntry<bool> ClearDropTable { get; private set; }
         public static ConfigEntry<bool> MinionDamage { get; private set; }
+        public static ConfigEntry<bool> RandomBoss { get; private set; }
+        public static ConfigEntry<bool> BuffAfterKillingEnabled { get; private set; }
+        public static ConfigEntry<int> BuffAfterKillingPrefabGUID { get; private set; }
+        public static ConfigEntry<bool> TeamBossEnable { get; private set; }
 
         public static void Initialize()
         {
+
             var bepInExConfigFolder = BepInEx.Paths.ConfigPath ?? Path.Combine("BepInEx", "config");
             var configFolder = Path.Combine(bepInExConfigFolder, "BloodyBoss");
             if (!Directory.Exists(configFolder))
@@ -40,6 +46,10 @@ namespace BloodyBoss.Configuration
             PlayersMultiplier = _mainConfig.Bind("Main", "PlayersOnlineMultiplier", false, "If you activate this option, the boss life formula changes from \"bosslife * multiplier\" to \"bosslife * multiplier * numberofonlineplayers\".");
             ClearDropTable = _mainConfig.Bind("Main", "ClearDropTable", false, "If you activate this option it will remove the original vblood droptable.");
             MinionDamage = _mainConfig.Bind("Main", "MinionDamage", true, "Disable minion damage to bosses.");
+            RandomBoss = _mainConfig.Bind("Main", "RandomBoss", false, "If you activate this option instead of spawning a specific boss at a specific time, the system will search for a random boss and spawn the random boss instead of the original boss at the original boss's specific time..");
+            BuffAfterKillingEnabled = _mainConfig.Bind("Main", "BuffAfterKillingEnabled", true, "Deactivates the buff animation received by players who have participated in the battle for three seconds.");
+            BuffAfterKillingPrefabGUID = _mainConfig.Bind("Main", "BuffAfterKillingPrefabGUID", -2061047741, "PrefabGUID of the buff received by players who have participated in the battle for three seconds.");
+            TeamBossEnable = _mainConfig.Bind("Main", "TeamBossEnable", false, "If you activate this option, the bosses will not attack each other and will team up if two bosses are summoned together..");
         }
         public static void Destroy()
         {

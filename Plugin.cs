@@ -10,6 +10,14 @@ using Bloody.Core;
 using Bloodstone.API;
 using BloodyBoss.Systems;
 using Bloody.Core.API.v1;
+using ProjectM;
+using BloodyBoss.Hooks;
+using Bloody.Core.Helper.v1;
+using BloodyBoss.DB.Models;
+using System.Linq;
+using static UnityEngine.Rendering.HighDefinition.HDRenderPipeline;
+using System;
+using Bloody.Core.GameData.v1;
 
 namespace BloodyBoss;
 
@@ -41,7 +49,8 @@ public class Plugin : BasePlugin, IRunOnInitialized
         // Harmony patching
         _harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
 
-        _harmony.PatchAll(typeof(NpcSystem));
+        _harmony.PatchAll(typeof(DealDamageHook));
+        //_harmony.PatchAll(typeof(VBloodSystemHook));
 
         EventsHandlerSystem.OnInitialize += GameDataOnInitialize;
 
@@ -71,13 +80,11 @@ public class Plugin : BasePlugin, IRunOnInitialized
         Logger.LogInfo("Binding configuration");
         PluginConfig.Initialize();
 
-        BossSystem.StartTimer();
-        
-
-        EventsHandlerSystem.OnDeathVBlood += BossSystem.OnDeathVblood;
+        EventsHandlerSystem.OnDeathVBlood += VBloodSystemHook.OnDeathVblood;
         //EventsHandlerSystem.OnDamage += NpcSystem.OnDamageNpc;
-        EventsHandlerSystem.OnDeath += NpcSystem.OnDeathNpc;
-
+        EventsHandlerSystem.OnDeath += DeathNpcHook.OnDeathNpc;
+        BossSystem.GenerateStats();
+        BossSystem.CheckBoss();
     }
 
     private static void GameFrame_OnUpdate()
