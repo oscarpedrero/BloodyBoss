@@ -15,6 +15,7 @@ using Bloody.Core;
 using ProjectM.Network;
 using HarmonyLib;
 using BloodyBoss.DB.Models;
+using Stunlock.Core;
 
 namespace BloodyBoss.Hooks
 {
@@ -34,8 +35,7 @@ namespace BloodyBoss.Hooks
                 
                 try
                 {
-                    NpcModel npc = GameData.Npcs.FromEntity(event_damage.Target);
-                    var npcAssetName = _prefabCollectionSystem._PrefabDataLookup[npc.PrefabGUID].AssetName;
+                    var npcAssetName = _prefabCollectionSystem._PrefabDataLookup[event_damage.Target.Read<PrefabGUID>()].AssetName;
                     var modelBoss = Database.BOSSES.Where(x => x.AssetName == npcAssetName.ToString() && x.bossSpawn == true).FirstOrDefault();
                     if (modelBoss != null && modelBoss.GetBossEntity() && modelBoss.bossEntity.Has<NameableInteractable>())
                     {
@@ -48,7 +48,6 @@ namespace BloodyBoss.Hooks
 
                                 var player = _entityManager.GetComponentData<PlayerCharacter>(event_damage.SpellSource.Read<EntityOwner>().Owner);
                                 var user = _entityManager.GetComponentData<User>(player.UserEntity);
-
                                 modelBoss.AddKiller(user.CharacterName.ToString());
                             }
                             else

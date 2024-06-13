@@ -52,9 +52,10 @@ namespace BloodyBoss.Hooks
 
                             if (modelBoss.bossEntity.Has<VBloodUnit>())
                             {
+                              
                                 continue;
                             }
-
+                         
                             var health = modelBoss.bossEntity.Read<Health>();
 
                             if (health.IsDead)

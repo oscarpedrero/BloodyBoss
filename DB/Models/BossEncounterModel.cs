@@ -195,8 +195,7 @@ namespace BloodyBoss.DB.Models
 
         public void ModifyBoss(Entity user, Entity boss)
         {
-            NpcModel npc = GameData.Npcs.FromEntity(boss);
-            AssetName = Plugin.SystemsCore.PrefabCollectionSystem._PrefabDataLookup[npc.PrefabGUID].AssetName.ToString();
+            AssetName = Plugin.SystemsCore.PrefabCollectionSystem._PrefabDataLookup[new PrefabGUID(PrefabGUID)].AssetName.ToString();
             var players = GameData.Users.Online.ToList().Count;
             var unit = boss.Read<UnitLevel>();
             unit.Level = new ModifiableInt(level);

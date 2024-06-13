@@ -25,7 +25,12 @@ namespace BloodyBoss.Hooks
         {
 
             Action killAction = () =>
-            {   if(!killVBloodyModel.bossSpawn) killVBloodyModel.SendAnnouncementMessage();
+            {
+                
+                if (killVBloodyModel.bossSpawn)
+                {
+                    killVBloodyModel.SendAnnouncementMessage();
+                }
             };
 
             foreach (var event_vblood in deathEvents)
@@ -36,17 +41,23 @@ namespace BloodyBoss.Hooks
                     var user = _entityManager.GetComponentData<User>(player.UserEntity);
                     var playerModel = GameData.Users.GetUserByCharacterName(user.CharacterName.ToString());
                     var vblood = _prefabCollectionSystem._PrefabDataLookup[event_vblood.Source].AssetName;
-
+          
                     var modelBoss = Database.BOSSES.Where(x => x.AssetName == vblood.ToString() && x.bossSpawn == true).FirstOrDefault();
+             
                     if (modelBoss != null && modelBoss.GetBossEntity())
                     {
+                  
                         var health = modelBoss.bossEntity.Read<Health>();
-
+                   
                         if (health.IsDead && modelBoss.bossEntity.Has<VBloodUnit>())
                         {
+                           
                             Entity userOnline = UserSystem.GetOneUserOnline();
+                      
                             killVBloodyModel = modelBoss;
+                       
                             modelBoss.BuffKillers();
+                      
                             CoroutineHandler.StartGenericCoroutine(killAction, 3);
                         }
                     }

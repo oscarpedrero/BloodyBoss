@@ -85,6 +85,9 @@ Then just modify the ones you want in your Bosses.json configuration file and ex
 <details>
 <summary>Changelog</summary>
 
+`1.1.9`
+- Fixed error that did not recognize some VBLOOD as such.
+
 `1.1.8`
 - Fixed bug when sending the message multiple times when more than one vampire kills the world boss.
 
