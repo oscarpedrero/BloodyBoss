@@ -85,6 +85,9 @@ Then just modify the ones you want in your Bosses.json configuration file and ex
 <details>
 <summary>Changelog</summary>
 
+`1.1.8`
+- Fixed bug when sending the message multiple times when more than one vampire kills the world boss.
+
 `1.1.7`
 - Fixed an error that occurred when you turned off the server with a boss in the world that did not change its statistics once you restarted the server.
 - Fixed the bug that did not eliminate a world boss if you turned off the server before its spawn and turned it on after its spawn.

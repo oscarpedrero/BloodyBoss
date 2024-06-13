@@ -25,8 +25,7 @@ namespace BloodyBoss.Hooks
         {
 
             Action killAction = () =>
-            {
-                killVBloodyModel.SendAnnouncementMessage();
+            {   if(!killVBloodyModel.bossSpawn) killVBloodyModel.SendAnnouncementMessage();
             };
 
             foreach (var event_vblood in deathEvents)
