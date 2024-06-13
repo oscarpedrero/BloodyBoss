@@ -5,16 +5,12 @@ using BloodyBoss.DB;
 using ProjectM.Gameplay.Systems;
 using ProjectM;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Unity.Entities;
 using Unity.Collections;
 using Bloody.Core;
 using ProjectM.Network;
 using HarmonyLib;
-using BloodyBoss.DB.Models;
 using Stunlock.Core;
 
 namespace BloodyBoss.Hooks
@@ -36,38 +32,41 @@ namespace BloodyBoss.Hooks
                 try
                 {
                     var npcAssetName = _prefabCollectionSystem._PrefabDataLookup[event_damage.Target.Read<PrefabGUID>()].AssetName;
-                    var modelBoss = Database.BOSSES.Where(x => x.AssetName == npcAssetName.ToString() && x.bossSpawn == true).FirstOrDefault();
-                    if (modelBoss != null && modelBoss.GetBossEntity() && modelBoss.bossEntity.Has<NameableInteractable>())
+                    var modelBosses = Database.BOSSES.Where(x => x.AssetName == npcAssetName.ToString() && x.bossSpawn == true).ToList();
+                    foreach (var modelBoss in modelBosses)
                     {
-                        NameableInteractable _nameableInteractable = modelBoss.bossEntity.Read<NameableInteractable>();
-                        if (_nameableInteractable.Name.Value == (modelBoss.nameHash + "bb"))
+                        if (modelBoss != null && modelBoss.GetBossEntity() && modelBoss.bossEntity.Has<NameableInteractable>())
                         {
-                            if (_entityManager.HasComponent<PlayerCharacter>(event_damage.SpellSource.Read<EntityOwner>().Owner))
+                            NameableInteractable _nameableInteractable = modelBoss.bossEntity.Read<NameableInteractable>();
+                            if (_nameableInteractable.Name.Value == (modelBoss.nameHash + "bb"))
                             {
-                                var owner = event_damage.SpellSource.Read<EntityOwner>().Owner;
-
-                                var player = _entityManager.GetComponentData<PlayerCharacter>(event_damage.SpellSource.Read<EntityOwner>().Owner);
-                                var user = _entityManager.GetComponentData<User>(player.UserEntity);
-                                modelBoss.AddKiller(user.CharacterName.ToString());
-                            }
-                            else
-                            {
-                                if (PluginConfig.MinionDamage.Value)
+                                if (_entityManager.HasComponent<PlayerCharacter>(event_damage.SpellSource.Read<EntityOwner>().Owner))
                                 {
-                                    return false;
+                                    var owner = event_damage.SpellSource.Read<EntityOwner>().Owner;
+
+                                    var player = _entityManager.GetComponentData<PlayerCharacter>(event_damage.SpellSource.Read<EntityOwner>().Owner);
+                                    var user = _entityManager.GetComponentData<User>(player.UserEntity);
+
+                                    modelBoss.AddKiller(user.CharacterName.ToString());
                                 }
                                 else
                                 {
-                                    return true;
+                                    if (PluginConfig.MinionDamage.Value)
+                                    {
+                                        return false;
+                                    }
+                                    else
+                                    {
+                                        return true;
+                                    }
                                 }
                             }
-                        }                       
+                        }
                     }
 
                 }
                 catch
                 {
-
                     continue;
                 }
             }

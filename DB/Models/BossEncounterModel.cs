@@ -19,8 +19,6 @@ using Bloody.Core.GameData.v1;
 using Bloody.Core.Patch.Server;
 using Bloody.Core.Methods;
 using Bloody.Core.Models.v1;
-using System.Diagnostics.CodeAnalysis;
-using static VCF.Core.Basics.RoleCommands;
 
 namespace BloodyBoss.DB.Models
 {
@@ -211,18 +209,20 @@ namespace BloodyBoss.DB.Models
 
             if (!IsVBlood(boss))
             {
-                var blood = boss.Read<BloodConsumeSource>();
-                blood.CanBeConsumed = false;
-                boss.Write(blood);
+                if (boss.Has<BloodConsumeSource>())
+                {
+                    var blood = boss.Read<BloodConsumeSource>();
+                    blood.CanBeConsumed = false;
+                    boss.Write(blood);
+                }
             }
 
             var BossUnitStats = boss.Read<UnitStats>();
-
             if (unitStats == null)
             {
                 GenerateStats();
             }
-            
+
             boss.Write(unitStats.FillStats(BossUnitStats));
 
             health.Value = health.MaxHealth.Value;

@@ -1,20 +1,12 @@
 ﻿using Bloody.Core;
-using Bloody.Core.API.v1;
 using Bloody.Core.GameData.v1;
-using Bloody.Core.Helper.v1;
 using BloodyBoss.DB;
-using BloodyBoss.DB.Models;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Services.Analytics.Internal;
 
 namespace BloodyBoss.Hooks
 {
@@ -22,50 +14,36 @@ namespace BloodyBoss.Hooks
     {
         private static PrefabCollectionSystem _prefabCollectionSystem = Plugin.SystemsCore.PrefabCollectionSystem;
         private static EntityManager _entityManager = Plugin.SystemsCore.EntityManager;
-        private static BossEncounterModel killVBloodyModel;
 
         internal static void OnDeathNpc(DeathEventListenerSystem sender, NativeArray<DeathEvent> deathEvents)
         {
 
-            Action killAction = () =>
+            foreach (var deathEvent in deathEvents)
             {
-                killVBloodyModel.SendAnnouncementMessage();
-            };
 
-
-            if (deathEvents.Length > 0)
-            {
-                foreach (var deathEvent in deathEvents)
+                if (_entityManager.HasComponent<PlayerCharacter>(deathEvent.Killer))
                 {
+                    var npcGUID = deathEvent.Died.Read<PrefabGUID>();
+                    var npc = _prefabCollectionSystem._PrefabDataLookup[npcGUID].AssetName;
+                    var player = _entityManager.GetComponentData<PlayerCharacter>(deathEvent.Killer);
+                    var user = _entityManager.GetComponentData<User>(player.UserEntity);
 
-                    if (_entityManager.HasComponent<PlayerCharacter>(deathEvent.Killer))
+                    var modelBosses = Database.BOSSES.Where(x => x.AssetName == npc.ToString() && x.bossSpawn == true).ToList();
+                    foreach (var modelBoss in modelBosses)
                     {
-                        var npcGUID = deathEvent.Died.Read<PrefabGUID>();
-                        var npc = _prefabCollectionSystem._PrefabDataLookup[npcGUID].AssetName;
-                        var player = _entityManager.GetComponentData<PlayerCharacter>(deathEvent.Killer);
-                        var user = _entityManager.GetComponentData<User>(player.UserEntity);
 
-                        var modelBoss = Database.BOSSES.Where(x => x.AssetName == npc.ToString() && x.bossSpawn == true).FirstOrDefault();
-
-                        if (modelBoss != null)
+                        if (modelBoss.bossEntity.Has<VBloodUnit>())
                         {
+                            continue;
+                        }
 
-                            if (modelBoss.bossEntity.Has<VBloodUnit>())
-                            {
-                              
-                                continue;
-                            }
-                         
-                            var health = modelBoss.bossEntity.Read<Health>();
-
-                            if (health.IsDead)
-                            {
-                                var playerModel = GameData.Users.GetUserByCharacterName(user.CharacterName.Value);
-                                killVBloodyModel = modelBoss;
-                                modelBoss.BuffKillers();
-                                CoroutineHandler.StartGenericCoroutine(killAction, 3);
-                                break;
-                            }
+                        NameableInteractable _nameableInteractable = modelBoss.bossEntity.Read<NameableInteractable>();
+                        if (_nameableInteractable.Name.Value == (modelBoss.nameHash + "bb"))
+                        {
+                            var playerModel = GameData.Users.GetUserByCharacterName(user.CharacterName.Value);
+                            modelBoss.BuffKillers();
+                            modelBoss.SendAnnouncementMessage();
+                            break;
                         }
                     }
                 }

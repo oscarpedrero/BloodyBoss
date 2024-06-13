@@ -81,9 +81,16 @@ Then just modify the ones you want in your Bosses.json configuration file and ex
 
 **If with this version you have problems with messages or drops, I recommend that you make a copy of your boss configuration and create them again. Some problems have been reported with previous versions.**
 
+## Known bugs
+
+- When spawning two bosses at the same time based on the same PrefabGUID, if they die at the same time, only one rewards.
 
 <details>
 <summary>Changelog</summary>
+
+`1.1.10`
+- Fixed error when spawning two bosses based on the same prefabGUID that only gave a reward to one of them.
+- Fixed a bug where some NPCs did not spawn correctly due to the BloodConsumeSource component
 
 `1.1.9`
 - Fixed error that did not recognize some VBLOOD as such.
