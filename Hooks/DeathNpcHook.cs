@@ -36,9 +36,9 @@ namespace BloodyBoss.Hooks
                         {
                             continue;
                         }
-
-                        NameableInteractable _nameableInteractable = modelBoss.bossEntity.Read<NameableInteractable>();
-                        if (_nameableInteractable.Name.Value == (modelBoss.nameHash + "bb"))
+                        var health = modelBoss.bossEntity.Read<Health>();
+                        
+                        if (health.IsDead || health.Value == 0)
                         {
                             var playerModel = GameData.Users.GetUserByCharacterName(user.CharacterName.Value);
                             modelBoss.BuffKillers();

@@ -88,6 +88,9 @@ Then just modify the ones you want in your Bosses.json configuration file and ex
 <details>
 <summary>Changelog</summary>
 
+`1.1.11`
+- Fixed the error that occurred when the Vblood/NPC spawned by Bloodyboss appears in the game, if you defeat the original Vblood/NPC, you are considered to have killed the Vblood/NPC spawned by Bloodyboss and you will receive the items set by Bloodyboss.
+
 `1.1.10`
 - Fixed error when spawning two bosses based on the same prefabGUID that only gave a reward to one of them.
 - Fixed a bug where some NPCs did not spawn correctly due to the BloodConsumeSource component
