@@ -34,19 +34,35 @@ namespace BloodyBoss.Hooks
                     var modelBosses = Database.BOSSES.Where(x => x.AssetName == vblood.ToString() && x.bossSpawn == true).ToList();
                     foreach (var modelBoss in modelBosses)
                     {
-                        if (modelBoss.GetBossEntity())
+
+                        if (modelBoss.vbloodFirstKill)
                         {
-                            var health = modelBoss.bossEntity.Read<Health>();
-                            if (health.IsDead || health.Value == 0)
+                            modelBoss.AddKiller(user.CharacterName.ToString());
+                            modelBoss.BuffKillers();
+                        } else
+                        {
+                            if (modelBoss.GetBossEntity())
                             {
-                                Entity userOnline = UserSystem.GetOneUserOnline();
-                                modelBoss.BuffKillers();
-                                if (modelBoss.bossSpawn)
+                                var health = modelBoss.bossEntity.Read<Health>();
+                                if (health.IsDead || health.Value == 0)
                                 {
-                                    modelBoss.SendAnnouncementMessage();
+                                    modelBoss.vbloodFirstKill = true;
+                                    modelBoss.AddKiller(user.CharacterName.ToString());
+                                    modelBoss.BuffKillers();
+                                    if (modelBoss.bossSpawn)
+                                    {
+                                        var killAction = () =>
+                                        {
+                                            modelBoss.vbloodFirstKill = false;
+                                            modelBoss.SendAnnouncementMessage();
+                                        };
+                                        CoroutineHandler.StartGenericCoroutine(killAction, 2);
+                                        
+                                    }
                                 }
                             }
                         }
+                        
                     }
                 }
             }

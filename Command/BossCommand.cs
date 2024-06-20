@@ -10,6 +10,9 @@ using VampireCommandFramework;
 using Bloody.Core.GameData.v1;
 using Stunlock.Core;
 using ProjectM;
+using Bloody.Core.Helper.v1;
+using Unity.Entities;
+using System.Linq;
 
 namespace BloodyBoss.Command
 {
@@ -228,6 +231,36 @@ namespace BloodyBoss.Command
             catch (BossDontExistException)
             {
                 throw ctx.Error($"Boss with name '{BossName}' does not exist.");
+            }
+            catch (Exception e)
+            {
+                throw ctx.Error($"Error: {e.Message}");
+            }
+
+
+        }
+
+        [Command("clearallicons", description: "The confrontation with a Boss begins.", adminOnly: true)]
+        public static void ClearAllIcons(ChatCommandContext ctx)
+        {
+            try
+            {
+                var userModel = GameData.Users.All.FirstOrDefault();
+                var user = userModel.Entity;
+                var entities = QueryComponents.GetEntitiesByComponentTypes<MapIconData>(EntityQueryOptions.IncludeDisabledEntities);
+                var i = 0;
+                foreach (var entity in entities)
+                {
+                    var prefab = entity.Read<PrefabGUID>();
+                    var mapicon = Plugin.SystemsCore.PrefabCollectionSystem._PrefabDataLookup[prefab].AssetName;
+                    if (prefab.GuidHash == Prefabs.MapIcon_POI_VBloodSource.GuidHash)
+                    {
+                        i++;
+                        StatChangeUtility.KillOrDestroyEntity(Plugin.SystemsCore.EntityManager, entity, user, user, 0, StatChangeReason.Any, true);
+                    }
+                }
+                entities.Dispose();
+                ctx.Reply($"Removed icons ['{i}']");
             }
             catch (Exception e)
             {

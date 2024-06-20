@@ -47,6 +47,8 @@ namespace BloodyBoss.DB.Models
         private const double SendMessageDelay = 2;
         public static List<string> vbloodKills = new();
 
+        public bool vbloodFirstKill = false;
+
         public List<ItemEncounterModel> GetItems()
         {
             return items;
@@ -441,7 +443,7 @@ namespace BloodyBoss.DB.Models
 
                 foreach (var killer in killers)
                 {
-                    ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, $"{FontColorChatSystem.Yellow($"- {killer}")}, ");
+                    ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, $"{FontColorChatSystem.Yellow($"- {killer}")}");
                 }
 
                 RemoveKillers();

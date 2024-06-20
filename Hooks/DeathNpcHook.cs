@@ -36,6 +36,7 @@ namespace BloodyBoss.Hooks
                         {
                             continue;
                         }
+
                         var health = modelBoss.bossEntity.Read<Health>();
                         
                         if (health.IsDead || health.Value == 0)

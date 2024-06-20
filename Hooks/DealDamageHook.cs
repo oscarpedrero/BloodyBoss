@@ -42,6 +42,12 @@ namespace BloodyBoss.Hooks
                             {
                                 if (_entityManager.HasComponent<PlayerCharacter>(event_damage.SpellSource.Read<EntityOwner>().Owner))
                                 {
+
+                                    if (modelBoss.bossEntity.Has<VBloodUnit>())
+                                    {
+                                        continue;
+                                    }
+
                                     var owner = event_damage.SpellSource.Read<EntityOwner>().Owner;
 
                                     var player = _entityManager.GetComponentData<PlayerCharacter>(event_damage.SpellSource.Read<EntityOwner>().Owner);
