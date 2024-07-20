@@ -2,6 +2,12 @@
 
 **BloodyBoss** is a mod for V Rising that allows you to create VBlood world bosses with random rewards that can be set for each of the world bosses.
 
+# BloodyConfig
+
+**BloodyConfig** It is a Windows application that will help you configure the bosses and their drop table.
+
+https://github.com/oscarpedrero/BloodyConfig/releases/tag/v0.0.2
+
 ## IMPORTANT NOTE
 
 You must have version 1.2.4 of Bloody.Core installed to be able to use version 1.1.4 or higher of this mod
@@ -87,6 +93,9 @@ Then just modify the ones you want in your Bosses.json configuration file and ex
 
 <details>
 <summary>Changelog</summary>
+
+`1.1.13`
+- Added functionality for random bosses to appear at the spawn location of the original boss
 
 `1.1.12`
 - Added `clearallicons` command to remove any icons that are stuck on the BloodyBoss map

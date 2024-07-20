@@ -1,6 +1,5 @@
 ﻿using Bloody.Core.Models.v1;
 using Bloody.Core;
-using BloodyBoss;
 using BloodyBoss.DB;
 using BloodyBoss.DB.Models;
 using BloodyBoss.Exceptions;

@@ -49,6 +49,10 @@ namespace BloodyBoss.DB.Models
 
         public bool vbloodFirstKill = false;
 
+        private static readonly System.Random Random = new();
+
+        private BossEncounterModel bossRandom;
+
         public List<ItemEncounterModel> GetItems()
         {
             return items;
@@ -135,6 +139,47 @@ namespace BloodyBoss.DB.Models
             });
 
             
+
+            var _message = PluginConfig.SpawnMessageBossTemplate.Value;
+            _message = _message.Replace("#time#", FontColorChatSystem.Yellow($"{Lifetime / 60}"));
+            _message = _message.Replace("#worldbossname#", FontColorChatSystem.Yellow($"{name}"));
+            ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, FontColorChatSystem.Green($"{_message}"));
+
+            return true;
+        }
+
+        public bool Spawn(Entity sender, float locationX, float locationZ)
+        {
+            SpawnSystem.SpawnUnitWithCallback(sender, new PrefabGUID(PrefabGUID), new(locationX, locationZ), Lifetime + 5, (Entity e) => {
+
+                bossEntity = e;
+                ModifyBoss(sender, e);
+                if (PluginConfig.ClearDropTable.Value)
+                {
+                    var action = () =>
+                    {
+                        ClearDropTable(e);
+                    };
+                    CoroutineHandler.StartFrameCoroutine(action, 10, 1);
+                }
+
+                var actionTeams = () =>
+                {
+                    BossSystem.CheckTeams(e);
+                };
+                var random = new System.Random();
+                CoroutineHandler.StartFrameCoroutine(actionTeams, random.Next(60), 1);
+
+
+                var actionIcon = () =>
+                {
+                    AddIcon(bossEntity, locationX, locationZ);
+                };
+                ActionScheduler.RunActionOnceAfterDelay(actionIcon, 3);
+
+            });
+
+
 
             var _message = PluginConfig.SpawnMessageBossTemplate.Value;
             _message = _message.Replace("#time#", FontColorChatSystem.Yellow($"{Lifetime / 60}"));
@@ -239,6 +284,25 @@ namespace BloodyBoss.DB.Models
         {
 
             SpawnSystem.SpawnUnitWithCallback(boss, Prefabs.MapIcon_POI_VBloodSource, new float2(x, z), Lifetime + 5, (Entity e) => {
+                icontEntity = e;
+                e.Add<MapIconData>();
+                e.Add<MapIconTargetEntity>();
+                var mapIconTargetEntity = e.Read<MapIconTargetEntity>();
+                mapIconTargetEntity.TargetEntity = NetworkedEntity.ServerEntity(boss);
+                mapIconTargetEntity.TargetNetworkId = boss.Read<NetworkId>();
+                e.Write(mapIconTargetEntity);
+                e.Add<NameableInteractable>();
+                NameableInteractable _nameableInteractable = e.Read<NameableInteractable>();
+                _nameableInteractable.Name = new FixedString64Bytes(nameHash + "ibb");
+                e.Write(_nameableInteractable);
+            });
+            
+        }
+
+        private void AddIcon(Entity boss, float locationX, float locationZ)
+        {
+
+            SpawnSystem.SpawnUnitWithCallback(boss, Prefabs.MapIcon_POI_VBloodSource, new float2(locationX, locationZ), Lifetime + 5, (Entity e) => {
                 icontEntity = e;
                 e.Add<MapIconData>();
                 e.Add<MapIconTargetEntity>();
@@ -385,29 +449,60 @@ namespace BloodyBoss.DB.Models
                 {
                     var userModel = GameData.Users.All.FirstOrDefault();
                     var user = userModel.Entity;
-                    Plugin.Logger.LogInfo("Spawn Boss");
-                    Spawn(user);
-                    bossSpawn = true;
-                    Database.saveDatabase();
+                    if (Database.BOSSES.Count > 1 && PluginConfig.RandomBoss.Value)
+                    {
+                        Plugin.Logger.LogInfo("Spawn Random Boss");
+                        bossRandom = Database.BOSSES[Random.Next(Database.BOSSES.Count)];
+                        bossRandom.Spawn(user,x,z);
+                        bossRandom.bossSpawn = true;
+                        Database.saveDatabase();
+                    } else
+                    {
+                        Plugin.Logger.LogInfo("Spawn Boss");
+                        Spawn(user);
+                        bossSpawn = true;
+                        Database.saveDatabase();
+                    }
+                    
                 } else
                 {
                     Plugin.Logger.LogWarning($"The boss {name} cannot be summoned again, since it is currently active");
                 }
             }
-            
+
             if (date.ToString("HH:mm:ss") == HourDespawn)
             {
-                if (bossSpawn)
+                var userModel = GameData.Users.All.FirstOrDefault();
+                var user = userModel.Entity;
+                if (Database.BOSSES.Count > 1 && PluginConfig.RandomBoss.Value)
                 {
-                    var userModel = GameData.Users.All.FirstOrDefault();
-                    var user = userModel.Entity;
-                    Plugin.Logger.LogInfo("Despawn Boss");
-                    var _message = PluginConfig.DespawnMessageBossTemplate.Value;
-                    _message = _message.Replace("#worldbossname#", FontColorChatSystem.Yellow($"{name}"));
-                    ServerChatUtils.SendSystemMessageToAllClients(Plugin.SystemsCore.EntityManager, FontColorChatSystem.Green($"{_message}"));
-                    DespawnBoss(user);
-                    Database.saveDatabase();
-                    
+                    if (bossRandom.bossSpawn)
+                    {
+
+                        Plugin.Logger.LogInfo("Despawn Random Boss");
+                        var _message = PluginConfig.DespawnMessageBossTemplate.Value;
+                        _message = _message.Replace("#worldbossname#", FontColorChatSystem.Yellow($"{name}"));
+                        ServerChatUtils.SendSystemMessageToAllClients(Plugin.SystemsCore.EntityManager, FontColorChatSystem.Green($"{_message}"));
+                        bossRandom.DespawnBoss(user);
+                        bossRandom.bossSpawn = false;
+                        bossRandom = null;
+                        Database.saveDatabase();
+
+                    }
+                }
+                else
+                {
+                    if (bossSpawn)
+                    {
+                        Plugin.Logger.LogInfo("Despawn Boss");
+                        var _message = PluginConfig.DespawnMessageBossTemplate.Value;
+                        _message = _message.Replace("#worldbossname#", FontColorChatSystem.Yellow($"{name}"));
+                        ServerChatUtils.SendSystemMessageToAllClients(Plugin.SystemsCore.EntityManager, FontColorChatSystem.Green($"{_message}"));
+                        DespawnBoss(user);
+                        bossSpawn = false;
+                        Database.saveDatabase();
+
+                    }
                 }
             }
         }
