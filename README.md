@@ -94,6 +94,10 @@ Then just modify the ones you want in your Bosses.json configuration file and ex
 <details>
 <summary>Changelog</summary>
 
+`1.1.14`
+- Fixed bug when bosses did not have a spawn time they would sometimes stop the spawn timer.
+- Fixed a bug that caused enemies to not be on the same team and attack each other.
+
 `1.1.13`
 - Added functionality for random bosses to appear at the spawn location of the original boss
 

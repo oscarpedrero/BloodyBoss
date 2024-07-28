@@ -4,6 +4,7 @@ using BloodyBoss.DB;
 using ProjectM;
 using ProjectM.Network;
 using Stunlock.Core;
+using System;
 using System.Linq;
 using Unity.Collections;
 using Unity.Entities;
@@ -31,20 +32,33 @@ namespace BloodyBoss.Hooks
                     var modelBosses = Database.BOSSES.Where(x => x.AssetName == npc.ToString() && x.bossSpawn == true).ToList();
                     foreach (var modelBoss in modelBosses)
                     {
-
-                        if (modelBoss.bossEntity.Has<VBloodUnit>())
+                        try
                         {
-                            continue;
+                            modelBoss.GetBossEntity();
+                            if (modelBoss.bossEntity.Has<VBloodUnit>())
+                            {
+                                continue;
+                            }
+
+                            var health = modelBoss.bossEntity.Read<Health>();
+
+                            if (health.IsDead || health.Value == 0)
+                            {
+                                var playerModel = GameData.Users.GetUserByCharacterName(user.CharacterName.Value);
+                                modelBoss.BuffKillers();
+                                modelBoss.SendAnnouncementMessage();
+                                break;
+                            }
                         }
-
-                        var health = modelBoss.bossEntity.Read<Health>();
-                        
-                        if (health.IsDead || health.Value == 0)
+                        catch (Exception ex)
                         {
-                            var playerModel = GameData.Users.GetUserByCharacterName(user.CharacterName.Value);
-                            modelBoss.BuffKillers();
-                            modelBoss.SendAnnouncementMessage();
-                            break;
+                            Plugin.Logger.LogError(ex.Message);
+                            if (ex.Message.Contains("The entity does not exist"))
+                            {
+                                modelBoss.BuffKillers();
+                                modelBoss.SendAnnouncementMessage();
+                            }
+                            continue;
                         }
                     }
                 }

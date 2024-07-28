@@ -163,19 +163,19 @@ namespace BloodyBoss.DB.Models
                     CoroutineHandler.StartFrameCoroutine(action, 10, 1);
                 }
 
-                var actionTeams = () =>
-                {
-                    BossSystem.CheckTeams(e);
-                };
-                var random = new System.Random();
-                CoroutineHandler.StartFrameCoroutine(actionTeams, random.Next(60), 1);
-
 
                 var actionIcon = () =>
                 {
                     AddIcon(bossEntity, locationX, locationZ);
                 };
                 ActionScheduler.RunActionOnceAfterDelay(actionIcon, 3);
+
+                var actionTeams = () =>
+                {
+                    BossSystem.CheckTeams(e);
+                };
+                var random = new System.Random();
+                ActionScheduler.RunActionOnceAfterDelay(actionTeams, 2);
 
             });
 
