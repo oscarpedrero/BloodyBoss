@@ -1,5 +1,4 @@
-﻿using Bloodstone.API;
-using BloodyBoss.Configuration;
+﻿using BloodyBoss.Configuration;
 using BloodyBoss.Exceptions;
 using BloodyBoss.Systems;
 using ProjectM;
@@ -19,6 +18,7 @@ using Bloody.Core.GameData.v1;
 using Bloody.Core.Patch.Server;
 using Bloody.Core.Methods;
 using Bloody.Core.Models.v1;
+using BloodyBoss.Utils;
 
 namespace BloodyBoss.DB.Models
 {
@@ -143,7 +143,9 @@ namespace BloodyBoss.DB.Models
             var _message = PluginConfig.SpawnMessageBossTemplate.Value;
             _message = _message.Replace("#time#", FontColorChatSystem.Yellow($"{Lifetime / 60}"));
             _message = _message.Replace("#worldbossname#", FontColorChatSystem.Yellow($"{name}"));
-            ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, FontColorChatSystem.Green($"{_message}"));
+
+            var _ref_message = (FixedString512Bytes) FontColorChatSystem.Green($"{_message}");
+            ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager,ref _ref_message);
 
             return true;
         }
@@ -184,7 +186,8 @@ namespace BloodyBoss.DB.Models
             var _message = PluginConfig.SpawnMessageBossTemplate.Value;
             _message = _message.Replace("#time#", FontColorChatSystem.Yellow($"{Lifetime / 60}"));
             _message = _message.Replace("#worldbossname#", FontColorChatSystem.Yellow($"{name}"));
-            ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, FontColorChatSystem.Green($"{_message}"));
+            var _ref_message = (FixedString512Bytes)FontColorChatSystem.Green($"{_message}");
+            ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, ref _ref_message);
 
             return true;
         }
@@ -482,7 +485,8 @@ namespace BloodyBoss.DB.Models
                         Plugin.Logger.LogInfo("Despawn Random Boss");
                         var _message = PluginConfig.DespawnMessageBossTemplate.Value;
                         _message = _message.Replace("#worldbossname#", FontColorChatSystem.Yellow($"{name}"));
-                        ServerChatUtils.SendSystemMessageToAllClients(Plugin.SystemsCore.EntityManager, FontColorChatSystem.Green($"{_message}"));
+                        var _ref_message = (FixedString512Bytes)FontColorChatSystem.Green($"{_message}");
+                        ServerChatUtils.SendSystemMessageToAllClients(Plugin.SystemsCore.EntityManager, ref _ref_message);
                         bossRandom.DespawnBoss(user);
                         bossRandom.bossSpawn = false;
                         bossRandom = null;
@@ -497,7 +501,8 @@ namespace BloodyBoss.DB.Models
                         Plugin.Logger.LogInfo("Despawn Boss");
                         var _message = PluginConfig.DespawnMessageBossTemplate.Value;
                         _message = _message.Replace("#worldbossname#", FontColorChatSystem.Yellow($"{name}"));
-                        ServerChatUtils.SendSystemMessageToAllClients(Plugin.SystemsCore.EntityManager, FontColorChatSystem.Green($"{_message}"));
+                        var _ref_message = (FixedString512Bytes)FontColorChatSystem.Green($"{_message}");
+                        ServerChatUtils.SendSystemMessageToAllClients(Plugin.SystemsCore.EntityManager, ref _ref_message );
                         DespawnBoss(user);
                         bossSpawn = false;
                         Database.saveDatabase();
@@ -533,12 +538,13 @@ namespace BloodyBoss.DB.Models
             {
                 var killers = GetKillers();
                 DropItems();
-
-                ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, message);
+                var _ref_message = (FixedString512Bytes) message;
+                ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, ref _ref_message);
 
                 foreach (var killer in killers)
                 {
-                    ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, $"{FontColorChatSystem.Yellow($"- {killer}")}");
+                    _ref_message = (FixedString512Bytes)$"{FontColorChatSystem.Yellow($"- {killer}")}";
+                    ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, ref _ref_message);
                 }
 
                 RemoveKillers();

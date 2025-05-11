@@ -2,6 +2,8 @@
 
 **BloodyBoss** is a mod for V Rising that allows you to create VBlood world bosses with random rewards that can be set for each of the world bosses.
 
+## [BepInEx 1.733.2 (RC2)](https://github.com/decaprime/VRising-Modding/releases/tag/1.733.2)
+
 # BloodyConfig
 
 **BloodyConfig** It is a Windows application that will help you configure the bosses and their drop table.
@@ -10,82 +12,11 @@ https://github.com/oscarpedrero/BloodyConfig/releases/tag/v0.0.2
 
 ## IMPORTANT NOTE
 
-You must have version 1.2.4 of Bloody.Core installed to be able to use version 1.1.4 or higher of this mod
+You must have version 2.0.0 of Bloody.Core installed to be able to use version 2.0.0 or higher of this mod
 
 # Sponsor this project
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/K3K8ENRQY)
-
-## NEW IN 1.1.7
-
-- Added a configuration that makes the two bosses the same team and although they hit each other they do not take life and their preference is to attack the player and not each other
-- Added the ability to modify boss statistics.
-
-When you start the server the mod itself generates the statistics of the original boss if you don't have them filled out in the configuration file.
-Then just modify the ones you want in your Bosses.json configuration file and execute chatcommand `.bb reload` to reload Bosses.json file.
-
-
-```json
-[
-  {
-    "name": "Test Boss",
-    "nameHash": "292216611",
-    "AssetName": "CHAR_ChurchOfLight_Cardinal_VBlood",
-    "Hour": "00:30",
-    "HourDespawn": "00:55:00",
-    "PrefabGUID": 114912615,
-    "level": 105,
-    "multiplier": 1,
-    "unitStats": {
-      "PhysicalCriticalStrikeChance": 0,
-      "PhysicalCriticalStrikeDamage": 2,
-      "SpellCriticalStrikeChance": 0,
-      "SpellCriticalStrikeDamage": 2,
-      "PhysicalPower": 90.64623,
-      "SpellPower": 90.64623,
-      "ResourcePower": 48.96,
-      "SiegePower": 19.4,
-      "ResourceYieldModifier": 1,
-      "ReducedResourceDurabilityLoss": 1,
-      "PhysicalResistance": 0,
-      "SpellResistance": 0,
-      "SunResistance": 0,
-      "FireResistance": 0,
-      "HolyResistance": 0,
-      "SilverResistance": 0,
-      "SilverCoinResistance": 0,
-      "GarlicResistance": 0,
-      "PassiveHealthRegen": 1,
-      "CCReduction": 0,
-      "HealthRecovery": 1,
-      "DamageReduction": 0,
-      "HealingReceived": 0,
-      "ShieldAbsorbModifier": 1,
-      "BloodEfficiency": 1
-    },
-    "items": [
-      {
-        "name": "Brew of Ferocity",
-        "ItemID": -269326085,
-        "Stack": 12,
-        "Chance": 100,
-        "Color": "#daa520"
-      }
-    ],
-    "Lifetime": 1500,
-    "x": -2012.1184,
-    "y": 5.000004,
-    "z": -2792.9685,
-  }
-]
-```
-
-## NEW IN 1.1.4
-
-- Minions summoned by players do not harm the NPC.
-- Removed the ability to bite a non-vBlood NPC boss
-
-**If with this version you have problems with messages or drops, I recommend that you make a copy of your boss configuration and create them again. Some problems have been reported with previous versions.**
 
 ## Known bugs
 
@@ -93,6 +24,12 @@ Then just modify the ones you want in your Bosses.json configuration file and ex
 
 <details>
 <summary>Changelog</summary>
+
+`2.0.0`
+- Updated to Oakveil
+- Removed the following UnitStats: PhysicalCriticalStrikeDamage, SpellCriticalStrikeChance, SpellCriticalStrikeDamage, ResourceYieldModifier, ReducedResourceDurabilityLoss, SilverResistance, SilverCoinResistance, 
+GarlicResistance, PassiveHealthRegen, HealthRecovery, DamageReduction, HealingReceived and ShieldAbsorbModifier
+- Removed Bloodstone dependency
 
 `1.1.14`
 - Fixed bug when bosses did not have a spawn time they would sometimes stop the spawn timer.
@@ -185,10 +122,9 @@ Then just modify the ones you want in your Bosses.json configuration file and ex
 ## Requirements
 Ensure the following mods are installed for seamless integration:
 
-1. [BepInEx](https://thunderstore.io/c/v-rising/p/BepInEx/BepInExPack_V_Rising/)
-2. [Bloodstone](https://thunderstore.io/c/v-rising/p/deca/Bloodstone/)
-3. [VampireCommandFramework](https://thunderstore.io/c/v-rising/p/deca/VampireCommandFramework/)
-4. [Bloody.Core](https://thunderstore.io/c/v-rising/p/Trodi/BloodyCore/)
+1. [BepInEx 1.733.2 (RC2)](https://github.com/decaprime/VRising-Modding/releases/tag/1.733.2)
+2. [VampireCommandFramework](https://thunderstore.io/c/v-rising/p/deca/VampireCommandFramework/)
+3. [Bloody.Core](https://thunderstore.io/c/v-rising/p/Trodi/BloodyCore/)
 
 ## Installation
 1. Copy `BloodyBoss.dll` to your `BepInEx/Plugins` directory.
@@ -371,15 +307,14 @@ prefix: `.bb`.
 
 # Resources
 
-[Complete items list of prefabs/GUID](https://discord.com/channels/978094827830915092/1117273637024714862/1117273642817044571)
+[Complete items list of prefabs/GUID](https://wiki.vrisingmods.com/prefabs/)
 
 # Credits
 
 [V Rising Mod Community](https://discord.gg/vrisingmods) is the premier community of mods for V Rising.
 
-[@Deca](https://github.com/decaprime), thank you for the exceptional frameworks [VampireCommandFramework](https://github.com/decaprime/VampireCommandFramework) and [BloodStone](https://github.com/decaprime/Bloodstone), based on [WetStone](https://github.com/molenzwiebel/Wetstone) by [@Molenzwiebel](https://github.com/molenzwiebel).
+[@Deca](https://github.com/decaprime), thank you for the exceptional frameworks [VampireCommandFramework](https://github.com/decaprime/VampireCommandFramework)
 
 **Special thanks to the testers and supporters of the project:**
 
-- @Vex, owner & founder of [Vexor RPG](https://discord.gg/JpVsKVvKNR) server, a tester and great supporter who provided his server as a test platform and took care of all the graphics and documentation.
 - @Bromelda & Wolfyowns, owners & founders of [BloodCraft- Modded Xprising server](https://discord.gg/aDh98KtEWZ) server, for their great work giving me feedback and thoroughly testing the mod.

@@ -7,26 +7,17 @@ using BepInEx.Logging;
 using BloodyBoss.Configuration;
 using BloodyBoss.DB;
 using Bloody.Core;
-using Bloodstone.API;
 using BloodyBoss.Systems;
 using Bloody.Core.API.v1;
-using ProjectM;
 using BloodyBoss.Hooks;
 using Bloody.Core.Helper.v1;
-using BloodyBoss.DB.Models;
-using System.Linq;
-using static UnityEngine.Rendering.HighDefinition.HDRenderPipeline;
-using System;
-using Bloody.Core.GameData.v1;
 
 namespace BloodyBoss;
 
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
 [BepInDependency("gg.deca.VampireCommandFramework")]
-[BepInDependency("gg.deca.Bloodstone")]
 [BepInDependency("trodi.Bloody.Core")]
-[Bloodstone.API.Reloadable]
-public class Plugin : BasePlugin, IRunOnInitialized
+public class Plugin : BasePlugin
 {
     Harmony _harmony;
 
@@ -87,13 +78,4 @@ public class Plugin : BasePlugin, IRunOnInitialized
         BossSystem.CheckBoss();
     }
 
-    private static void GameFrame_OnUpdate()
-    {
-        Logger.LogInfo("GameFrame");
-    }
-
-    public void OnGameInitialized()
-    {
-        Logger.LogDebug("OnGameInitialized");
-    }
 }
