@@ -110,7 +110,7 @@ namespace BloodyBoss.DB.Models
 
         public bool Spawn(Entity sender)
         {
-            SpawnSystem.SpawnUnitWithCallback(sender, new PrefabGUID(PrefabGUID), new(x, z), Lifetime+5, (Entity e) => {
+            SpawnSystem.SpawnUnitWithCallback(sender, new PrefabGUID(PrefabGUID), new(x, z), Lifetime + 30, (Entity e) => {
                 
                 bossEntity = e;
                 ModifyBoss(sender, e);
@@ -143,7 +143,7 @@ namespace BloodyBoss.DB.Models
             var _message = PluginConfig.SpawnMessageBossTemplate.Value;
             _message = _message.Replace("#time#", FontColorChatSystem.Yellow($"{Lifetime / 60}"));
             _message = _message.Replace("#worldbossname#", FontColorChatSystem.Yellow($"{name}"));
-
+            HourDespawn = DateTime.Parse(Hour).AddSeconds(Lifetime).ToString("HH:mm:ss");
             var _ref_message = (FixedString512Bytes) FontColorChatSystem.Green($"{_message}");
             ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager,ref _ref_message);
 
@@ -152,7 +152,7 @@ namespace BloodyBoss.DB.Models
 
         public bool Spawn(Entity sender, float locationX, float locationZ)
         {
-            SpawnSystem.SpawnUnitWithCallback(sender, new PrefabGUID(PrefabGUID), new(locationX, locationZ), Lifetime + 5, (Entity e) => {
+            SpawnSystem.SpawnUnitWithCallback(sender, new PrefabGUID(PrefabGUID), new(locationX, locationZ), Lifetime + 30, (Entity e) => {
 
                 bossEntity = e;
                 ModifyBoss(sender, e);
@@ -187,6 +187,7 @@ namespace BloodyBoss.DB.Models
             _message = _message.Replace("#time#", FontColorChatSystem.Yellow($"{Lifetime / 60}"));
             _message = _message.Replace("#worldbossname#", FontColorChatSystem.Yellow($"{name}"));
             var _ref_message = (FixedString512Bytes)FontColorChatSystem.Green($"{_message}");
+            HourDespawn = DateTime.Parse(Hour).AddSeconds(Lifetime).ToString("HH:mm:ss");
             ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, ref _ref_message);
 
             return true;
@@ -223,7 +224,7 @@ namespace BloodyBoss.DB.Models
 
             if(string.Empty != Hour)
             {
-                HourDespawn = DateTime.Parse(Hour).AddSeconds(Lifetime).ToString("HH:mm:ss");
+                HourDespawn = DateTime.Parse(Hour).AddSeconds(Lifetime - 2).ToString("HH:mm:ss");
             }
             
             return true;
@@ -411,13 +412,13 @@ namespace BloodyBoss.DB.Models
         internal void SetHour(string hour)
         {
             Hour = hour;
-            HourDespawn = DateTime.Parse(hour).AddSeconds(Lifetime).ToString("HH:mm:ss");
+            HourDespawn = DateTime.Parse(hour).AddSeconds(Lifetime - 5).ToString("HH:mm:ss");
             Database.saveDatabase();
         }
 
         internal void SetHourDespawn()
         {
-            HourDespawn = DateTime.Now.AddSeconds(Lifetime).ToString("HH:mm:ss");
+            HourDespawn = DateTime.Now.AddSeconds(Lifetime - 5).ToString("HH:mm:ss");
             Database.saveDatabase();
         }
 
@@ -437,8 +438,39 @@ namespace BloodyBoss.DB.Models
 
         internal void DespawnBoss(Entity user)
         {
-            RemoveIcon(user);
-            KillBoss(user);
+            try
+            {
+                ClearDropTable(bossEntity);
+            } catch {
+
+                Plugin.Logger.LogWarning($"The boss {name} error cleardrop");
+
+            }
+
+            try
+            {
+                RemoveIcon(user);
+            }
+            catch
+            {
+
+                Plugin.Logger.LogWarning($"The boss {name} error remove icon");
+
+            }
+
+            try
+            {
+                KillBoss(user);
+            }
+            catch
+            {
+
+                Plugin.Logger.LogWarning($"The boss {name} error kill boss");
+
+            }
+
+            
+            
             bossSpawn = false;
         }
 
@@ -472,7 +504,8 @@ namespace BloodyBoss.DB.Models
                     Plugin.Logger.LogWarning($"The boss {name} cannot be summoned again, since it is currently active");
                 }
             }
-
+            
+            //Plugin.Logger.LogInfo($"Check {date.ToString("HH:mm:ss")} vs {HourDespawn}");
             if (date.ToString("HH:mm:ss") == HourDespawn)
             {
                 var userModel = GameData.Users.All.FirstOrDefault();

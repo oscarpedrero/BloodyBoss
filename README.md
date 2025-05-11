@@ -30,6 +30,8 @@ You must have version 2.0.0 of Bloody.Core installed to be able to use version 2
 - Removed the following UnitStats: PhysicalCriticalStrikeDamage, SpellCriticalStrikeChance, SpellCriticalStrikeDamage, ResourceYieldModifier, ReducedResourceDurabilityLoss, SilverResistance, SilverCoinResistance, 
 GarlicResistance, PassiveHealthRegen, HealthRecovery, DamageReduction, HealingReceived and ShieldAbsorbModifier
 - Removed Bloodstone dependency
+- Fixed when the boss disappears due to time, it used to drop loot, now it doesn't anymore ;)
+- Fixed an issue with lifetime and despawn time
 
 `1.1.14`
 - Fixed bug when bosses did not have a spawn time they would sometimes stop the spawn timer.
