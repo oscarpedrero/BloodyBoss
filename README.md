@@ -22,6 +22,7 @@ You must have version 2.0.0 of Bloody.Core installed to be able to use version 2
 
 - When spawning two bosses at the same time based on the same PrefabGUID, if they die at the same time, only one rewards.
 
+
 <details>
 <summary>Changelog</summary>
 
