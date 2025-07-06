@@ -365,6 +365,243 @@ Reload boss database from file.
 - `💰 Requires 5x Blood Essence (you have 2)`
 - `💀 Boss 'Ancient Dracula' is dead`
 
+## 🧪 Modular Ability System Commands (v2.1.0)
+
+**NEW!** Mix and match abilities from different VBloods while preserving original appearance.
+
+### `.bb ability-slot-set`
+**Admin only** - Configure individual ability slot.
+
+**Syntax:** `.bb ability-slot-set <BossName> <SlotName> <SourcePrefabGUID> <AbilityIndex> [Enabled] [Description]`
+
+**Parameters:**
+- `SlotName` - Custom name for this ability slot
+- `SourcePrefabGUID` - VBlood to copy ability from
+- `AbilityIndex` - Which ability index to use (0-36)
+- `Enabled` - true/false (default: true)
+- `Description` - Optional description
+
+**Examples:**
+```bash
+.bb ability-slot-set "HybridBoss" "primary" -327335305 0 true "Dracula shockwave"
+.bb ability-slot-set "HybridBoss" "spell1" -99012450 2 true "Christina AoE"
+.bb ability-slot-set "HybridBoss" "mobility" -1905691330 6 true "Wolf pounce"
+```
+
+### `.bb ability-slot-remove`
+**Admin only** - Remove specific ability slot.
+
+**Syntax:** `.bb ability-slot-remove <BossName> <SlotName>`
+
+**Examples:**
+```bash
+.bb ability-slot-remove "HybridBoss" "primary"
+.bb ability-slot-remove "HybridBoss" "spell1"
+```
+
+### `.bb ability-slot-toggle`
+**Admin only** - Enable/disable specific ability slot.
+
+**Syntax:** `.bb ability-slot-toggle <BossName> <SlotName>`
+
+**Examples:**
+```bash
+.bb ability-slot-toggle "HybridBoss" "primary"    # Disables if enabled
+.bb ability-slot-toggle "HybridBoss" "spell1"     # Enables if disabled
+```
+
+### `.bb ability-slot-clear`
+**Admin only** - Remove all custom ability slots from boss.
+
+**Syntax:** `.bb ability-slot-clear <BossName>`
+
+**Examples:**
+```bash
+.bb ability-slot-clear "HybridBoss"
+.bb ability-slot-clear "TestBoss"
+```
+
+### `.bb ability-slot-list`
+**Admin only** - List all configured ability slots for boss.
+
+**Syntax:** `.bb ability-slot-list <BossName>`
+
+**Example output:**
+```
+📋 Custom ability slots for boss 'HybridBoss':
+────────────────────────────────────────────────
+├─ Slot 'primary': ✅
+│  ├─ Source: Dracula (-327335305)
+│  ├─ Ability Index: 0
+│  └─ Description: Dracula shockwave slash
+├─ Slot 'spell1': ✅
+│  ├─ Source: Christina (-99012450)
+│  ├─ Ability Index: 2
+│  └─ Description: Christina AoE magic
+└─ Total: 2 slots (2 enabled)
+```
+
+### `.bb ability-preset`
+**Admin only** - Apply predefined ability combination.
+
+**Syntax:** `.bb ability-preset <BossName> <PresetName>`
+
+**Available presets:**
+- `dracula-mix` - Dracula melee + Vincent frost
+- `frost-warrior` - Tristan knight + Vincent ice
+- `spell-caster` - Christina holy + Dracula dark
+
+**Examples:**
+```bash
+.bb ability-preset "HybridBoss" "dracula-mix"
+.bb ability-preset "MageBoss" "spell-caster"
+.bb ability-preset "KnightBoss" "frost-warrior"
+```
+
+### `.bb ability-discover`
+**Admin only** - Discover all VBloods currently in the game world.
+
+**Syntax:** `.bb ability-discover`
+
+**Example output:**
+```
+🔍 Discovering all VBloods in the game world...
+Found 25 VBlood entities in game world:
+├─ CHAR_VBlood_Dracula_VBlood
+│  ├─ PrefabGUID: -327335305
+│  ├─ AbilityBar: ✅
+│  └─ Abilities: 37 slots
+├─ CHAR_Undead_BishopOfShadows_VBlood
+│  ├─ PrefabGUID: 939467639
+│  ├─ AbilityBar: ✅
+│  └─ Abilities: 6 slots
+└─ Total unique VBloods discovered: 25
+```
+
+**Generates file:** `Discovered_VBloods_[timestamp].txt`
+
+### `.bb ability-inspect`
+**Admin only** - Inspect detailed abilities of specific VBlood.
+
+**Syntax:** `.bb ability-inspect <SourcePrefabGUID>`
+
+**Examples:**
+```bash
+.bb ability-inspect -327335305    # Dracula abilities
+.bb ability-inspect 939467639     # Vincent abilities
+.bb ability-inspect -99012450     # Christina abilities
+```
+
+**Example output:**
+```
+🔍 Detailed abilities for Dracula (PrefabGUID: -327335305):
+────────────────────────────────────────────────
+✅ Has AbilityBar_Shared component
+✅ Found 37 ability groups:
+
+├─ Index 0: Primary Attack - 'Vampire Dracula ShockwaveSlash Group'
+├─ Index 1: Secondary Attack - 'Vampire Dracula DownSwing group'
+├─ Index 2: Special/Spell - 'Vampire Dracula SwordThrow group'
+├─ Index 3: Ultimate/Spell - 'Vampire Dracula WolfAtk group'
+├─ Index 4: Combat Ability - 'Vampire Dracula WolfLeap EnterTravel Group'
+└─ ... and 32 more abilities
+
+💡 Usage examples:
+   .bb ability-slot-set "YourBoss" "slot1" -327335305 0 true "Dracula ability 1"
+   .bb ability-slot-set "YourBoss" "slot2" -327335305 1 true "Dracula ability 2"
+```
+
+### `.bb ability-export-all`
+**Admin only** - Generate comprehensive abilities documentation.
+
+**Syntax:** `.bb ability-export-all`
+
+**Features:**
+- Scans all available VBloods
+- Documents each ability with names and classifications
+- Generates markdown documentation file
+- Includes usage examples for each VBlood
+
+**Generates file:** `VBlood_Abilities_Documentation_[timestamp].md`
+
+**Example output:**
+```
+📄 Documentation exported successfully!
+└─ File: VBlood_Abilities_Documentation_20241215_143052.md
+└─ Path: /BepInEx/config/BloodyBoss/VBlood_Abilities_Documentation_20241215_143052.md
+└─ Total VBloods documented: 25
+```
+
+## 🧪 Modular Ability Examples
+
+### Basic Hybrid Setup
+```bash
+# Create boss with Vincent appearance
+.bb create "HybridTest" 939467639 350 6 3000
+
+# Set location
+.bb set location "HybridTest"
+
+# Mix abilities from different VBloods
+.bb ability-slot-set "HybridTest" "primary" -327335305 0 true "Dracula shockwave"
+.bb ability-slot-set "HybridTest" "secondary" 1112948824 1 true "Tristan charge"
+.bb ability-slot-set "HybridTest" "spell1" -99012450 2 true "Christina AoE"
+.bb ability-slot-set "HybridTest" "spell2" -99012450 3 true "Christina minions"
+.bb ability-slot-set "HybridTest" "mobility" -1905691330 6 true "Wolf pounce"
+
+# Start the encounter
+.bb start "HybridTest"
+```
+
+### Using Presets for Quick Setup
+```bash
+# Create multiple themed bosses quickly
+.bb create "DarkMage" 939467639 400 8 2400
+.bb ability-preset "DarkMage" "dracula-mix"
+
+.bb create "HolyKnight" 1112948824 350 6 2400  
+.bb ability-preset "HolyKnight" "spell-caster"
+
+.bb create "FrostWarrior" -327335305 375 7 2400
+.bb ability-preset "FrostWarrior" "frost-warrior"
+```
+
+### Discovery and Documentation Workflow
+```bash
+# Step 1: Discover what's available
+.bb ability-discover
+
+# Step 2: Inspect specific VBloods for abilities
+.bb ability-inspect -327335305    # Check Dracula's 37 abilities
+.bb ability-inspect 939467639     # Check Vincent's 6 abilities
+
+# Step 3: Generate complete documentation
+.bb ability-export-all
+
+# Step 4: Configure based on findings
+.bb ability-slot-set "CustomBoss" "ultimate" -327335305 21 true "Blood shower"
+```
+
+### Troubleshooting Modular Abilities
+```bash
+# Check current ability configuration
+.bb ability-slot-list "ProblematicBoss"
+
+# Disable problematic abilities temporarily  
+.bb ability-slot-toggle "ProblematicBoss" "broken_ability"
+
+# Remove and reconfigure
+.bb ability-slot-remove "ProblematicBoss" "bad_slot"
+.bb ability-slot-set "ProblematicBoss" "fixed_slot" -99012450 1 true "Working ability"
+
+# Clear all and start fresh if needed
+.bb ability-slot-clear "ProblematicBoss"
+
+# Force respawn to apply changes
+.bb despawn "ProblematicBoss"
+.bb start "ProblematicBoss"
+```
+
 ## 📊 Command Usage Examples
 
 ### Setting Up a Weekly Boss Event

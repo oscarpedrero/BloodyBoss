@@ -3,6 +3,7 @@ using BloodyBoss.Exceptions;
 using BloodyBoss.Systems;
 using ProjectM;
 using ProjectM.Network;
+using ProjectM.CastleBuilding;
 using Stunlock.Core;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ using System.Linq;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Transforms;
 using ProjectM.Shared;
 using Bloody.Core;
 using Bloody.Core.API.v1;
@@ -61,6 +63,12 @@ namespace BloodyBoss.DB.Models
         
         // Phase Announcement Properties
         public int LastAnnouncedPhase { get; set; } = 0;
+        
+        // Ability Swap Properties
+        public int? AbilitySwapPrefabGUID { get; set; } = null;
+        
+        // Modular Ability System Properties
+        public Dictionary<string, CustomAbilitySlot> CustomAbilities { get; set; } = new Dictionary<string, CustomAbilitySlot>();
 
         private static readonly System.Random Random = new();
 
@@ -123,7 +131,18 @@ namespace BloodyBoss.DB.Models
 
         public bool Spawn(Entity sender)
         {
-            SpawnSystem.SpawnUnitWithCallback(sender, new PrefabGUID(PrefabGUID), new(x, z), Lifetime + 30, (Entity e) => {
+            // Verificar y obtener posición válida para spawn
+            var (validX, validZ, usedOriginal) = GetValidSpawnPosition(x, z);
+            
+            if (!usedOriginal)
+            {
+                Plugin.Logger.LogInfo($"Boss {name}: Spawn position adjusted to avoid castle territory");
+            }
+            
+            // Mantener siempre el PrefabGUID original para la apariencia
+            var spawnPrefabGUID = new PrefabGUID(PrefabGUID);
+            
+            SpawnSystem.SpawnUnitWithCallback(sender, spawnPrefabGUID, new(validX, validZ), Lifetime + 30, (Entity e) => {
                 
                 bossEntity = e;
                 ModifyBoss(sender, e);
@@ -146,7 +165,7 @@ namespace BloodyBoss.DB.Models
 
                 var actionIcon = () =>
                 {
-                    AddIcon(bossEntity);
+                    AddIcon(bossEntity, validX, validZ);
                 };
                 ActionScheduler.RunActionOnceAfterDelay(actionIcon, 3);
             });
@@ -165,7 +184,18 @@ namespace BloodyBoss.DB.Models
 
         public bool Spawn(Entity sender, float locationX, float locationZ)
         {
-            SpawnSystem.SpawnUnitWithCallback(sender, new PrefabGUID(PrefabGUID), new(locationX, locationZ), Lifetime + 30, (Entity e) => {
+            // Verificar y obtener posición válida para spawn
+            var (validX, validZ, usedOriginal) = GetValidSpawnPosition(locationX, locationZ);
+            
+            if (!usedOriginal)
+            {
+                Plugin.Logger.LogInfo($"Boss {name}: Spawn position adjusted to avoid castle territory");
+            }
+            
+            // Mantener siempre el PrefabGUID original para la apariencia
+            var spawnPrefabGUID = new PrefabGUID(PrefabGUID);
+            
+            SpawnSystem.SpawnUnitWithCallback(sender, spawnPrefabGUID, new(validX, validZ), Lifetime + 30, (Entity e) => {
 
                 bossEntity = e;
                 ModifyBoss(sender, e);
@@ -181,7 +211,7 @@ namespace BloodyBoss.DB.Models
 
                 var actionIcon = () =>
                 {
-                    AddIcon(bossEntity, locationX, locationZ);
+                    AddIcon(bossEntity, validX, validZ);
                 };
                 ActionScheduler.RunActionOnceAfterDelay(actionIcon, 3);
 
@@ -354,6 +384,20 @@ namespace BloodyBoss.DB.Models
             RenameBoss(boss);
             bossSpawn = true;
             LastSpawn = DateTime.Now;
+            
+            // Aplicar intercambio de habilidades si está configurado
+            if (AbilitySwapPrefabGUID.HasValue)
+            {
+                Plugin.Logger.LogInfo($"Boss {name}: Applying ability swap to {AbilitySwapPrefabGUID.Value} while maintaining visual appearance");
+                ApplyAbilitySwapPostSpawn(boss, new PrefabGUID(AbilitySwapPrefabGUID.Value));
+            }
+            
+            // Aplicar sistema modular de habilidades personalizadas
+            if (CustomAbilities.Count > 0)
+            {
+                Plugin.Logger.LogInfo($"Boss {name}: Applying modular ability system with {CustomAbilities.Count} custom slots");
+                ApplyModularAbilitiesPostSpawn(boss);
+            }
 
         }
 
@@ -689,6 +733,351 @@ namespace BloodyBoss.DB.Models
             var _message = PluginConfig.KillMessageBossTemplate.Value;
             _message = _message.Replace("#vblood#", $"{FontColorChatSystem.Red(name)}");
             return FontColorChatSystem.Green($"{_message}");
+        }
+
+        /// <summary>
+        /// Verifica si una posición está dentro de un territorio de castillo
+        /// </summary>
+        /// <param name="position">Posición a verificar</param>
+        /// <param name="checkRadius">Radio de verificación en unidades (por defecto 10)</param>
+        /// <returns>True si está en un castillo, False si es una posición válida para spawn</returns>
+        private static bool IsPositionInCastle(float3 position, float checkRadius = 10f)
+        {
+            try
+            {
+                var query = Core.World.EntityManager.CreateEntityQuery(
+                    ComponentType.ReadOnly<PrefabGUID>(),
+                    ComponentType.ReadOnly<LocalToWorld>(),
+                    ComponentType.ReadOnly<UserOwner>(),
+                    ComponentType.ReadOnly<CastleFloor>());
+
+                var entities = query.ToEntityArray(Allocator.Temp);
+                
+                foreach (var entity in entities)
+                {
+                    if (!entity.Has<LocalToWorld>())
+                    {
+                        continue;
+                    }
+                    var localToWorld = entity.Read<LocalToWorld>();
+                    var castlePosition = localToWorld.Position;
+                    
+                    var distance = math.distance(position, castlePosition);
+                    if (distance < checkRadius)
+                    {
+                        entities.Dispose();
+                        query.Dispose();
+                        return true; // Está dentro de un castillo
+                    }
+                }
+                entities.Dispose();
+                query.Dispose();
+                return false; // Posición válida, no está en castillo
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.LogError($"Error checking castle position: {ex.Message}");
+                return false; // En caso de error, asumir que es válida
+            }
+        }
+
+        /// <summary>
+        /// Busca una posición válida para spawn cerca de la posición original
+        /// </summary>
+        /// <param name="originalPosition">Posición original donde se quería hacer spawn</param>
+        /// <param name="searchRadius">Radio de búsqueda en unidades</param>
+        /// <param name="attempts">Número de intentos de búsqueda</param>
+        /// <returns>Nueva posición válida o null si no se encuentra</returns>
+        private static float3? FindValidSpawnPosition(float3 originalPosition, float searchRadius = 100f, int attempts = 20)
+        {
+            try
+            {
+                for (int i = 0; i < attempts; i++)
+                {
+                    // Generar posición aleatoria dentro del radio
+                    var angle = Random.NextDouble() * 2 * Math.PI;
+                    var distance = Random.NextDouble() * searchRadius;
+                    
+                    var testPosition = new float3(
+                        originalPosition.x + (float)(Math.Cos(angle) * distance),
+                        originalPosition.y, // Mantener la Y original
+                        originalPosition.z + (float)(Math.Sin(angle) * distance)
+                    );
+
+                    // Verificar si la nueva posición está libre de castillos
+                    if (!IsPositionInCastle(testPosition))
+                    {
+                        Plugin.Logger.LogInfo($"Found valid spawn position after {i + 1} attempts. Distance from original: {math.distance(originalPosition, testPosition):F2} units");
+                        return testPosition;
+                    }
+                }
+
+                Plugin.Logger.LogWarning($"Could not find valid spawn position after {attempts} attempts within {searchRadius} units radius");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.LogError($"Error finding valid spawn position: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Obtiene una posición válida para spawn, verificando castillos y buscando alternativas si es necesario
+        /// </summary>
+        /// <param name="originalX">Coordenada X original</param>
+        /// <param name="originalZ">Coordenada Z original</param>
+        /// <returns>Tupla con las coordenadas válidas y si se usó la posición original</returns>
+        private (float x, float z, bool usedOriginal) GetValidSpawnPosition(float originalX, float originalZ)
+        {
+            // Si la detección de castillos está deshabilitada, usar posición original
+            if (!PluginConfig.EnableCastleDetection.Value)
+            {
+                Plugin.Logger.LogInfo($"Boss {name}: Castle detection disabled, using original position");
+                return (originalX, originalZ, true);
+            }
+            
+            var originalPosition = new float3(originalX, y, originalZ);
+            
+            // Verificar si la posición original está en un castillo
+            if (!IsPositionInCastle(originalPosition))
+            {
+                Plugin.Logger.LogInfo($"Boss {name}: Original position is valid for spawn");
+                return (originalX, originalZ, true);
+            }
+
+            Plugin.Logger.LogWarning($"Boss {name}: Original position is inside a castle territory, searching for alternative...");
+            
+            // Buscar posición alternativa
+            var validPosition = FindValidSpawnPosition(originalPosition, 100f);
+            
+            if (validPosition.HasValue)
+            {
+                var newPos = validPosition.Value;
+                Plugin.Logger.LogInfo($"Boss {name}: Found alternative spawn position ({newPos.x:F2}, {newPos.z:F2})");
+                return (newPos.x, newPos.z, false);
+            }
+            
+            // Si no se encuentra posición válida, usar la original como último recurso
+            Plugin.Logger.LogError($"Boss {name}: Could not find valid spawn position, using original despite castle conflict");
+            return (originalX, originalZ, false);
+        }
+        
+        /// <summary>
+        /// Aplica intercambio de habilidades manteniendo la apariencia visual original
+        /// </summary>
+        private void ApplyAbilitySwapPostSpawn(Entity bossEntity, PrefabGUID sourcePrefabGUID)
+        {
+            try
+            {
+                // Obtener la entidad fuente del prefab
+                if (!Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(sourcePrefabGUID, out Entity sourceEntity))
+                {
+                    Plugin.Logger.LogError($"Source prefab {sourcePrefabGUID.GuidHash} not found for ability swap");
+                    return;
+                }
+                
+                Plugin.Logger.LogInfo($"Applying ability swap from {sourcePrefabGUID.GuidHash} to boss while preserving visual appearance");
+                
+                // Usar el sistema existente pero preservando la apariencia
+                var entityManager = Core.World.EntityManager;
+                
+                // 1. Copiar AbilityBar_Shared
+                if (sourceEntity.Has<AbilityBar_Shared>())
+                {
+                    var sourceAbilityBar = sourceEntity.Read<AbilityBar_Shared>();
+                    if (!bossEntity.Has<AbilityBar_Shared>())
+                    {
+                        bossEntity.Add<AbilityBar_Shared>();
+                    }
+                    bossEntity.Write(sourceAbilityBar);
+                    Plugin.Logger.LogInfo("Applied AbilityBar_Shared from source");
+                }
+                
+                // 2. Copiar AbilityGroupSlotBuffer
+                if (entityManager.HasBuffer<AbilityGroupSlotBuffer>(sourceEntity))
+                {
+                    var sourceBuffer = entityManager.GetBuffer<AbilityGroupSlotBuffer>(sourceEntity);
+                    DynamicBuffer<AbilityGroupSlotBuffer> targetBuffer;
+                    
+                    if (!entityManager.HasBuffer<AbilityGroupSlotBuffer>(bossEntity))
+                    {
+                        targetBuffer = entityManager.AddBuffer<AbilityGroupSlotBuffer>(bossEntity);
+                    }
+                    else
+                    {
+                        targetBuffer = entityManager.GetBuffer<AbilityGroupSlotBuffer>(bossEntity);
+                        targetBuffer.Clear();
+                    }
+                    
+                    for (int i = 0; i < sourceBuffer.Length; i++)
+                    {
+                        targetBuffer.Add(sourceBuffer[i]);
+                    }
+                    Plugin.Logger.LogInfo($"Applied {sourceBuffer.Length} ability groups from source");
+                }
+                
+                // 3. Forzar refresh de AI manteniendo la apariencia
+                ForceAIRefreshPreservingAppearance(bossEntity);
+                
+                Plugin.Logger.LogInfo("Ability swap applied successfully while preserving visual appearance");
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.LogError($"Error applying ability swap post-spawn: {ex.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// Refresca la AI sin cambiar la apariencia visual
+        /// </summary>
+        private void ForceAIRefreshPreservingAppearance(Entity entity)
+        {
+            try
+            {
+                var entityManager = Core.World.EntityManager;
+                
+                // Guardar PrefabGUID original para mantener apariencia
+                var originalPrefabGUID = entity.Read<PrefabGUID>();
+                
+                // Refrescar componentes de AI/comportamiento
+                if (entity.Has<AggroConsumer>())
+                {
+                    var aggro = entity.Read<AggroConsumer>();
+                    entity.Remove<AggroConsumer>();
+                    entity.Add<AggroConsumer>();
+                    entity.Write(aggro);
+                }
+                
+                // Asegurar que el PrefabGUID se mantiene original para la apariencia
+                entity.Write(originalPrefabGUID);
+                
+                Plugin.Logger.LogInfo("AI refreshed while preserving original appearance");
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.LogError($"Error refreshing AI while preserving appearance: {ex.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// Aplica el sistema modular de habilidades personalizadas
+        /// </summary>
+        private void ApplyModularAbilitiesPostSpawn(Entity bossEntity)
+        {
+            try
+            {
+                var entityManager = Core.World.EntityManager;
+                Plugin.Logger.LogInfo($"Starting modular ability application for boss {name}");
+                
+                // Crear o obtener el buffer de habilidades
+                DynamicBuffer<AbilityGroupSlotBuffer> abilityBuffer;
+                if (!entityManager.HasBuffer<AbilityGroupSlotBuffer>(bossEntity))
+                {
+                    abilityBuffer = entityManager.AddBuffer<AbilityGroupSlotBuffer>(bossEntity);
+                }
+                else
+                {
+                    abilityBuffer = entityManager.GetBuffer<AbilityGroupSlotBuffer>(bossEntity);
+                    abilityBuffer.Clear();
+                }
+                
+                // Aplicar habilidades personalizadas por slot
+                foreach (var slot in CustomAbilities)
+                {
+                    if (!slot.Value.Enabled)
+                    {
+                        Plugin.Logger.LogInfo($"Skipping disabled slot: {slot.Key}");
+                        continue;
+                    }
+                    
+                    Plugin.Logger.LogInfo($"Processing slot {slot.Key}: PrefabGUID={slot.Value.SourcePrefabGUID}, Index={slot.Value.AbilityIndex}");
+                    
+                    // Obtener la entidad fuente
+                    var sourcePrefabGUID = new PrefabGUID(slot.Value.SourcePrefabGUID);
+                    if (!Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(sourcePrefabGUID, out Entity sourceEntity))
+                    {
+                        Plugin.Logger.LogError($"Source prefab {slot.Value.SourcePrefabGUID} not found for slot {slot.Key}");
+                        continue;
+                    }
+                    
+                    // Obtener las habilidades de la fuente
+                    if (!entityManager.HasBuffer<AbilityGroupSlotBuffer>(sourceEntity))
+                    {
+                        Plugin.Logger.LogError($"Source entity does not have ability buffer for slot {slot.Key}");
+                        continue;
+                    }
+                    
+                    var sourceBuffer = entityManager.GetBuffer<AbilityGroupSlotBuffer>(sourceEntity);
+                    
+                    // Verificar que el índice sea válido
+                    if (slot.Value.AbilityIndex >= sourceBuffer.Length)
+                    {
+                        Plugin.Logger.LogError($"Ability index {slot.Value.AbilityIndex} out of range for slot {slot.Key} (max: {sourceBuffer.Length - 1})");
+                        continue;
+                    }
+                    
+                    // Copiar la habilidad específica
+                    var abilitySlot = sourceBuffer[slot.Value.AbilityIndex];
+                    abilityBuffer.Add(abilitySlot);
+                    
+                    Plugin.Logger.LogInfo($"Successfully copied ability {slot.Value.AbilityIndex} from {slot.Value.SourcePrefabGUID} to slot {slot.Key}");
+                }
+                
+                // Actualizar AbilityBar_Shared si hay habilidades configuradas
+                if (abilityBuffer.Length > 0)
+                {
+                    // Intentar obtener AbilityBar_Shared de la primera fuente como base
+                    var firstSlot = CustomAbilities.Values.FirstOrDefault(s => s.Enabled);
+                    if (firstSlot != null)
+                    {
+                        var firstSourcePrefab = new PrefabGUID(firstSlot.SourcePrefabGUID);
+                        if (Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(firstSourcePrefab, out Entity firstSourceEntity))
+                        {
+                            if (firstSourceEntity.Has<AbilityBar_Shared>())
+                            {
+                                var sourceAbilityBar = firstSourceEntity.Read<AbilityBar_Shared>();
+                                if (!bossEntity.Has<AbilityBar_Shared>())
+                                {
+                                    bossEntity.Add<AbilityBar_Shared>();
+                                }
+                                bossEntity.Write(sourceAbilityBar);
+                                Plugin.Logger.LogInfo("Applied AbilityBar_Shared from modular system");
+                            }
+                        }
+                    }
+                }
+                
+                // Refrescar AI para activar las nuevas habilidades
+                ForceAIRefreshPreservingAppearance(bossEntity);
+                
+                Plugin.Logger.LogInfo($"Modular ability system applied successfully: {abilityBuffer.Length} abilities configured");
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.LogError($"Error applying modular abilities: {ex.Message}");
+            }
+        }
+    }
+    
+    /// <summary>
+    /// Represents a custom ability slot configuration
+    /// </summary>
+    public class CustomAbilitySlot
+    {
+        public int SourcePrefabGUID { get; set; } = 0;
+        public int AbilityIndex { get; set; } = 0;
+        public bool Enabled { get; set; } = true;
+        public string Description { get; set; } = "";
+        
+        public CustomAbilitySlot() { }
+        
+        public CustomAbilitySlot(int sourcePrefabGUID, int abilityIndex, bool enabled = true, string description = "")
+        {
+            SourcePrefabGUID = sourcePrefabGUID;
+            AbilityIndex = abilityIndex;
+            Enabled = enabled;
+            Description = description;
         }
     }
 }

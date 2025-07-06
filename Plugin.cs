@@ -55,6 +55,7 @@ public class Plugin : BasePlugin
     public override bool Unload()
     {
         EventsHandlerSystem.OnInitialize -= GameDataOnInitialize;
+        BossSystem.StopTimer(); // Detener el timer independiente
         CommandRegistry.UnregisterAssembly();
         _harmony?.UnpatchSelf();
         return true;
@@ -76,6 +77,7 @@ public class Plugin : BasePlugin
         EventsHandlerSystem.OnDeath += DeathNpcHook.OnDeathNpc;
         BossSystem.GenerateStats();
         BossSystem.CheckBoss();
+        BossSystem.StartTimer(); // Iniciar el timer independiente
     }
 
 }

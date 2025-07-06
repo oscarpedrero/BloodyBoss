@@ -70,6 +70,9 @@ namespace BloodyBoss.Configuration
         
         // Additional Message Templates
         public static ConfigEntry<string> ConsecutiveInfoTemplate { get; private set; }
+        
+        // Castle Detection Configuration
+        public static ConfigEntry<bool> EnableCastleDetection { get; private set; }
 
         public static void Initialize()
         {
@@ -141,6 +144,9 @@ namespace BloodyBoss.Configuration
             
             // Additional Message Templates
             ConsecutiveInfoTemplate = _mainConfig.Bind("Phase Messages", "ConsecutiveInfoTemplate", " | Consecutive: #consecutive#", "Template for consecutive spawn information. Use #consecutive# placeholder");
+            
+            // Castle Detection Configuration
+            EnableCastleDetection = _mainConfig.Bind("Castle Detection", "Enable", true, "Enable castle territory detection to prevent boss spawns inside player bases");
         }
         public static void Destroy()
         {

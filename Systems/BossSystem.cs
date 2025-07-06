@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using BloodyBoss.Configuration;
 using BloodyBoss.DB;
 using BloodyBoss.DB.Models;
@@ -22,68 +23,101 @@ namespace BloodyBoss.Systems
         
         private static int lastMinute = DateTime.Now.Minute;
         private static int lastSecond = DateTime.Now.Second;
-        
+        private static Timer bossTimer;
+        private static bool isTimerRunning = false;
        
         public static Action bossAction;
 
         public static void StartTimer()
         {
-            Plugin.Logger.LogInfo("Start Timner for BloodyBoss");
+            // Evitar múltiples timers
+            if (isTimerRunning)
+            {
+                Plugin.Logger.LogInfo("BloodyBoss timer already running, skipping...");
+                return;
+            }
+
+            Plugin.Logger.LogInfo("Starting BloodyBoss timer (independent of player connections)");
+            
             bossAction = () =>
             {
-                var now = DateTime.Now;
-                bool minuteChanged = now.Minute != lastMinute;
-                bool secondChanged = now.Second != lastSecond;
-                
-                if (minuteChanged)
+                try
                 {
-                    lastMinute = now.Minute;
-                    var currentTime = now.ToString("HH:mm");
-                    var spawnsBoss = Database.BOSSES.Where(x => x.Hour == currentTime && !x.IsPaused).ToList();
-                    if (spawnsBoss.Count > 0)
+                    var now = DateTime.Now;
+                    bool minuteChanged = now.Minute != lastMinute;
+                    bool secondChanged = now.Second != lastSecond;
+                    
+                    if (minuteChanged)
                     {
-                        foreach (var spawnBoss in spawnsBoss)
+                        lastMinute = now.Minute;
+                        var currentTime = now.ToString("HH:mm");
+                        var spawnsBoss = Database.BOSSES.Where(x => x.Hour == currentTime && !x.IsPaused).ToList();
+                        if (spawnsBoss.Count > 0)
                         {
-                            Action actionSpawnDespawn = () =>
-                            {
-                                spawnBoss.CheckSpawnDespawn();
-                            };
-
-                            ActionScheduler.RunActionOnMainThread(actionSpawnDespawn);
-                        }
-                    }
-                }
-                
-                if (secondChanged)
-                {
-                    lastSecond = now.Second;
-                    var currentTimeWithSeconds = now.ToString("HH:mm:ss");
-                    var despawnsBoss = Database.BOSSES.Where(x => x.HourDespawn == currentTimeWithSeconds && x.bossSpawn == true && !x.IsPaused).ToList();
-                    if (despawnsBoss.Count > 0)
-                    {
-                        foreach (var deSpawnBoss in despawnsBoss)
-                        {
-                            var entityUnit = Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap[new PrefabGUID(deSpawnBoss.PrefabGUID)];
-
-                            if (entityUnit.Has<VBloodUnit>())
+                            Plugin.Logger.LogInfo($"Found {spawnsBoss.Count} bosses to spawn at {currentTime}");
+                            foreach (var spawnBoss in spawnsBoss)
                             {
                                 Action actionSpawnDespawn = () =>
                                 {
-                                    deSpawnBoss.CheckSpawnDespawn();
+                                    spawnBoss.CheckSpawnDespawn();
                                 };
-                                
+
                                 ActionScheduler.RunActionOnMainThread(actionSpawnDespawn);
                             }
-                            else
+                        }
+                    }
+                    
+                    if (secondChanged)
+                    {
+                        lastSecond = now.Second;
+                        var currentTimeWithSeconds = now.ToString("HH:mm:ss");
+                        var despawnsBoss = Database.BOSSES.Where(x => x.HourDespawn == currentTimeWithSeconds && x.bossSpawn == true && !x.IsPaused).ToList();
+                        if (despawnsBoss.Count > 0)
+                        {
+                            Plugin.Logger.LogInfo($"Found {despawnsBoss.Count} bosses to despawn at {currentTimeWithSeconds}");
+                            foreach (var deSpawnBoss in despawnsBoss)
                             {
-                                Plugin.Logger.LogError($"The PrefabGUID does not correspond to a VBlood Unit. Ignore Spawn");
+                                var entityUnit = Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap[new PrefabGUID(deSpawnBoss.PrefabGUID)];
+
+                                if (entityUnit.Has<VBloodUnit>())
+                                {
+                                    Action actionSpawnDespawn = () =>
+                                    {
+                                        deSpawnBoss.CheckSpawnDespawn();
+                                    };
+                                    
+                                    ActionScheduler.RunActionOnMainThread(actionSpawnDespawn);
+                                }
+                                else
+                                {
+                                    Plugin.Logger.LogError($"The PrefabGUID does not correspond to a VBlood Unit. Ignore Spawn");
+                                }
                             }
                         }
                     }
                 }
+                catch (Exception ex)
+                {
+                    Plugin.Logger.LogError($"Error in BossSystem timer: {ex.Message}");
+                }
             };
-            CoroutineHandler.StartRepeatingCoroutine(bossAction, 1);
 
+            // Usar System.Threading.Timer en lugar de CoroutineHandler
+            // Esto funciona independientemente de si hay jugadores conectados
+            bossTimer = new Timer(_ => bossAction?.Invoke(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+            isTimerRunning = true;
+            Plugin.Logger.LogInfo("BloodyBoss timer started successfully");
+        }
+
+        public static void StopTimer()
+        {
+            if (bossTimer != null)
+            {
+                bossTimer.Dispose();
+                bossTimer = null;
+                isTimerRunning = false;
+                Plugin.Logger.LogInfo("BloodyBoss timer stopped");
+            }
         }
 
         public void StartTimerteam()
@@ -140,7 +174,7 @@ namespace BloodyBoss.Systems
                 }
             }
             entities.Dispose();
-            StartTimer();
+            // Ya no necesitamos llamar StartTimer() aquí porque el timer ya está funcionando independientemente
         }
 
         internal static void CheckTeams(Entity boss)
