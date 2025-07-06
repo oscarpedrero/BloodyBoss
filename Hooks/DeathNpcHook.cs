@@ -45,6 +45,7 @@ namespace BloodyBoss.Hooks
                             if (health.IsDead || health.Value == 0)
                             {
                                 var playerModel = GameData.Users.GetUserByCharacterName(user.CharacterName.Value);
+                                modelBoss.AddKiller(user.CharacterName.ToString());
                                 modelBoss.BuffKillers();
                                 modelBoss.SendAnnouncementMessage();
                                 break;
@@ -55,6 +56,7 @@ namespace BloodyBoss.Hooks
                             Plugin.Logger.LogError(ex.Message);
                             if (ex.Message.Contains("The entity does not exist"))
                             {
+                                modelBoss.AddKiller(user.CharacterName.ToString());
                                 modelBoss.BuffKillers();
                                 modelBoss.SendAnnouncementMessage();
                             }

@@ -1,12 +1,11 @@
 ﻿{
   "name": "BloodyBoss",
-  "version_number": "1.1.0",
+  "version_number": "2.1.0",
   "website_url": "https://github.com/oscarpedrero/BloodyBoss",
-  "description": "BloodyBoss is a mod for V Rising that allows you to create VBlood world bosses with random rewards that can be set for each of the world bosses.",
+  "description": "BloodyBoss is an advanced mod for V Rising that allows you to create dynamic VBlood world bosses with intelligent scaling, progressive difficulty, phase announcements, and extensive customization options.",
   "dependencies": [
-    "BepInEx-BepInExPack_V_Rising-1.668.5",
-    "deca-Bloodstone-0.1.6",
-    "deca-VampireCommandFramework-0.9.0",
-    "Trodi-BloodyCore-1.2.2"
+    "BepInEx-BepInExPack_V_Rising-1.733.2",
+    "deca-VampireCommandFramework-0.10.4",
+    "Trodi-BloodyCore-2.0.0"
   ]
 }

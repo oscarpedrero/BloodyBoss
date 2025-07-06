@@ -1,323 +1,242 @@
-# BloodyBoss
+# BloodyBoss v2.1.0
 
-**BloodyBoss** is a mod for V Rising that allows you to create VBlood world bosses with random rewards that can be set for each of the world bosses.
+**BloodyBoss** is an advanced mod for V Rising that allows you to create dynamic VBlood world bosses with intelligent scaling, progressive difficulty, and extensive customization options. Create epic encounters that adapt to your player base and provide engaging challenges for solo players and large groups alike.
 
-## [BepInEx 1.733.2 (RC2)](https://github.com/decaprime/VRising-Modding/releases/tag/1.733.2)
+## 🆕 What's New in v2.1.0
 
-# BloodyConfig
+### 🎯 **Dynamic Scaling System**
+- **Automatic scaling** based on online players - bosses become stronger with more players
+- **Separate multipliers** for health and damage scaling
+- **Configurable caps** to prevent overwhelming difficulty
+- **Real-time adjustment** as players join or leave the server
 
-**BloodyConfig** It is a Windows application that will help you configure the bosses and their drop table.
+### 📈 **Progressive Difficulty**
+- **Consecutive spawn tracking** - bosses become more challenging if they keep spawning
+- **Escalating rewards** for defeating harder iterations
+- **Automatic reset** on successful kills or configurable persistence
+- **Visual indicators** showing difficulty progression
 
-https://github.com/oscarpedrero/BloodyConfig/releases/tag/v0.0.2
+### 🎭 **Phase Announcement System**
+- **Dynamic phase notifications** when bosses scale up or down
+- **Fully customizable messages** supporting multiple languages
+- **Color-coded difficulty levels** (Normal, Hard, Epic, Legendary)
+- **Special effects** for high-tier encounters
+- **Consecutive spawn milestones** with unique announcements
 
-## IMPORTANT NOTE
+### 🎮 **Advanced Command System**
+New administrative and player commands for enhanced control:
+- **Boss management** - despawn, pause, resume boss timers
+- **Debugging tools** - detailed status and technical information
+- **Simulation commands** - test boss mechanics safely
+- **Teleportation system** - configurable player/admin access to boss locations
+- **Force mechanics** - manually trigger drops, reset kill counters
 
-You must have version 2.0.0 of Bloody.Core installed to be able to use version 2.0.0 or higher of this mod
+### ⚙️ **Enhanced Configuration**
+- **Modular settings** for all new systems
+- **Per-server customization** of messages and behavior
+- **Granular control** over scaling parameters
+- **Backward compatibility** with existing configurations
 
-# Sponsor this project
+### 🌍 **Internationalization Support**
+- **Translatable phase names** and messages
+- **Configurable templates** with placeholder system
+- **Multi-language ready** - easily adapt to any language
+- **Server-specific branding** with custom prefixes and suffixes
+
+## ✨ Key Features
+
+- 🎯 **Smart Boss Scaling** - Automatically adjusts difficulty based on server population
+- 📊 **Progressive Challenges** - Bosses become stronger over multiple spawns
+- 🎪 **Epic Encounters** - Special phases with dramatic announcements
+- 🎮 **Advanced Commands** - Complete administrative control over boss systems
+- 🌐 **Multi-language** - Fully customizable in any language
+- ⚡ **Performance Optimized** - Efficient timer system with minimal server impact
+- 🔧 **Highly Configurable** - Extensive options for server customization
+
+## 📋 Requirements
+
+Ensure the following mods are installed for seamless integration:
+
+1. [BepInEx 1.733.2](https://thunderstore.io/c/v-rising/p/BepInEx/BepInExPack_V_Rising/) 
+2. [VampireCommandFramework 0.10.4](https://thunderstore.io/c/v-rising/p/deca/VampireCommandFramework/)
+3. [Bloody.Core 2.0.0](https://thunderstore.io/c/v-rising/p/Trodi/BloodyCore/)
+
+## 🚀 Quick Start
+
+1. **Install** the mod and dependencies
+2. **Launch** your server to generate config files
+3. **Configure** your settings in `BepInEx/Config/BloodyBoss.cfg`
+4. **Create** your first boss with `.bb create "My Boss" -1905691330 90 2 1800`
+5. **Set location** with `.bb set location "My Boss"`
+6. **Set spawn time** with `.bb set hour "My Boss" 20:00`
+7. **Add rewards** with `.bb items add "My Boss" "Blood Essence" 1055853475 50 100`
+8. **Start** the encounter with `.bb start "My Boss"`
+
+## 📚 Documentation
+
+| Topic | Description |
+|-------|-------------|
+| [📦 Installation](docs/INSTALLATION.md) | Complete installation guide and troubleshooting |
+| [⚙️ Configuration](docs/CONFIGURATION.md) | Detailed configuration options and examples |
+| [🎮 Commands](docs/COMMANDS.md) | Complete command reference with examples |
+| [🚀 Advanced Features](docs/ADVANCED-FEATURES.md) | Dynamic scaling, progressive difficulty, and phase systems |
+| [🛠️ Troubleshooting](docs/TROUBLESHOOTING.md) | Common issues and solutions |
+| [📝 Examples](docs/EXAMPLES.md) | Step-by-step setup guides and use cases |
+
+## 🎯 Example Boss Encounter
+
+```bash
+# Create a challenging boss that scales with players
+.bb create "Ancient Dracula" -1905691330 100 2 2400
+
+# Set location (stand where you want the boss to spawn)
+.bb set location "Ancient Dracula"
+
+# Schedule for 8 PM server time
+.bb set hour "Ancient Dracula" 20:00
+
+# Add epic rewards
+.bb items add "Ancient Dracula" "Greater Blood Essence" 1055853475 100 75
+.bb items add "Ancient Dracula" "Legendary Weapon Box" -257494203 1 25
+.bb items add "Ancient Dracula" "Ancient Relic" 429052660 5 50
+
+# Enable dynamic scaling for this encounter
+# Configure in BloodyBoss.cfg:
+# EnableDynamicScaling = true
+# HealthPerPlayer = 0.3    (30% more health per player)
+# DamagePerPlayer = 0.2    (20% more damage per player)
+# EnableProgressiveDifficulty = true
+```
+
+This will create a boss that:
+- ⚖️ **Scales automatically** with 2-10 players online
+- 📈 **Gets progressively harder** if not defeated
+- 📢 **Announces phase changes** to all players
+- 🎁 **Drops rare rewards** with configured chances
+- ⏰ **Spawns reliably** at 8 PM server time
+
+## 🔧 Configuration Preview
+
+**Dynamic Scaling:**
+```ini
+[Dynamic Scaling]
+Enable = true
+BaseHealthMultiplier = 1.5
+HealthPerPlayer = 0.25
+DamagePerPlayer = 0.15
+MaxPlayersForScaling = 10
+```
+
+**Phase Messages (Customizable):**
+```ini
+[Phase Messages]
+EpicTemplate = ⚡ EPIC ENCOUNTER! #bossname# [#phasename#] - Phase #phase#
+LegendaryPrefix = 💀 LEGENDARY THREAT! 
+```
+
+## 🎮 Command Examples
+
+**Basic Commands:**
+```bash
+.bb create "Shadow Lord" -1905691330 95 3 3000
+.bb set location "Shadow Lord"
+.bb set hour "Shadow Lord" 21:30
+.bb start "Shadow Lord"
+```
+
+**Advanced Commands (v2.1.0):**
+```bash
+.bb status "Shadow Lord"           # Detailed boss information
+.bb pause "Shadow Lord"            # Pause boss timer
+.bb resume "Shadow Lord"           # Resume boss timer
+.bb despawn "Shadow Lord"          # Force despawn boss
+.bb teleport "Shadow Lord"         # Teleport to boss (if enabled)
+.bb debug "Shadow Lord"            # Technical debug information
+```
+
+## 🎭 Phase System Examples
+
+When dynamic scaling is enabled, players will see announcements like:
+
+- `⚔️ Ancient Dracula [Normal] - Phase 1 | 2 players | Damage x1.3`
+- `⚡ EPIC ENCOUNTER! Ancient Dracula [Epic Veteran] - Phase 3 | 6 players | Damage x2.8 | Consecutive: 4`
+- `💀 LEGENDARY THREAT! Ancient Dracula [Legendary Enraged] - Phase 5 | 8 players | Damage x3.5 | Consecutive: 6 💀`
+
+## 🐛 Known Issues
+
+- When two bosses with identical PrefabGUIDs die simultaneously, only one may grant rewards
+- Boss icons may occasionally persist on the map after boss death (use `.bb clearallicons` to fix)
+
+## 📊 Performance Notes
+
+- ✅ **Optimized timer system** - Uses numeric comparisons instead of string parsing
+- ✅ **Efficient scaling calculations** - Cached values reduce computation overhead  
+- ✅ **Smart announcement system** - Only triggers on meaningful phase changes
+- ✅ **Memory optimized** - Proper entity cleanup and disposal
+
+## 🤝 Community & Support
+
+- 🎮 [V Rising Mod Community Discord](https://discord.gg/vrisingmods)
+- 🐛 [Report Issues](https://github.com/your-repo/issues)
+- 💡 [Request Features](https://github.com/your-repo/discussions)
+- 📖 [Modding Wiki](https://wiki.vrisingmods.com/)
+
+## 🎁 Support the Project
+
+If you enjoy BloodyBoss and want to support continued development:
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/K3K8ENRQY)
 
-## Known bugs
+## 🏆 Credits
 
-- When spawning two bosses at the same time based on the same PrefabGUID, if they die at the same time, only one rewards.
+**Special thanks to:**
 
+- 👨‍💻 **[@Deca](https://github.com/decaprime)** - VampireCommandFramework creator
+- 🎮 **[V Rising Mod Community](https://discord.gg/vrisingmods)** - Premier modding community
+- 🧪 **Beta Testers** - @Bromelda, @Wolfyowns, and the [BloodCraft server](https://discord.gg/aDh98KtEWZ) community
+- 🔧 **Contributors** - Everyone who reported issues and suggested improvements
+
+---
+
+## 📋 Changelog
 
 <details>
-<summary>Changelog</summary>
+<summary>Version History</summary>
 
-`2.0.0`
-- Updated to Oakveil
-- Removed the following UnitStats: PhysicalCriticalStrikeDamage, SpellCriticalStrikeChance, SpellCriticalStrikeDamage, ResourceYieldModifier, ReducedResourceDurabilityLoss, SilverResistance, SilverCoinResistance, 
-GarlicResistance, PassiveHealthRegen, HealthRecovery, DamageReduction, HealingReceived and ShieldAbsorbModifier
-- Removed Bloodstone dependency
-- Fixed when the boss disappears due to time, it used to drop loot, now it doesn't anymore ;)
-- Fixed an issue with lifetime and despawn time
+### `2.1.0` - Dynamic Scaling & Advanced Features
+- ✨ **NEW**: Dynamic scaling system based on online players
+- ✨ **NEW**: Progressive difficulty with consecutive spawn tracking  
+- ✨ **NEW**: Phase announcement system with customizable messages
+- ✨ **NEW**: Advanced admin commands (despawn, pause, resume, debug, etc.)
+- ✨ **NEW**: Teleportation system with configurable permissions
+- ✨ **NEW**: Multi-language support for all messages
+- 🔧 **IMPROVED**: Timer system performance with numeric comparisons
+- 🔧 **IMPROVED**: Error handling and logging throughout
+- 🔧 **UPDATED**: Dependencies to latest versions (BepInEx 1.733.2, VCF 0.10.4)
 
-`1.1.14`
-- Fixed bug when bosses did not have a spawn time they would sometimes stop the spawn timer.
-- Fixed a bug that caused enemies to not be on the same team and attack each other.
+### `2.0.0` - Oakveil Compatibility Update
+- 🔧 **UPDATED**: To Oakveil compatibility
+- 🗑️ **REMOVED**: Deprecated UnitStats properties for Oakveil compatibility
+- 🗑️ **REMOVED**: Bloodstone dependency
+- 🐛 **FIXED**: Boss despawn loot drop issue
+- 🐛 **FIXED**: Lifetime and despawn time calculation issues
 
-`1.1.13`
-- Added functionality for random bosses to appear at the spawn location of the original boss
+### `1.1.14`
+- 🐛 **FIXED**: Spawn timer stopping when bosses lack spawn times
+- 🐛 **FIXED**: Boss team assignment causing friendly fire
 
-`1.1.12`
-- Added `clearallicons` command to remove any icons that are stuck on the BloodyBoss map
-- The VBlood works again in the original way. Only those who bite the VBlood receive the reward
-- Removed the comma from the end of each player's name.
-- Removed the WorldBossFinalConcatCharacters parameter from the configuration.
+### `1.1.13`
+- ✨ **NEW**: Random boss spawning at original locations
 
-`1.1.11`
-- Fixed the error that occurred when the Vblood/NPC spawned by Bloodyboss appears in the game, if you defeat the original Vblood/NPC, you are considered to have killed the Vblood/NPC spawned by Bloodyboss and you will receive the items set by Bloodyboss.
+### `1.1.12`  
+- ✨ **NEW**: `clearallicons` command for stuck map icons
+- 🔧 **IMPROVED**: VBlood reward system restored to original behavior
+- 🔧 **CLEANED**: Removed trailing commas from player names
 
-`1.1.10`
-- Fixed error when spawning two bosses based on the same prefabGUID that only gave a reward to one of them.
-- Fixed a bug where some NPCs did not spawn correctly due to the BloodConsumeSource component
+[View full changelog...](docs/CHANGELOG.md)
 
-`1.1.9`
-- Fixed error that did not recognize some VBLOOD as such.
-
-`1.1.8`
-- Fixed bug when sending the message multiple times when more than one vampire kills the world boss.
-
-`1.1.7`
-- Fixed an error that occurred when you turned off the server with a boss in the world that did not change its statistics once you restarted the server.
-- Fixed the bug that did not eliminate a world boss if you turned off the server before its spawn and turned it on after its spawn.
-- Fixed a bug that did not spawn the boss when there was no one online on the server.
-- Added animation when you kill a boss for all players who participated in the battle.
-- Added a configuration that makes the two bosses the same team and although they hit each other they do not take life and their preference is to attack the player and not each other
-
-`1.1.6`
-- Added option to enable or disable damage from players' minions to the boss
-
-`1.1.5`
-- Fixed doble icon
-
-`1.1.4`
-- Updated the timer system through CoroutineHandler.
-- Minions summoned by players do not harm the NPC.
-- Removed the ability to bite a non-vBlood NPC boss.
-- Fixed errors that existed with messages from VBlood and non-VBlood NPCS.
-- Fixed reward item duplication bug.
-- Fixed the error that did not deliver the items in the inventory and always threw them on the ground.
-
-`1.1.3`
-- Fixed error with duplicate messages when killing an NPCS boss
-
-`1.1.2`
-- Performance improvements
-
-`1.1.1`
-- Added that any NPC can be used to act as a boss
-- Updated to the latest version of Bloody.Core
-
-`1.1.0`
-- Fixed bug that occurred when too many players consumed the blood of a world boss.
-- The location of the configuration file has been changed to the root config folder.
-
-`1.0.8`
-- Added protection against being able to include a drive other than VBlood.
-- Added command to reload the vblood database in case the json is changed by hand.
-- Added option in the BloodyBoss.cfg configuration file a section to prevent the boss from doing its original drop
-
-`1.0.7`
-- Fixed bug that caused the BloodyBoss reward system and death message to also affect the game's default Vblood if the VBlood Prefab was set to BloodyBoss and BloodyBoss was active at that time.
-
-`1.0.6`
-- Bloody.Core dependency removed as dll and added as framework
-- The drop calculation formula has been solved, now it is not 100% as it used to be
-
-`1.0.5`
-- Addeed clearicon command
-
-`1.0.4`
-- Added the PlayersOnlineMultiplier option in the general configuration of the mod to activate or deactivate the online player multiplier.
-
-`1.0.3`
-- Fixed the error where the Boss's life multiplier used the total number of users registered on the server and not the number of users online on the server.
-- Fixed the bug that the boss autospawn had. A new spawn system has been generated to avoid incompatibilities with other mods
-- Fixed bug that caused the BloodyBoss reward system and death message to also affect the game's default Vblood if the VBlood Prefab was configured as BloodyBoss.
-
-`1.0.0`
-- Initial public release of the mod
 </details>
 
-## Requirements
-Ensure the following mods are installed for seamless integration:
+---
 
-1. [BepInEx 1.733.2 (RC2)](https://github.com/decaprime/VRising-Modding/releases/tag/1.733.2)
-2. [VampireCommandFramework](https://thunderstore.io/c/v-rising/p/deca/VampireCommandFramework/)
-3. [Bloody.Core](https://thunderstore.io/c/v-rising/p/Trodi/BloodyCore/)
-
-## Installation
-1. Copy `BloodyBoss.dll` to your `BepInEx/Plugins` directory.
-2. Launch the server once to generate the config file; configurations will be located in the `BepInEx/Config` directory.
-
-## Configuration
-
-**BloodyBoss.cfg** In the configuration file **BloodyBoss.cfg** you have several options to configure the mod to your liking
-
-```
-[Main]
-
-## Determines whether the boss spawn timer is enabled or not.
-# Setting type: Boolean
-# Default value: true
-Enabled = true
-
-## The message that will appear globally once the boss gets killed.
-# Setting type: String
-# Default value: The #vblood# boss has been defeated by the following brave warriors:
-KillMessageBossTemplate = The #vblood# boss has been defeated by the following brave warriors:
-
-## The message that will appear globally one the boss gets spawned.
-# Setting type: String
-# Default value: A Boss #worldbossname# has been summon you got #time# minutes to defeat it!.
-SpawnMessageBossTemplate = A Boss #worldbossname# has been summon you got #time# minutes to defeat it!.
-
-## The message that will appear globally if the players failed to kill the boss.
-# Setting type: String
-# Default value: You failed to kill the Boss #worldbossname# in time.
-DespawnMessageBossTemplate = You failed to kill the Boss #worldbossname# in time.
-
-## Buff that applies to each of the Bosses that we create with our mod.
-# Setting type: Int32
-# Default value: 1163490655
-BuffForWorldBoss = 1163490655
-
-## Final string for concat two or more players kill a WorldBoss Boss.
-# Setting type: String
-# Default value: and
-WorldBossFinalConcatCharacters = and
-
-## If you activate this option, the boss life formula changes from "bosslife * multiplier" to "bosslife * multiplier * numberofonlineplayers".
-# Setting type: Boolean
-# Default value: false
-PlayersOnlineMultiplier = false
-
-## If you activate this option it will remove the original vblood droptable.
-# Setting type: Boolean
-# Default value: false
-ClearDropTable = false
-
-## Disable minion damage to bosses.
-# Setting type: Boolean
-# Default value: true
-MinionDamage = true
-
-## If you activate this option instead of spawning a specific boss at a specific time, the system will search for a random boss and spawn the random boss instead of the original boss at the original boss's specific time..
-# Setting type: Boolean
-# Default value: false
-RandomBoss = true
-
-## Deactivates the buff animation received by players who have participated in the battle for three seconds.
-# Setting type: Boolean
-# Default value: true
-BuffAfterKillingEnabled = true
-
-## PrefabGUID of the buff received by players who have participated in the battle for three seconds.
-# Setting type: Int32
-# Default value: -2061047741
-BuffAfterKillingPrefabGUID = -2061047741
-
-## If you activate this option, the bosses will not attack each other and will team up if two bosses are summoned together.
-# Setting type: Boolean
-# Default value: false
-TeamBossEnable = true
-```
-
-## Commands
-It's crucial to note that for any command containing a name argument such as `<NameOfBoss>` or `<ItemName>`, if your name consists of more than one word, include it inside `""` to ensure proper functionality (e.g., "Alpha Wolf" or "Blood Rose Potion").
-
-prefix: `.bb`.
-
-```ansi
-.bb test <NameOfBoss>
-```
-- This command spawns the boss you want at your position and sets it to spawn within one minute. This is useful to see what time your server has set and to know what time to add to each boss.
-  - Example: `.bb test "Alpha Wolf"`
-
-```ansi
-.bb reload
-```
-- Reload boss database in case the json is changed by hand (It only reloads bosses, it does not reload mod settings)
-  - Example: `.bb reload`
-
-```ansi
-.bb create <NameOfBoss> <PrefabGUIDOfBOSS> <Level> <Multiplier> <LifeTimeSeconds>
-```
-- Create your desired Boss to include in the Boss list.
-  - **NameOfBoss**: The Boss name that will appear in the chat when the Boss spawn.
-  - **PrefabGUIDOfBOSS**: The GUID of the Boss you prefer to use. 
-  - **Level**: Specify the level you want the Boss  to be.
-  - **Multiplier**: Specify the HP multiplier based on how many players are online. For example, if the multiplier is 2 and there are 2 players online then the Boss HP will be x4 (2 for `multiplier value` x 2 `players online`) 
-  - **LifeTimeSeconds**: The duration the player has to kill the Boss in seconds.
-  - Example: `.bb create "Alpha Wolf" -1905691330 90 1 1800`
-
-```ansi
-.bb remove (bossName)
-```
-- Remove a Boss from the Boss list.
-  - **bossName**: The Boss name that you want to remove from the list.
-  - Example: `.bb remove "Alpha Wolf"`
-
-```ansi
-.bb list
-```
-- List all the available Bosses to spawn from the Boss list.
-  - Example: `.bb list`
-
-```ansi
-.bb set location <NameOfBoss>
-```
-- Specify the location at which a specific Boss will spawn based on where you currently at in the game, meaning that where you stand is where the boss will spawn.
-  - **NameOfBoss**: The Boss name you want to specify the spawn location of.
-  - Example: `.bbs set location "Alpha Wolf"`
-
-```ansi
-.bb set hour <NameOfBoss> <Hour>
-```
-- Specifies the time when a specific boss will appear.
-  - **NameOfBoss**: The Boss name you want to specify the spawn location of.
-  - **Hour**:  The format must be in 24 hours and HH:MM. 01:00 for 1 AM and 13:00 for 1 PM.
-  - Example: `.bbs set hour "Alpha Wolf" 18:30`
-
-```ansi
-.bb items add <NameOfBoss> <ItemName> <ItemPrefabID> <Stack> <Chance>
-```
-- Adds items/rewards to the randomized pool that the player will receive from defeating a particular Boss.
-  - **NameOfBoss**: The Boss name to which you want to add items.
-  - **ItemName**: The name of the item/reward appearing in the chat once the player defeats the Boss.
-  - **ItemPrefabID**: The GUID for the item you want to add.
-  - **Stack**: The quantity of items the player will gain upon winning the encounter (e.g., x25 Blood Potions).
-  - **Chance**: The chance of that item to get upon defeating the Boss from 1 to 100.
-  - Example: `.bb items add "Alpha Wolf" "Blood Rose Potion" 429052660 25 10`
-
-```ansi
-.bb items remove <NameOfBoss> <ItemName>
-```
-- Removes items/rewards from the randomized pool that the player will receive from defeating a particular Boss.
-  - **NameOfBoss**: The Boss name to which you want to remove items.
-  - **ItemName**: The name of the item/reward you want to remove.
-  - Example: `.bb items remove "Alpha Wolf" "Blood Rose"`
-
-```ansi
-.bb items list <NameOfBoss>
-```
-- Display all items/rewards from the randomized pool that the player will receive from defeating a particular Boss.
-  - **NameOfBoss**: The Boss name to which you want to display items/rewards.
-  - Example: `.bb items list "Alpha Wolf"`
-
-```ansi
-.bb start <NameOfBoss>
-```
-- Manually spawn the Boss in its specified location.
-  - **NameOfBoss**: The Boss name you want to start.
-  - Example: `.bb start "Alpha Wolf"`
-
-```ansi
-.bb clearicon <NameOfBoss>
-```
-- If at any time you have an icon left on the minimap due to some error, with this command you can delete it.
-  - **NameOfBoss**: The Boss name you want to start.
-  - Example: `.bb clearicon "Alpha Wolf"`
-
-```ansi
-.bb clearallicons
-```
-- Forces the removal of all icons that exist on the map generated by BloodyBoss without having to specify the boss's name
-  - Example: `.bb clearallicons`
-
-# Resources
-
-[Complete items list of prefabs/GUID](https://wiki.vrisingmods.com/prefabs/)
-
-# Credits
-
-[V Rising Mod Community](https://discord.gg/vrisingmods) is the premier community of mods for V Rising.
-
-[@Deca](https://github.com/decaprime), thank you for the exceptional frameworks [VampireCommandFramework](https://github.com/decaprime/VampireCommandFramework)
-
-**Special thanks to the testers and supporters of the project:**
-
-- @Bromelda & Wolfyowns, owners & founders of [BloodCraft- Modded Xprising server](https://discord.gg/aDh98KtEWZ) server, for their great work giving me feedback and thoroughly testing the mod.
+*BloodyBoss v2.1.0 - Creating legendary encounters for V Rising servers worldwide* 🧛‍♂️⚔️

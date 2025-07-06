@@ -20,8 +20,8 @@ namespace BloodyBoss.Systems
     internal class BossSystem
     {
         
-        private static DateTime lastDateMinute = DateTime.Now;
-        private static DateTime lastDateSecond = DateTime.Now;
+        private static int lastMinute = DateTime.Now.Minute;
+        private static int lastSecond = DateTime.Now.Second;
         
        
         public static Action bossAction;
@@ -31,11 +31,15 @@ namespace BloodyBoss.Systems
             Plugin.Logger.LogInfo("Start Timner for BloodyBoss");
             bossAction = () =>
             {
-                var date = DateTime.Now;
-                if (lastDateMinute.ToString("HH:mm") != date.ToString("HH:mm"))
+                var now = DateTime.Now;
+                bool minuteChanged = now.Minute != lastMinute;
+                bool secondChanged = now.Second != lastSecond;
+                
+                if (minuteChanged)
                 {
-                    lastDateMinute = date;
-                    var spawnsBoss = Database.BOSSES.Where(x => x.Hour == date.ToString("HH:mm")).ToList();
+                    lastMinute = now.Minute;
+                    var currentTime = now.ToString("HH:mm");
+                    var spawnsBoss = Database.BOSSES.Where(x => x.Hour == currentTime && !x.IsPaused).ToList();
                     if (spawnsBoss.Count > 0)
                     {
                         foreach (var spawnBoss in spawnsBoss)
@@ -49,11 +53,13 @@ namespace BloodyBoss.Systems
                         }
                     }
                 }
-                if (lastDateSecond.ToString("HH:mm:ss") != date.ToString("HH:mm:ss"))
+                
+                if (secondChanged)
                 {
-                    lastDateSecond = date;
-                    var despawnsBoss = Database.BOSSES.Where(x => x.HourDespawn == date.ToString("HH:mm:ss") && x.bossSpawn == true).ToList();
-                    if (despawnsBoss != null)
+                    lastSecond = now.Second;
+                    var currentTimeWithSeconds = now.ToString("HH:mm:ss");
+                    var despawnsBoss = Database.BOSSES.Where(x => x.HourDespawn == currentTimeWithSeconds && x.bossSpawn == true && !x.IsPaused).ToList();
+                    if (despawnsBoss.Count > 0)
                     {
                         foreach (var deSpawnBoss in despawnsBoss)
                         {
@@ -108,7 +114,7 @@ namespace BloodyBoss.Systems
                             {
                                 bossModel.bossSpawn = false;
                                 StatChangeUtility.KillOrDestroyEntity(Plugin.SystemsCore.EntityManager, entity, user, user, 0, StatChangeReason.Any, true);
-                                DeleteIcon(bossModel);
+                                bossModel.RemoveIcon(user);
                             }
                             else
                             {
@@ -166,22 +172,6 @@ namespace BloodyBoss.Systems
             }
         } 
 
-        internal static void DeleteIcon(BossEncounterModel model)
-        {
-            var entities = QueryComponents.GetEntitiesByComponentTypes<NameableInteractable, MapIconData>(EntityQueryOptions.IncludeDisabledEntities);
-            foreach (var entity in entities)
-            {
-                NameableInteractable _nameableInteractable = entity.Read<NameableInteractable>();
-                if (_nameableInteractable.Name.Value == model.nameHash + "ibb")
-                {
-                    var userModel = GameData.Users.All.FirstOrDefault();
-                    var user = userModel.Entity;
-                    StatChangeUtility.KillOrDestroyEntity(Plugin.SystemsCore.EntityManager, entity, user, user, 0, StatChangeReason.Any, true);
-                    break;
-                }
-            }
-            entities.Dispose();
-        }
 
         internal static void GenerateStats()
         {

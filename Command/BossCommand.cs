@@ -12,6 +12,12 @@ using ProjectM;
 using Bloody.Core.Helper.v1;
 using Unity.Entities;
 using System.Linq;
+using BloodyBoss.Systems;
+using Bloody.Core.API.v1;
+using Unity.Collections;
+using ProjectM.Network;
+using BloodyBoss.Configuration;
+using Unity.Mathematics;
 
 namespace BloodyBoss.Command
 {
@@ -267,6 +273,411 @@ namespace BloodyBoss.Command
             }
 
 
+        }
+
+        // ===== ADVANCED COMMANDS =====
+
+        [Command("despawn", usage: "<BossName>", description: "Despawn a boss immediately", adminOnly: true)]
+        public static void DespawnBoss(ChatCommandContext ctx, string bossName)
+        {
+            try
+            {
+                if (Database.GetBoss(bossName, out BossEncounterModel boss))
+                {
+                    if (!boss.bossSpawn)
+                    {
+                        throw ctx.Error($"Boss '{bossName}' is not currently spawned");
+                    }
+
+                    var userModel = GameData.Users.GetUserByCharacterName(ctx.Event.User.CharacterName.Value);
+                    
+                    // Send manual despawn message
+                    var message = $"⚡ Boss {FontColorChatSystem.Yellow(bossName)} has been manually despawned by admin";
+                    var refMessage = (FixedString512Bytes)FontColorChatSystem.Red(message);
+                    ServerChatUtils.SendSystemMessageToAllClients(Plugin.SystemsCore.EntityManager, ref refMessage);
+                    
+                    // Remove icon and entity
+                    boss.RemoveIcon(userModel.Entity);
+                    boss.DespawnBoss(userModel.Entity);
+                    boss.bossSpawn = false;
+                    
+                    // Clear killers and save
+                    boss.RemoveKillers();
+                    Database.saveDatabase();
+                    
+                    ctx.Reply($"Boss '{bossName}' despawned successfully");
+                }
+                else
+                {
+                    throw new BossDontExistException();
+                }
+            }
+            catch (BossDontExistException)
+            {
+                throw ctx.Error($"Boss '{bossName}' does not exist");
+            }
+        }
+
+        [Command("pause", usage: "<BossName>", description: "Pause boss timer", adminOnly: true)]
+        public static void PauseBoss(ChatCommandContext ctx, string bossName)
+        {
+            try
+            {
+                if (Database.GetBoss(bossName, out BossEncounterModel boss))
+                {
+                    if (boss.IsPaused)
+                    {
+                        throw ctx.Error($"Boss '{bossName}' is already paused");
+                    }
+                    
+                    boss.IsPaused = true;
+                    boss.PausedAt = DateTime.Now;
+                    Database.saveDatabase();
+                    
+                    ctx.Reply($"⏸️ Boss '{bossName}' timer paused at {DateTime.Now:HH:mm:ss}");
+                }
+                else
+                {
+                    throw new BossDontExistException();
+                }
+            }
+            catch (BossDontExistException)
+            {
+                throw ctx.Error($"Boss '{bossName}' does not exist");
+            }
+        }
+
+        [Command("resume", usage: "<BossName>", description: "Resume boss timer", adminOnly: true)]
+        public static void ResumeBoss(ChatCommandContext ctx, string bossName)
+        {
+            try
+            {
+                if (Database.GetBoss(bossName, out BossEncounterModel boss))
+                {
+                    if (!boss.IsPaused)
+                    {
+                        throw ctx.Error($"Boss '{bossName}' is not paused");
+                    }
+                    
+                    // Calculate pause duration
+                    var pauseDuration = DateTime.Now - boss.PausedAt.Value;
+                    
+                    boss.IsPaused = false;
+                    boss.PausedAt = null;
+                    Database.saveDatabase();
+                    
+                    ctx.Reply($"▶️ Boss '{bossName}' timer resumed (was paused for {pauseDuration.TotalMinutes:F1} minutes)");
+                }
+                else
+                {
+                    throw new BossDontExistException();
+                }
+            }
+            catch (BossDontExistException)
+            {
+                throw ctx.Error($"Boss '{bossName}' does not exist");
+            }
+        }
+
+        [Command("status", usage: "<BossName>", description: "Show detailed boss status", adminOnly: true)]
+        public static void BossStatus(ChatCommandContext ctx, string bossName)
+        {
+            try
+            {
+                if (Database.GetBoss(bossName, out BossEncounterModel boss))
+                {
+                    ctx.Reply($"📊 Status for Boss '{bossName}':");
+                    ctx.Reply($"├─ Currently Spawned: {(boss.bossSpawn ? "✅ Yes" : "❌ No")}");
+                    ctx.Reply($"├─ Timer Status: {(boss.IsPaused ? "⏸️ Paused" : "▶️ Running")}");
+                    ctx.Reply($"├─ Spawn Time: {boss.Hour}");
+                    ctx.Reply($"├─ Despawn Time: {boss.HourDespawn}");
+                    ctx.Reply($"├─ Level: {boss.level} | Multiplier: {boss.multiplier}x");
+                    ctx.Reply($"├─ Lifetime: {boss.Lifetime}s ({boss.Lifetime/60}min)");
+                    ctx.Reply($"├─ Position: ({boss.x:F1}, {boss.y:F1}, {boss.z:F1})");
+                    ctx.Reply($"├─ Current Killers: {boss.GetKillers().Count}");
+                    ctx.Reply($"├─ Consecutive Spawns: {boss.ConsecutiveSpawns}");
+                    ctx.Reply($"├─ Difficulty Multiplier: {boss.CurrentDifficultyMultiplier:F2}x");
+                    
+                    if (boss.bossSpawn && boss.GetBossEntity())
+                    {
+                        var health = boss.bossEntity.Read<Health>();
+                        var healthPercent = (health.Value / health.MaxHealth.Value) * 100;
+                        ctx.Reply($"├─ Health: {health.Value:F0}/{health.MaxHealth.Value:F0} ({healthPercent:F1}%)");
+                    }
+                    
+                    ctx.Reply($"├─ Items: {boss.items.Count} configured");
+                    ctx.Reply($"└─ Last Spawn: {(boss.LastSpawn != DateTime.MinValue ? boss.LastSpawn.ToString("yyyy-MM-dd HH:mm:ss") : "Never")}");
+                }
+                else
+                {
+                    throw new BossDontExistException();
+                }
+            }
+            catch (BossDontExistException)
+            {
+                throw ctx.Error($"Boss '{bossName}' does not exist");
+            }
+        }
+
+        [Command("debug", usage: "<BossName>", description: "Show technical debug info", adminOnly: true)]
+        public static void DebugBoss(ChatCommandContext ctx, string bossName)
+        {
+            try
+            {
+                if (Database.GetBoss(bossName, out BossEncounterModel boss))
+                {
+                    ctx.Reply($"🔧 Debug Info for '{bossName}':");
+                    ctx.Reply($"├─ Asset Name: {boss.AssetName}");
+                    ctx.Reply($"├─ PrefabGUID: {boss.PrefabGUID}");
+                    ctx.Reply($"├─ Name Hash: {boss.nameHash}");
+                    ctx.Reply($"├─ VBlood First Kill: {boss.vbloodFirstKill}");
+                    
+                    if (boss.GetBossEntity())
+                    {
+                        ctx.Reply($"├─ Entity ID: {boss.bossEntity.Index}.{boss.bossEntity.Version}");
+                        ctx.Reply($"├─ Has VBloodUnit: {boss.bossEntity.Has<VBloodUnit>()}");
+                        ctx.Reply($"├─ Has Health: {boss.bossEntity.Has<Health>()}");
+                        ctx.Reply($"├─ Has UnitStats: {boss.bossEntity.Has<UnitStats>()}");
+                    }
+                    else
+                    {
+                        ctx.Reply($"├─ Entity: ❌ Not found/Invalid");
+                    }
+                    
+                    // Technical stats
+                    if (boss.unitStats != null)
+                    {
+                        ctx.Reply($"├─ Physical Power: {boss.unitStats.PhysicalPower}");
+                        ctx.Reply($"├─ Spell Power: {boss.unitStats.SpellPower}");
+                        ctx.Reply($"├─ Physical Resistance: {boss.unitStats.PhysicalResistance}");
+                    }
+                    
+                    ctx.Reply($"└─ Database Index: {Database.BOSSES.IndexOf(boss)}");
+                }
+                else
+                {
+                    throw new BossDontExistException();
+                }
+            }
+            catch (BossDontExistException)
+            {
+                throw ctx.Error($"Boss '{bossName}' does not exist");
+            }
+        }
+
+        [Command("simulate", usage: "<BossName> [killer]", description: "Simulate boss death for testing", adminOnly: true)]
+        public static void SimulateBossDeath(ChatCommandContext ctx, string bossName, string killerName = null)
+        {
+            try
+            {
+                if (Database.GetBoss(bossName, out BossEncounterModel boss))
+                {
+                    if (!boss.bossSpawn)
+                    {
+                        throw ctx.Error($"Boss '{bossName}' is not currently spawned");
+                    }
+                    
+                    var killer = killerName ?? ctx.Event.User.CharacterName.Value;
+                    
+                    ctx.Reply($"🎭 Simulating death of boss '{bossName}' killed by '{killer}'...");
+                    
+                    // Simulate death process
+                    boss.AddKiller(killer);
+                    boss.BuffKillers();
+                    boss.SendAnnouncementMessage();
+                    
+                    ctx.Reply($"✅ Death simulation completed:");
+                    ctx.Reply($"├─ Killer added: {killer}");
+                    ctx.Reply($"├─ Buffs applied: {(PluginConfig.BuffAfterKillingEnabled.Value ? "Yes" : "No")}");
+                    ctx.Reply($"├─ Items dropped: {boss.items.Count} configured");
+                    ctx.Reply($"└─ Boss despawned: Yes");
+                }
+                else
+                {
+                    throw new BossDontExistException();
+                }
+            }
+            catch (BossDontExistException)
+            {
+                throw ctx.Error($"Boss '{bossName}' does not exist");
+            }
+        }
+
+        [Command("resetkills", usage: "<BossName>", description: "Clear boss killers list", adminOnly: true)]
+        public static void ResetBossKills(ChatCommandContext ctx, string bossName)
+        {
+            try
+            {
+                if (Database.GetBoss(bossName, out BossEncounterModel boss))
+                {
+                    var previousKillers = boss.GetKillers().Count;
+                    boss.RemoveKillers();
+                    boss.vbloodFirstKill = false;
+                    Database.saveDatabase();
+                    
+                    ctx.Reply($"🧹 Cleared {previousKillers} killers from boss '{bossName}'");
+                    ctx.Reply($"└─ VBlood first kill flag reset");
+                }
+                else
+                {
+                    throw new BossDontExistException();
+                }
+            }
+            catch (BossDontExistException)
+            {
+                throw ctx.Error($"Boss '{bossName}' does not exist");
+            }
+        }
+
+        [Command("forcedrop", usage: "<BossName> [player]", description: "Force boss to drop items", adminOnly: true)]
+        public static void ForceBossDrop(ChatCommandContext ctx, string bossName, string playerName = null)
+        {
+            try
+            {
+                if (Database.GetBoss(bossName, out BossEncounterModel boss))
+                {
+                    var targetPlayer = playerName ?? ctx.Event.User.CharacterName.Value;
+                    
+                    if (boss.GetKillers().Count == 0)
+                    {
+                        boss.AddKiller(targetPlayer);
+                    }
+                    
+                    ctx.Reply($"💰 Forcing item drop for boss '{bossName}'...");
+                    
+                    var dropped = boss.DropItems();
+                    
+                    if (dropped)
+                    {
+                        ctx.Reply($"✅ Items dropped successfully to:");
+                        foreach (var killer in boss.GetKillers())
+                        {
+                            ctx.Reply($"└─ {killer}");
+                        }
+                    }
+                    else
+                    {
+                        ctx.Reply($"❌ No items were dropped (check boss configuration)");
+                    }
+                }
+                else
+                {
+                    throw new BossDontExistException();
+                }
+            }
+            catch (BossDontExistException)
+            {
+                throw ctx.Error($"Boss '{bossName}' does not exist");
+            }
+        }
+
+        [Command("teleport", usage: "<BossName>", description: "Teleport to boss location")]
+        public static void TeleportToBoss(ChatCommandContext ctx, string bossName)
+        {
+            try
+            {
+                var playerName = ctx.Event.User.CharacterName.Value;
+                var userModel = GameData.Users.GetUserByCharacterName(playerName);
+                
+                // Verify if the command is enabled
+                if (!PluginConfig.EnableTeleportCommand.Value)
+                {
+                    throw ctx.Error("Teleport command is disabled");
+                }
+                
+                // Verify permissions (admin only if configured)
+                if (PluginConfig.TeleportAdminOnly.Value && !ctx.Event.User.IsAdmin)
+                {
+                    throw ctx.Error("🚫 Teleport command is restricted to administrators only");
+                }
+                
+                // Verify if the boss exists
+                if (!Database.GetBoss(bossName, out BossEncounterModel boss))
+                {
+                    throw ctx.Error($"Boss '{bossName}' does not exist");
+                }
+                
+                // Verify if only allows teleport to active bosses
+                if (PluginConfig.TeleportOnlyToActiveBosses.Value && !boss.bossSpawn)
+                {
+                    throw ctx.Error($"Boss '{bossName}' is not currently active");
+                }
+                
+                // Verify cooldown
+                if (!TeleportManager.CanPlayerTeleport(playerName, out string cooldownReason))
+                {
+                    throw ctx.Error($"⏰ {cooldownReason}");
+                }
+                
+                // Verify cost (only for non-admins)
+                if (!ctx.Event.User.IsAdmin && !TeleportManager.HasTeleportCost(userModel, out string costInfo))
+                {
+                    throw ctx.Error($"💰 {costInfo}");
+                }
+                
+                // Determine teleport position
+                float3 targetPosition;
+                bool isBossAlive = false;
+                
+                if (boss.bossSpawn && boss.GetBossEntity())
+                {
+                    // Verify if the boss is alive
+                    if (boss.bossEntity.Has<Health>())
+                    {
+                        var health = boss.bossEntity.Read<Health>();
+                        isBossAlive = !health.IsDead && health.Value > 0;
+                        
+                        if (PluginConfig.TeleportRequireBossAlive.Value && !isBossAlive)
+                        {
+                            throw ctx.Error($"💀 Boss '{bossName}' is dead");
+                        }
+                    }
+                    
+                    // Teleport to current boss position
+                    var bossTranslation = boss.bossEntity.Read<Translation>();
+                    targetPosition = bossTranslation.Value;
+                    
+                    var statusInfo = isBossAlive ? "alive" : "dead";
+                    ctx.Reply($"🌀 Teleporting to {statusInfo} boss '{bossName}'...");
+                }
+                else
+                {
+                    // Teleport to configured boss position
+                    targetPosition = new float3(boss.x, boss.y, boss.z);
+                    ctx.Reply($"🌀 Teleporting to boss '{bossName}' spawn location...");
+                }
+                
+                // Consume cost (only for non-admins)
+                if (!ctx.Event.User.IsAdmin)
+                {
+                    if (!TeleportManager.ConsumeTeleportCost(userModel))
+                    {
+                        throw ctx.Error("Failed to consume teleport cost");
+                    }
+                }
+                
+                // Apply teleport
+                var playerEntity = userModel.Character.Entity;
+                var translation = playerEntity.Read<Translation>();
+                translation.Value = targetPosition;
+                playerEntity.Write(translation);
+                
+                // Apply cooldown
+                TeleportManager.SetTeleportCooldown(playerName);
+                
+                // Confirmation message
+                ctx.Reply($"✅ Teleported to {targetPosition.x:F1}, {targetPosition.y:F1}, {targetPosition.z:F1}");
+                
+                if (PluginConfig.TeleportCooldown.Value > 0)
+                {
+                    ctx.Reply($"⏰ Next teleport available in {PluginConfig.TeleportCooldown.Value:F0} seconds");
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.LogError($"Teleport command failed: {ex.Message}");
+                throw ctx.Error($"Teleport failed: {ex.Message}");
+            }
         }
     }
 }

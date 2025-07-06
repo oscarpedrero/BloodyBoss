@@ -49,6 +49,19 @@ namespace BloodyBoss.DB.Models
 
         public bool vbloodFirstKill = false;
 
+        // Progressive Difficulty Properties
+        public int ConsecutiveSpawns { get; set; } = 0;
+        public DateTime? LastSuccessfulKill { get; set; } = null;
+        public float CurrentDifficultyMultiplier { get; set; } = 1.0f;
+
+        // Timer Management Properties
+        public bool IsPaused { get; set; } = false;
+        public DateTime? PausedAt { get; set; } = null;
+        public DateTime LastSpawn { get; set; } = DateTime.MinValue;
+        
+        // Phase Announcement Properties
+        public int LastAnnouncedPhase { get; set; } = 0;
+
         private static readonly System.Random Random = new();
 
         private BossEncounterModel bossRandom;
@@ -201,24 +214,49 @@ namespace BloodyBoss.DB.Models
 
         public bool DropItems()
         {
+            var killers = GetKillers();
+            Plugin.Logger.LogInfo($"Boss {name} dropping items to {killers.Count} killers");
+            
+            if (killers.Count == 0)
+            {
+                Plugin.Logger.LogWarning($"Boss {name} has no killers registered, no items will drop");
+                return false;
+            }
 
             foreach (var item in items)
             {
                 if (probabilityGeneratingReward(item.Chance))
                 {
+                    Plugin.Logger.LogInfo($"Boss {name} dropping item {item.ItemID} x{item.Stack}");
 
-                    foreach (var user in GetKillers())
+                    foreach (var user in killers)
                     {
+                        try
+                        {
+                            UserModel player = GameData.Users.GetUserByCharacterName(user);
+                            if (player == null)
+                            {
+                                Plugin.Logger.LogWarning($"Player {user} not found for item drop");
+                                continue;
+                            }
 
-                        UserModel player = GameData.Users.GetUserByCharacterName(user);
-                        var itemGuid = new PrefabGUID(item.ItemID);
-                        var stacks = item.Stack;
+                            var itemGuid = new PrefabGUID(item.ItemID);
+                            var stacks = item.Stack;
 
-                        if(!player.TryGiveItem(itemGuid, stacks, out Entity itemEntity)){
-                            player.DropItemNearby(itemGuid, stacks);
+                            if(!player.TryGiveItem(itemGuid, stacks, out Entity itemEntity)){
+                                player.DropItemNearby(itemGuid, stacks);
+                                Plugin.Logger.LogInfo($"Item dropped near player {user}");
+                            } else {
+                                Plugin.Logger.LogInfo($"Item given to player {user}");
+                            }
                         }
-
+                        catch (Exception ex)
+                        {
+                            Plugin.Logger.LogError($"Error dropping item to player {user}: {ex.Message}");
+                        }
                     }
+                } else {
+                    Plugin.Logger.LogInfo($"Boss {name} item {item.ItemID} failed probability check ({item.Chance}%)");
                 }
             }
 
@@ -250,13 +288,29 @@ namespace BloodyBoss.DB.Models
             unit.Level = new ModifiableInt(level);
             boss.Write(unit);
             var health = boss.Read<Health>();
-            if (PluginConfig.PlayersMultiplier.Value)
+            
+            // Calculate health multiplier using dynamic scaling or legacy system
+            float healthMultiplier = multiplier;
+            
+            if (PluginConfig.EnableDynamicScaling.Value)
             {
-                health.MaxHealth._Value = (health.MaxHealth * (players * multiplier));
-            } else
-            {
-                health.MaxHealth._Value = health.MaxHealth * multiplier;
+                // Use new dynamic scaling system
+                healthMultiplier = DynamicScalingSystem.CalculateHealthMultiplier(this);
+                Plugin.Logger.LogInfo($"Boss {name} using dynamic scaling: x{healthMultiplier:F2}");
             }
+            else if (PluginConfig.PlayersMultiplier.Value)
+            {
+                // Use legacy player multiplier system
+                healthMultiplier = players * multiplier;
+                Plugin.Logger.LogInfo($"Boss {name} using legacy scaling: {players} players x {multiplier} = x{healthMultiplier:F2}");
+            }
+            else
+            {
+                // Use base multiplier only
+                Plugin.Logger.LogInfo($"Boss {name} using base multiplier: x{healthMultiplier:F2}");
+            }
+            
+            health.MaxHealth._Value = health.MaxHealth * healthMultiplier;
 
             if (!IsVBlood(boss))
             {
@@ -274,13 +328,32 @@ namespace BloodyBoss.DB.Models
                 GenerateStats();
             }
 
-            boss.Write(unitStats.FillStats(BossUnitStats));
+            // Apply dynamic scaling to stats if enabled
+            UnitStatsModel finalStats;
+            if (PluginConfig.EnableDynamicScaling.Value)
+            {
+                finalStats = DynamicScalingSystem.ApplyDynamicScaling(this, unitStats);
+                
+                // Increment consecutive spawns for progressive difficulty
+                if (PluginConfig.EnableProgressiveDifficulty.Value)
+                {
+                    ConsecutiveSpawns++;
+                    Plugin.Logger.LogInfo($"Boss {name} consecutive spawns: {ConsecutiveSpawns}");
+                }
+            }
+            else
+            {
+                finalStats = unitStats;
+            }
+
+            boss.Write(finalStats.FillStats(BossUnitStats));
 
             health.Value = health.MaxHealth.Value;
             boss.Write(health);
             BuffSystem.BuffNPC(boss, user, new PrefabGUID(PluginConfig.BuffForWorldBoss.Value), 0);
             RenameBoss(boss);
             bossSpawn = true;
+            LastSpawn = DateTime.Now;
 
         }
 
@@ -582,6 +655,15 @@ namespace BloodyBoss.DB.Models
 
                 RemoveKillers();
                 bossSpawn = false;
+
+                // Reset progressive difficulty on successful kill
+                if (PluginConfig.EnableProgressiveDifficulty.Value && PluginConfig.ResetDifficultyOnKill.Value)
+                {
+                    ConsecutiveSpawns = 0;
+                    CurrentDifficultyMultiplier = 1.0f;
+                    LastSuccessfulKill = DateTime.Now;
+                    Plugin.Logger.LogInfo($"Boss {name} difficulty reset after successful kill");
+                }
 
                 RemoveIcon(GameData.Users.All.FirstOrDefault().Entity);
                 Database.saveDatabase();

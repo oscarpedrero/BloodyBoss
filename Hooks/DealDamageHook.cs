@@ -71,8 +71,9 @@ namespace BloodyBoss.Hooks
                     }
 
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Plugin.Logger.LogError($"Error processing damage event: {ex.Message}");
                     continue;
                 }
             }
