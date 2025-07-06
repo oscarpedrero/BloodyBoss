@@ -37,6 +37,18 @@ New administrative and player commands for enhanced control:
 - **Granular control** over scaling parameters
 - **Backward compatibility** with existing configurations
 
+### 🏰 **Smart Territory System**
+- **Castle detection** - automatically detects player-built territories
+- **Intelligent relocation** - finds alternative spawn positions within 100 units
+- **Conflict prevention** - prevents boss spawns inside player bases
+- **Seamless operation** - works transparently without user intervention
+
+### ⚡ **Reliable Timer System**
+- **Independent operation** - functions regardless of player connection status
+- **System.Threading.Timer** - more reliable than game-dependent coroutines
+- **Consistent scheduling** - bosses spawn on time even on empty servers
+- **Performance optimized** - minimal server resource usage
+
 ### 🌍 **Internationalization Support**
 - **Translatable phase names** and messages
 - **Configurable templates** with placeholder system
@@ -51,6 +63,9 @@ New administrative and player commands for enhanced control:
 - 🎮 **Advanced Commands** - Complete administrative control over boss systems
 - 🌐 **Multi-language** - Fully customizable in any language
 - ⚡ **Performance Optimized** - Efficient timer system with minimal server impact
+- 🏰 **Territory Aware** - Intelligently avoids spawning bosses inside player castles
+- ⏰ **Always-On Timers** - Reliable spawning even when no players are online
+- 🔇 **Silent Operations** - Optional quiet mode for administrative actions
 - 🔧 **Highly Configurable** - Extensive options for server customization
 
 ## 📋 Requirements
@@ -210,8 +225,12 @@ If you enjoy BloodyBoss and want to support continued development:
 - ✨ **NEW**: Advanced admin commands (despawn, pause, resume, debug, etc.)
 - ✨ **NEW**: Teleportation system with configurable permissions
 - ✨ **NEW**: Multi-language support for all messages
+- ✨ **NEW**: Castle territory detection - prevents boss spawns inside player castles
+- ✨ **NEW**: Automatic spawn position relocation - finds valid positions within 100 units if original is in castle
+- ✨ **NEW**: Independent timer system - bosses spawn on schedule regardless of player connection status
 - 🔧 **IMPROVED**: Timer system performance with numeric comparisons
 - 🔧 **IMPROVED**: Error handling and logging throughout
+- 🔧 **IMPROVED**: Silent despawn command - no more spam messages when admins manually despawn bosses
 - 🔧 **UPDATED**: Dependencies to latest versions (BepInEx 1.733.2, VCF 0.10.4)
 
 ### `2.0.0` - Oakveil Compatibility Update
