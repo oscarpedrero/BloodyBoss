@@ -349,6 +349,55 @@ EnragedSuffix =  Wütend
 ConsecutiveInfoTemplate =  | Aufeinanderfolgend: #consecutive#
 ```
 
+### [Ability Compatibility] - VBlood Ability System
+
+**✨ New in v2.1.0** - Configure ability compatibility checking for the VBlood ability swap system.
+
+```ini
+[Ability Compatibility]
+## Enable ability compatibility checking when swapping VBlood abilities
+# Setting type: Boolean
+# Default value: true
+Enable = true
+
+## Block ability swaps if incompatibilities are detected (false = allow with warnings)
+# Setting type: Boolean
+# Default value: false
+StrictMode = false
+
+## Log compatibility warnings to server console
+# Setting type: Boolean
+# Default value: true
+LogWarnings = true
+
+## Allow abilities across different creature types (e.g., vampire abilities on beasts)
+# Setting type: Boolean
+# Default value: false
+AllowCrossType = false
+```
+
+**Compatibility Settings Explained:**
+- **Enable**: Master switch for compatibility checking system
+- **StrictMode**: When `true`, blocks incompatible abilities entirely. When `false`, allows with warnings
+- **LogWarnings**: Logs detailed compatibility information to server console for debugging
+- **AllowCrossType**: Experimental - allows mixing very different creature types (may cause visual issues)
+
+**Compatibility Levels:**
+- **[PERFECT]** - No issues expected
+- **[GOOD]** - Minor visual glitches possible
+- **[WARNING]** - Noticeable issues likely
+- **[INCOMPATIBLE]** - Significant problems expected
+
+### [Castle Detection] - Territory Protection
+
+```ini
+[Castle Detection]
+## Enable castle territory detection to prevent boss spawns inside player bases
+# Setting type: Boolean
+# Default value: true
+Enable = true
+```
+
 ## 🎛️ Advanced Configuration Scenarios
 
 ### Scenario 1: Casual Server (Easy Mode)
