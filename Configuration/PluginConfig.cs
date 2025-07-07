@@ -73,6 +73,12 @@ namespace BloodyBoss.Configuration
         
         // Castle Detection Configuration
         public static ConfigEntry<bool> EnableCastleDetection { get; private set; }
+        
+        // Ability Compatibility Configuration
+        public static ConfigEntry<bool> EnableAbilityCompatibilityCheck { get; private set; }
+        public static ConfigEntry<bool> StrictCompatibilityMode { get; private set; }
+        public static ConfigEntry<bool> LogCompatibilityWarnings { get; private set; }
+        public static ConfigEntry<bool> AllowCrossTypeAbilities { get; private set; }
 
         public static void Initialize()
         {
@@ -147,6 +153,12 @@ namespace BloodyBoss.Configuration
             
             // Castle Detection Configuration
             EnableCastleDetection = _mainConfig.Bind("Castle Detection", "Enable", true, "Enable castle territory detection to prevent boss spawns inside player bases");
+            
+            // Ability Compatibility Configuration
+            EnableAbilityCompatibilityCheck = _mainConfig.Bind("Ability Compatibility", "Enable", true, "Enable ability compatibility checking when swapping VBlood abilities");
+            StrictCompatibilityMode = _mainConfig.Bind("Ability Compatibility", "StrictMode", false, "Block ability swaps if incompatibilities are detected (false = allow with warnings)");
+            LogCompatibilityWarnings = _mainConfig.Bind("Ability Compatibility", "LogWarnings", true, "Log compatibility warnings to server console");
+            AllowCrossTypeAbilities = _mainConfig.Bind("Ability Compatibility", "AllowCrossType", false, "Allow abilities across different creature types (e.g., vampire abilities on beasts)");
         }
         public static void Destroy()
         {

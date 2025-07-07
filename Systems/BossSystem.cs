@@ -95,6 +95,14 @@ namespace BloodyBoss.Systems
                             }
                         }
                     }
+                    
+                    // Monitor health of all spawned bosses
+                    // Must run on main thread
+                    Action healthMonitorAction = () =>
+                    {
+                        HealthMonitorSystem.Update();
+                    };
+                    ActionScheduler.RunActionOnMainThread(healthMonitorAction);
                 }
                 catch (Exception ex)
                 {
@@ -154,6 +162,11 @@ namespace BloodyBoss.Systems
                             {
                                 bossModel.ModifyBoss(user, entity);
                                 CheckTeams(entity);
+                                
+                                // Check time-based and player count mechanics
+                                BossMechanicSystem.CheckTimeMechanics(entity, bossModel);
+                                BossMechanicSystem.CheckPlayerCountMechanics(entity, bossModel);
+                                
                                 if (PluginConfig.ClearDropTable.Value)
                                 {
                                     var action = () =>

@@ -41,6 +41,7 @@ public class Plugin : BasePlugin
         _harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
 
         _harmony.PatchAll(typeof(DealDamageHook));
+        //_harmony.PatchAll(typeof(StatChangeHook));
         //_harmony.PatchAll(typeof(VBloodSystemHook));
 
         EventsHandlerSystem.OnInitialize += GameDataOnInitialize;
@@ -71,6 +72,39 @@ public class Plugin : BasePlugin
         Database.Initialize();
         Logger.LogInfo("Binding configuration");
         PluginConfig.Initialize();
+        
+        // Inicializar escáner de VBloods para compatibilidad
+        Logger.LogInfo("Initializing VBlood Scanner for ability compatibility");
+        try
+        {
+            // Ejecutar escaneo después de un breve retraso
+            bool scanExecuted = false;
+            CoroutineHandler.StartRepeatingCoroutine(() => 
+            {
+                if (!scanExecuted)
+                {
+                    // COMENTADO: Scanner y debugger ya no son necesarios con la base de datos estática
+                    // El comando vblood-export ya genera toda la información necesaria
+                    
+                    // // Primero ejecutar el scanner normal con LogInfo
+                    // Logger.LogInfo("=== Starting VBlood Prefab Scanner (Info Level) ===");
+                    // VBloodPrefabScanner.ScanVBloodPrefabs();
+                    // var vbloods = VBloodPrefabScanner.GetAllVBloods();
+                    // Logger.LogInfo($"VBlood Scanner completed: Found {vbloods.Count} VBloods");
+                    
+                    // // Luego ejecutar el debugger con LogWarning para análisis detallado
+                    // Logger.LogWarning("=== Starting VBlood Component Debugger (Warning Level) ===");
+                    // VBloodComponentDebugger.DebugVBloodComponents();
+                    // Logger.LogWarning("=== VBlood Component Debugger Completed ===");
+                    
+                    scanExecuted = true;
+                }
+            }, 5f);
+        }
+        catch (System.Exception ex)
+        {
+            Logger.LogError($"Failed to initialize VBlood Scanner: {ex.Message}");
+        }
 
         EventsHandlerSystem.OnDeathVBlood += VBloodSystemHook.OnDeathVblood;
         //EventsHandlerSystem.OnDamage += NpcSystem.OnDamageNpc;

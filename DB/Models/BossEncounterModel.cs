@@ -69,6 +69,10 @@ namespace BloodyBoss.DB.Models
         
         // Modular Ability System Properties
         public Dictionary<string, CustomAbilitySlot> CustomAbilities { get; set; } = new Dictionary<string, CustomAbilitySlot>();
+        public List<BossMechanicModel> Mechanics { get; set; } = new List<BossMechanicModel>();
+        
+        // Ability Swap Configuration
+        public Dictionary<int, AbilitySwapConfig> AbilitySwaps { get; set; } = new Dictionary<int, AbilitySwapConfig>();
 
         private static readonly System.Random Random = new();
 
@@ -199,6 +203,10 @@ namespace BloodyBoss.DB.Models
 
                 bossEntity = e;
                 ModifyBoss(sender, e);
+                
+                // Initialize boss mechanics system
+                BossMechanicSystem.InitializeBossMechanics(e, this);
+                
                 if (PluginConfig.ClearDropTable.Value)
                 {
                     var action = () =>
@@ -397,6 +405,20 @@ namespace BloodyBoss.DB.Models
             {
                 Plugin.Logger.LogInfo($"Boss {name}: Applying modular ability system with {CustomAbilities.Count} custom slots");
                 ApplyModularAbilitiesPostSpawn(boss);
+            }
+            
+            // Aplicar intercambio de habilidades individuales (nuevo sistema)
+            if (AbilitySwaps != null && AbilitySwaps.Count > 0)
+            {
+                Plugin.Logger.LogInfo($"Boss {name}: Applying individual ability swaps for {AbilitySwaps.Count} slots");
+                ApplyIndividualAbilitySwaps(boss);
+            }
+            
+            // Initialize boss mechanics
+            if (Mechanics.Count > 0)
+            {
+                Plugin.Logger.LogInfo($"Boss {name}: Initializing {Mechanics.Count} mechanics");
+                BossMechanicSystem.InitializeBossMechanics(boss, this);
             }
 
         }
@@ -961,6 +983,94 @@ namespace BloodyBoss.DB.Models
         }
         
         /// <summary>
+        /// Aplica intercambio de habilidades individuales desde VBloods
+        /// </summary>
+        private void ApplyIndividualAbilitySwaps(Entity bossEntity)
+        {
+            try
+            {
+                var entityManager = Core.World.EntityManager;
+                Plugin.Logger.LogInfo($"Starting individual ability swaps for boss {name}");
+                
+                foreach (var swap in AbilitySwaps)
+                {
+                    var slotIndex = swap.Key;
+                    var config = swap.Value;
+                    
+                    Plugin.Logger.LogInfo($"Processing ability swap for slot {slotIndex} from {config.SourceVBloodName}");
+                    
+                    // Obtener la entidad fuente
+                    var sourcePrefabGUID = new PrefabGUID(config.SourcePrefabGUID);
+                    if (!Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(sourcePrefabGUID, out Entity sourceEntity))
+                    {
+                        Plugin.Logger.LogError($"Source prefab {config.SourcePrefabGUID} not found for slot {slotIndex}");
+                        continue;
+                    }
+                    
+                    // Obtener las habilidades de la fuente
+                    if (!entityManager.HasBuffer<AbilityGroupSlotBuffer>(sourceEntity))
+                    {
+                        Plugin.Logger.LogError($"Source entity does not have ability buffer");
+                        continue;
+                    }
+                    
+                    var sourceBuffer = entityManager.GetBuffer<AbilityGroupSlotBuffer>(sourceEntity);
+                    
+                    // Verificar que el slot existe en la fuente
+                    if (slotIndex >= sourceBuffer.Length)
+                    {
+                        Plugin.Logger.LogError($"Slot index {slotIndex} out of range for source (max: {sourceBuffer.Length - 1})");
+                        continue;
+                    }
+                    
+                    // Obtener o crear el buffer del boss
+                    DynamicBuffer<AbilityGroupSlotBuffer> bossBuffer;
+                    if (!entityManager.HasBuffer<AbilityGroupSlotBuffer>(bossEntity))
+                    {
+                        bossBuffer = entityManager.AddBuffer<AbilityGroupSlotBuffer>(bossEntity);
+                        // Copiar todas las habilidades originales primero
+                        var originalPrefab = new PrefabGUID(PrefabGUID);
+                        if (Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(originalPrefab, out Entity originalEntity))
+                        {
+                            if (entityManager.HasBuffer<AbilityGroupSlotBuffer>(originalEntity))
+                            {
+                                var originalBuffer = entityManager.GetBuffer<AbilityGroupSlotBuffer>(originalEntity);
+                                for (int i = 0; i < originalBuffer.Length; i++)
+                                {
+                                    bossBuffer.Add(originalBuffer[i]);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        bossBuffer = entityManager.GetBuffer<AbilityGroupSlotBuffer>(bossEntity);
+                    }
+                    
+                    // Asegurar que el buffer tiene suficiente tamaño
+                    while (bossBuffer.Length <= slotIndex)
+                    {
+                        bossBuffer.Add(new AbilityGroupSlotBuffer());
+                    }
+                    
+                    // Reemplazar la habilidad en el slot específico
+                    bossBuffer[slotIndex] = sourceBuffer[slotIndex];
+                    
+                    Plugin.Logger.LogInfo($"Successfully swapped ability at slot {slotIndex} with {config.Description}");
+                }
+                
+                // Refrescar AI para activar las nuevas habilidades
+                ForceAIRefreshPreservingAppearance(bossEntity);
+                
+                Plugin.Logger.LogInfo($"Individual ability swaps completed successfully");
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.LogError($"Error applying individual ability swaps: {ex.Message}");
+            }
+        }
+        
+        /// <summary>
         /// Aplica el sistema modular de habilidades personalizadas
         /// </summary>
         private void ApplyModularAbilitiesPostSpawn(Entity bossEntity)
@@ -1079,5 +1189,16 @@ namespace BloodyBoss.DB.Models
             Enabled = enabled;
             Description = description;
         }
+    }
+    
+    /// <summary>
+    /// Configuration for ability swapping from VBloods
+    /// </summary>
+    public class AbilitySwapConfig
+    {
+        public int SourcePrefabGUID { get; set; }
+        public string SourceVBloodName { get; set; }
+        public int SlotIndex { get; set; }
+        public string Description { get; set; }
     }
 }

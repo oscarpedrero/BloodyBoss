@@ -18,14 +18,27 @@ using BloodyBoss.Systems;
 using Bloody.Core.API.v1;
 using Unity.Collections;
 using ProjectM.Network;
+using BloodyBoss.Data;
 using BloodyBoss.Configuration;
 using Unity.Mathematics;
+using BloodyBoss.Models;
 
 namespace BloodyBoss.Command
 {
     [CommandGroup("bb")]
-    public static class BossCommand
+    public static partial class BossCommand
     {
+        private static string GetCompatibilityIcon(AbilityCompatibilitySystem.CompatibilityLevel level)
+        {
+            return level switch
+            {
+                AbilityCompatibilitySystem.CompatibilityLevel.Perfect => FontColorChatSystem.Green("[PERFECT]"),
+                AbilityCompatibilitySystem.CompatibilityLevel.Good => FontColorChatSystem.Yellow("[GOOD]"),
+                AbilityCompatibilitySystem.CompatibilityLevel.Warning => FontColorChatSystem.Yellow("[WARNING]"),
+                AbilityCompatibilitySystem.CompatibilityLevel.Incompatible => FontColorChatSystem.Red("[INCOMPATIBLE]"),
+                _ => FontColorChatSystem.White("[UNKNOWN]")
+            };
+        }
 
         [Command("list", usage: "", description: "List of Boss", adminOnly: true)]
         public static void ListBoss(ChatCommandContext ctx)
@@ -48,6 +61,296 @@ namespace BloodyBoss.Command
             ctx.Reply($"----------------------------");
         }
 
+        [Command("extract-all-prefabs", usage: "", description: "Extract ALL prefabs from the game to markdown file", adminOnly: true)]
+        public static void ExtractAllPrefabs(ChatCommandContext ctx)
+        {
+            try
+            {
+                var outputPath = Path.Combine(Database.ConfigPath, "all_prefabs.md");
+                var buffData = new List<string>();
+                
+                buffData.Add("# V Rising All PrefabGUIDs");
+                buffData.Add($"## Extracted on {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+                buffData.Add("");
+                
+                // Try to get all prefabs from the PrefabCollectionSystem
+                var prefabCollectionSystem = Core.SystemsCore.PrefabCollectionSystem;
+                if (prefabCollectionSystem == null)
+                {
+                    ctx.Error("PrefabCollectionSystem not found!");
+                    return;
+                }
+                
+                var prefabGuidToEntityMap = prefabCollectionSystem._PrefabGuidToEntityMap;
+                
+                buffData.Add($"## Total Prefabs in Game: {prefabGuidToEntityMap.Count()}");
+                buffData.Add("");
+                
+                // Categorize prefabs
+                var buffs = new List<(PrefabGUID guid, string name)>();
+                var npcs = new List<(PrefabGUID guid, string name)>();
+                var abilities = new List<(PrefabGUID guid, string name)>();
+                var items = new List<(PrefabGUID guid, string name)>();
+                var other = new List<(PrefabGUID guid, string name)>();
+                
+                foreach (var prefabKvp in prefabGuidToEntityMap)
+                {
+                    var prefabGuid = prefabKvp.Key;
+                    var prefabName = prefabGuid.LookupName();
+                    
+                    if (string.IsNullOrEmpty(prefabName))
+                        prefabName = $"Unknown_{prefabGuid.GuidHash}";
+                    
+                    // Categorize by name patterns
+                    if (prefabName.Contains("Buff_") || prefabName.Contains("Debuff_"))
+                        buffs.Add((prefabGuid, prefabName));
+                    else if (prefabName.Contains("CHAR_") || prefabName.Contains("NPC_"))
+                        npcs.Add((prefabGuid, prefabName));
+                    else if (prefabName.Contains("AB_") || prefabName.Contains("Ability_"))
+                        abilities.Add((prefabGuid, prefabName));
+                    else if (prefabName.Contains("Item_"))
+                        items.Add((prefabGuid, prefabName));
+                    else
+                        other.Add((prefabGuid, prefabName));
+                }
+                
+                // Write Buffs/Debuffs
+                buffData.Add("## Buffs and Debuffs");
+                buffData.Add($"### Total: {buffs.Count}");
+                buffData.Add("");
+                buffData.Add("| PrefabGUID | Name |");
+                buffData.Add("|------------|------|");
+                foreach (var buff in buffs.OrderBy(b => b.name))
+                {
+                    buffData.Add($"| {buff.guid.GuidHash} | {buff.name} |");
+                }
+                
+                // Write NPCs
+                buffData.Add("");
+                buffData.Add("## NPCs and Characters");
+                buffData.Add($"### Total: {npcs.Count}");
+                buffData.Add("");
+                buffData.Add("| PrefabGUID | Name |");
+                buffData.Add("|------------|------|");
+                foreach (var npc in npcs.Take(200).OrderBy(n => n.name)) // Limit to 200 to avoid huge file
+                {
+                    buffData.Add($"| {npc.guid.GuidHash} | {npc.name} |");
+                }
+                
+                // Write Abilities
+                buffData.Add("");
+                buffData.Add("## Abilities");
+                buffData.Add($"### Total: {abilities.Count}");
+                buffData.Add("");
+                buffData.Add("| PrefabGUID | Name |");
+                buffData.Add("|------------|------|");
+                foreach (var ability in abilities.Take(200).OrderBy(a => a.name))
+                {
+                    buffData.Add($"| {ability.guid.GuidHash} | {ability.name} |");
+                }
+                
+                // Write Items (limited)
+                buffData.Add("");
+                buffData.Add("## Items (First 100)");
+                buffData.Add($"### Total: {items.Count}");
+                buffData.Add("");
+                buffData.Add("| PrefabGUID | Name |");
+                buffData.Add("|------------|------|");
+                foreach (var item in items.Take(100).OrderBy(i => i.name))
+                {
+                    buffData.Add($"| {item.guid.GuidHash} | {item.name} |");
+                }
+                
+                // Summary
+                buffData.Add("");
+                buffData.Add("## Summary");
+                buffData.Add($"- Total Prefabs: {prefabGuidToEntityMap.Count()}");
+                buffData.Add($"- Buffs/Debuffs: {buffs.Count}");
+                buffData.Add($"- NPCs: {npcs.Count}");
+                buffData.Add($"- Abilities: {abilities.Count}");
+                buffData.Add($"- Items: {items.Count}");
+                buffData.Add($"- Other: {other.Count}");
+                
+                // Write to file
+                File.WriteAllLines(outputPath, buffData);
+                
+                ctx.Reply($"Extraction complete! Saved to: {outputPath}");
+                ctx.Reply($"Total prefabs found: {prefabGuidToEntityMap.Count()}");
+                ctx.Reply($"Buffs: {buffs.Count}, NPCs: {npcs.Count}, Abilities: {abilities.Count}");
+            }
+            catch (Exception e)
+            {
+                ctx.Error($"Error extracting prefabs: {e.Message}");
+                Plugin.Logger.LogError($"ExtractAllPrefabs error: {e}");
+            }
+        }
+        
+        [Command("extract-buffs", usage: "", description: "Extract all buffs and effects to markdown file", adminOnly: true)]
+        public static void ExtractBuffs(ChatCommandContext ctx)
+        {
+            try
+            {
+                var outputPath = Path.Combine(Database.ConfigPath, "extracted_buffs.md");
+                var buffData = new List<string>();
+                
+                buffData.Add("# V Rising Buffs, Debuffs and Effects");
+                buffData.Add($"## Extracted on {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+                buffData.Add("");
+                
+                // Simple extraction - just list known prefab GUIDs
+                buffData.Add("## Known Buff PrefabGUIDs");
+                buffData.Add("");
+                buffData.Add("| Name | PrefabGUID | Type | Used In |");
+                buffData.Add("|------|------------|------|---------|");
+                
+                // List all the PrefabGUIDs we're using in mechanics
+                var knownBuffs = new Dictionary<string, (int guid, string type, string usedIn)>
+                {
+                    // Movement Control
+                    { "Stun", (-658795137, "CC", "StunMechanic, PullMechanic, TeleportMechanic") },
+                    { "Root", (1724281065, "CC", "RootMechanic, ShieldMechanic") },
+                    { "Slow", (-2099683628, "CC", "SlowMechanic, CurseMechanic") },
+                    { "Fear", (-111608736, "CC", "FearMechanic") },
+                    { "Knockback", (802825050, "Movement", "KnockbackMechanic, PullMechanic") },
+                    
+                    // Damage Over Time
+                    { "Poison", (1614409699, "DoT", "DotMechanic") },
+                    { "Ignite", (-1968815368, "DoT", "DotMechanic") },
+                    { "Bleed", (411225544, "DoT", "DotMechanic") },
+                    { "Corruption", (-201240543, "DoT", "DotMechanic") },
+                    { "Frost", (-387588255, "DoT", "DotMechanic") },
+                    
+                    // Defensive
+                    { "Shield Immunity", (584227282, "Shield", "ShieldMechanic") },
+                    { "Reflect", (721788343, "Shield", "ReflectMechanic, ShieldMechanic") },
+                    { "Shield Visual", (-1970513771, "Visual", "ShieldMechanic, ReflectMechanic") },
+                    
+                    // Debuffs
+                    { "Silence", (-1936575297, "Debuff", "SilenceMechanic, CurseMechanic") },
+                    { "Weakness", (-1584651229, "Debuff", "WeakenMechanic, BuffStealMechanic") },
+                    { "Curse Doom", (-1308605301, "Debuff", "CurseMechanic") },
+                    { "Curse Weakness", (1528607403, "Debuff", "CurseMechanic") },
+                    
+                    // Buffs
+                    { "Blood Rage", (2085766220, "Buff", "EnrageMechanic") },
+                    { "Speed Buff", (788443104, "Buff", "EnrageMechanic, TeleportMechanic") },
+                    { "Uninterruptible", (476036897, "Buff", "HealMechanic") },
+                    
+                    // Visual Effects
+                    { "Fire Aura", (-1576893213, "Visual", "EnrageMechanic") },
+                    { "Teleport Effect", (-1122234739, "Visual", "TeleportMechanic") },
+                    { "Explosion", (1320298810, "Visual", "AoeMechanic, TeleportMechanic") },
+                    { "Healing Glow", (1974723356, "Visual", "HealMechanic") },
+                    { "Holy Light", (-1204819086, "Visual", "HealMechanic") },
+                    
+                    // Special
+                    { "Mind Control", (-65362596, "Control", "MindControlMechanic") },
+                    { "Vision Darkness", (-534324419, "Visual", "VisionMechanic") },
+                    { "Trap Spike", (1723404789, "Trap", "TrapMechanic") }
+                };
+                
+                foreach (var buff in knownBuffs)
+                {
+                    buffData.Add($"| {buff.Key} | {buff.Value.guid} | {buff.Value.type} | {buff.Value.usedIn} |");
+                }
+
+                // Add summary
+                buffData.Add("");
+                buffData.Add("## Summary");
+                buffData.Add("");
+                buffData.Add("The PrefabGUID **-658795137** (Stun) is the one causing errors.");
+                buffData.Add("This GUID is used in 3 mechanics: StunMechanic, PullMechanic, and TeleportMechanic.");
+                buffData.Add("");
+                buffData.Add("To fix the error, you need to:");
+                buffData.Add("1. Find the correct Stun buff GUID from V Rising");
+                buffData.Add("2. Replace -658795137 with the correct GUID in all 3 mechanic files");
+                buffData.Add("3. Or remove the stun effect from those mechanics");
+                
+                // NPCs used in summons
+                buffData.Add("");
+                buffData.Add("## NPCs Used in Mechanics");
+                buffData.Add("");
+                buffData.Add("| Name | PrefabGUID | Used In |");
+                buffData.Add("|------|------------|---------|");
+                buffData.Add("| Alpha Wolf | -1905691330 | SummonMechanic (default) |");
+
+                // Write to file
+                File.WriteAllLines(outputPath, buffData);
+                
+                ctx.Reply($"Extraction complete! Saved to: {outputPath}");
+                ctx.Reply($"Total known buffs documented: {knownBuffs.Count}");
+                ctx.Reply($"The problematic Stun buff GUID -658795137 has been identified.");
+            }
+            catch (Exception e)
+            {
+                ctx.Error($"Error extracting buffs: {e.Message}");
+                Plugin.Logger.LogError($"ExtractBuffs error: {e}");
+            }
+        }
+
+        [Command("find-buff", usage: "<search>", description: "Find buffs by name pattern", adminOnly: true)]
+        public static void FindBuff(ChatCommandContext ctx, string search = "")
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(search))
+                {
+                    ctx.Error("Please provide a search term. Example: .bb find-buff stun");
+                    return;
+                }
+                
+                var prefabCollectionSystem = Core.SystemsCore.PrefabCollectionSystem;
+                if (prefabCollectionSystem == null)
+                {
+                    ctx.Error("PrefabCollectionSystem not found!");
+                    return;
+                }
+                
+                var prefabGuidToEntityMap = prefabCollectionSystem._PrefabGuidToEntityMap;
+                var matches = new List<(PrefabGUID guid, string name)>();
+                
+                foreach (var prefabKvp in prefabGuidToEntityMap)
+                {
+                    var prefabGuid = prefabKvp.Key;
+                    var prefabName = prefabGuid.LookupName();
+                    
+                    if (string.IsNullOrEmpty(prefabName))
+                        prefabName = $"Unknown_{prefabGuid.GuidHash}";
+                    
+                    // Case insensitive search
+                    if (prefabName.ToLower().Contains(search.ToLower()))
+                    {
+                        matches.Add((prefabGuid, prefabName));
+                    }
+                }
+                
+                if (matches.Count == 0)
+                {
+                    ctx.Reply($"No prefabs found containing '{search}'");
+                    return;
+                }
+                
+                ctx.Reply($"Found {matches.Count} prefabs containing '{search}':");
+                ctx.Reply("----------------------------");
+                
+                // Show first 20 matches
+                foreach (var match in matches.Take(20).OrderBy(m => m.name))
+                {
+                    ctx.Reply($"{match.guid.GuidHash} = {match.name}");
+                }
+                
+                if (matches.Count > 20)
+                {
+                    ctx.Reply($"... and {matches.Count - 20} more matches");
+                }
+            }
+            catch (Exception e)
+            {
+                ctx.Error($"Error finding buff: {e.Message}");
+                Plugin.Logger.LogError($"FindBuff error: {e}");
+            }
+        }
+        
         [Command("test", usage: "", description: "Test Boss", adminOnly: true)]
         public static void Test(ChatCommandContext ctx, string bossName)
         {
@@ -783,6 +1086,277 @@ namespace BloodyBoss.Command
             ctx.Reply($"   (Gives MyBoss the abilities of Dracula -> Solarus)");
         }
 
+        // COMENTADO: Comando para exportar la base de datos de VBloods
+        // Mantener para futuras actualizaciones del juego
+        // Para usar: descomentar temporalmente, ejecutar el comando, copiar el archivo generado
+        /*
+        [Command("vblood-export", usage: "", description: "Export VBlood compatibility database to JSON", adminOnly: true)]
+        public static void ExportVBloodDatabase(ChatCommandContext ctx)
+        {
+            try
+            {
+                ctx.Reply($"📊 Exporting VBlood compatibility database...");
+                
+                var vbloods = VBloodPrefabScanner.GetAllVBloods();
+                
+                if (vbloods.Count == 0)
+                {
+                    ctx.Reply($"❌ No VBlood data found. Make sure the scanner has run.");
+                    ctx.Reply($"The scanner runs automatically 5 seconds after server start.");
+                    return;
+                }
+                
+                // Create export structure with all data
+                var exportData = new
+                {
+                    ExportDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    TotalVBloods = vbloods.Count,
+                    VBloods = vbloods.Select(vb => new
+                    {
+                        PrefabGUID = vb.Value.PrefabGUID.GuidHash,
+                        Name = vb.Value.Name,
+                        Level = vb.Value.Level,
+                        CanFly = vb.Value.CanFly,
+                        Features = vb.Value.Features,
+                        AbilityCount = vb.Value.Abilities.Count,
+                        Abilities = vb.Value.Abilities.Select(ab => new
+                        {
+                            SlotIndex = ab.Value.SlotIndex,
+                            AbilityGUID = ab.Value.AbilityPrefabGUID.GuidHash,
+                            Name = ab.Value.Name,
+                            Category = ab.Value.Category.ToString(),
+                            RequiresAnimation = ab.Value.RequiresAnimation,
+                            IsChanneled = ab.Value.IsChanneled,
+                            RequiresFlight = ab.Value.RequiresFlight,
+                            CastTime = ab.Value.CastTime,
+                            PostCastTime = ab.Value.PostCastTime,
+                            AnimationSequence = ab.Value.AnimationSequence
+                        }).OrderBy(a => a.SlotIndex).ToList()
+                    }).OrderBy(v => v.Name).ToList()
+                };
+                
+                // Export to JSON
+                var json = System.Text.Json.JsonSerializer.Serialize(exportData, new System.Text.Json.JsonSerializerOptions 
+                { 
+                    WriteIndented = true,
+                    IncludeFields = true
+                });
+                
+                var fileName = $"VBlood_Compatibility_Database_{DateTime.Now:yyyyMMdd_HHmmss}.json";
+                var filePath = Path.Combine(Database.ConfigPath, fileName);
+                
+                File.WriteAllText(filePath, json);
+                
+                ctx.Reply($"✅ Export completed successfully!");
+                ctx.Reply($"├─ File: {fileName}");
+                ctx.Reply($"├─ Path: {filePath}");
+                ctx.Reply($"├─ Total VBloods: {vbloods.Count}");
+                
+                // Show summary by features
+                var featureSummary = new Dictionary<string, int>();
+                foreach (var vb in vbloods.Values)
+                {
+                    foreach (var feature in vb.Features)
+                    {
+                        if (!featureSummary.ContainsKey(feature))
+                            featureSummary[feature] = 0;
+                        featureSummary[feature]++;
+                    }
+                }
+                
+                ctx.Reply($"└─ Feature Distribution:");
+                foreach (var feature in featureSummary.OrderByDescending(f => f.Value).Take(10))
+                {
+                    ctx.Reply($"   ├─ {feature.Key}: {feature.Value} VBloods");
+                }
+                
+                // Generate C# model code for static database
+                var modelFileName = $"VBloodDatabase_Model_{DateTime.Now:yyyyMMdd_HHmmss}.cs";
+                var modelFilePath = Path.Combine(Database.ConfigPath, modelFileName);
+                var modelCode = GenerateVBloodDatabaseModel(vbloods);
+                
+                File.WriteAllText(modelFilePath, modelCode);
+                ctx.Reply($"");
+                ctx.Reply($"📝 Also generated C# model code:");
+                ctx.Reply($"└─ File: {modelFileName}");
+            }
+            catch (Exception ex)
+            {
+                ctx.Error($"Error exporting VBlood database: {ex.Message}");
+                Plugin.Logger.LogError($"VBlood export error: {ex}");
+            }
+        }
+        
+        private static string GenerateVBloodDatabaseModel(Dictionary<int, VBloodInfo> vbloods)
+        {
+            var sb = new System.Text.StringBuilder();
+            
+            sb.AppendLine("// Auto-generated VBlood Database Model");
+            sb.AppendLine($"// Generated on: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+            sb.AppendLine($"// Total VBloods: {vbloods.Count}");
+            sb.AppendLine();
+            sb.AppendLine("using System.Collections.Generic;");
+            sb.AppendLine("using Stunlock.Core;");
+            sb.AppendLine();
+            sb.AppendLine("namespace BloodyBoss.Data");
+            sb.AppendLine("{");
+            sb.AppendLine("    public static class VBloodDatabase");
+            sb.AppendLine("    {");
+            sb.AppendLine("        private static readonly Dictionary<int, VBloodStaticInfo> _database = new()");
+            sb.AppendLine("        {");
+            
+            foreach (var vb in vbloods.OrderBy(v => v.Value.Name))
+            {
+                sb.AppendLine($"            [{vb.Key}] = new VBloodStaticInfo // {vb.Value.Name}");
+                sb.AppendLine("            {");
+                sb.AppendLine($"                Name = \"{vb.Value.Name}\",");
+                sb.AppendLine($"                Level = {vb.Value.Level},");
+                sb.AppendLine($"                CanFly = {vb.Value.CanFly.ToString().ToLower()},");
+                sb.AppendLine($"                Features = new HashSet<string> {{ {string.Join(", ", vb.Value.Features.Select(f => $"\"{f}\""))} }},");
+                sb.AppendLine("                Abilities = new Dictionary<int, AbilityStaticInfo>");
+                sb.AppendLine("                {");
+                
+                foreach (var ability in vb.Value.Abilities.OrderBy(a => a.Key))
+                {
+                    sb.AppendLine($"                    [{ability.Key}] = new AbilityStaticInfo");
+                    sb.AppendLine("                    {");
+                    sb.AppendLine($"                        Category = AbilityCategory.{ability.Value.Category},");
+                    sb.AppendLine($"                        GUID = {ability.Value.AbilityPrefabGUID.GuidHash},");
+                    sb.AppendLine($"                        CastTime = {ability.Value.CastTime.ToString(System.Globalization.CultureInfo.InvariantCulture)}f,");
+                    sb.AppendLine($"                        PostCastTime = {ability.Value.PostCastTime.ToString(System.Globalization.CultureInfo.InvariantCulture)}f,");
+                    sb.AppendLine($"                        HideCastBar = {ability.Value.HideCastBar.ToString().ToLower()},");
+                    sb.AppendLine($"                        IsChanneled = {ability.Value.IsChanneled.ToString().ToLower()},");
+                    sb.AppendLine($"                        IsCombo = {ability.Value.IsCombo.ToString().ToLower()},");
+                    sb.AppendLine($"                        ComboLength = {ability.Value.ComboLength},");
+                    sb.AppendLine($"                        Cooldown = {ability.Value.Cooldown.ToString(System.Globalization.CultureInfo.InvariantCulture)}f,");
+                    sb.AppendLine($"                        Charges = {ability.Value.Charges},");
+                    sb.AppendLine($"                        RequiresAnimation = {ability.Value.RequiresAnimation.ToString().ToLower()},");
+                    sb.AppendLine($"                        RequiresFlight = {ability.Value.RequiresFlight.ToString().ToLower()},");
+                    sb.AppendLine($"                        CanMoveWhileCasting = {ability.Value.CanMoveWhileCasting.ToString().ToLower()},");
+                    sb.AppendLine($"                        CanRotateWhileCasting = {ability.Value.CanRotateWhileCasting.ToString().ToLower()},");
+                    if (!string.IsNullOrEmpty(ability.Value.AnimationSequence))
+                        sb.AppendLine($"                        AnimationSequence = \"{ability.Value.AnimationSequence}\",");
+                    
+                    // Add ExtraData if present
+                    if (ability.Value.ExtraData.Count > 0)
+                    {
+                        sb.AppendLine($"                        ExtraData = new Dictionary<string, object>");
+                        sb.AppendLine($"                        {{");
+                        foreach (var kvp in ability.Value.ExtraData)
+                        {
+                            if (kvp.Value is float floatValue)
+                            {
+                                sb.AppendLine($"                            {{ \"{kvp.Key}\", {floatValue.ToString(System.Globalization.CultureInfo.InvariantCulture)}f }},");
+                            }
+                            else if (kvp.Value is int intValue)
+                            {
+                                sb.AppendLine($"                            {{ \"{kvp.Key}\", {intValue} }},");
+                            }
+                            else if (kvp.Value is bool boolValue)
+                            {
+                                sb.AppendLine($"                            {{ \"{kvp.Key}\", {boolValue.ToString().ToLower()} }},");
+                            }
+                            else
+                            {
+                                sb.AppendLine($"                            {{ \"{kvp.Key}\", \"{kvp.Value}\" }},");
+                            }
+                        }
+                        sb.AppendLine($"                        }},");
+                    }
+                    
+                    // Add SpawnedPrefabs if present
+                    if (ability.Value.SpawnedPrefabs.Count > 0)
+                    {
+                        sb.AppendLine($"                        SpawnedPrefabs = new List<SpawnInfo>");
+                        sb.AppendLine($"                        {{");
+                        foreach (var spawn in ability.Value.SpawnedPrefabs)
+                        {
+                            sb.AppendLine($"                            new SpawnInfo");
+                            sb.AppendLine($"                            {{");
+                            sb.AppendLine($"                                SpawnPrefab = new PrefabGUID({spawn.SpawnPrefab.GuidHash}),");
+                            sb.AppendLine($"                                SpawnName = \"{spawn.SpawnName}\",");
+                            sb.AppendLine($"                                Target = \"{spawn.Target}\",");
+                            sb.AppendLine($"                                HoverDistance = {spawn.HoverDistance.ToString(System.Globalization.CultureInfo.InvariantCulture)}f,");
+                            sb.AppendLine($"                                HoverMaxDistance = {spawn.HoverMaxDistance.ToString(System.Globalization.CultureInfo.InvariantCulture)}f");
+                            sb.AppendLine($"                            }},");
+                        }
+                        sb.AppendLine($"                        }},");
+                    }
+                    
+                    // Add AppliedBuffs if present
+                    if (ability.Value.AppliedBuffs.Count > 0)
+                    {
+                        sb.AppendLine($"                        AppliedBuffs = new List<BuffInfo>");
+                        sb.AppendLine($"                        {{");
+                        foreach (var buff in ability.Value.AppliedBuffs)
+                        {
+                            sb.AppendLine($"                            new BuffInfo");
+                            sb.AppendLine($"                            {{");
+                            sb.AppendLine($"                                BuffPrefab = new PrefabGUID({buff.BuffPrefab.GuidHash}),");
+                            sb.AppendLine($"                                BuffName = \"{buff.BuffName}\",");
+                            sb.AppendLine($"                                BuffTarget = \"{buff.BuffTarget}\",");
+                            sb.AppendLine($"                                SpellTarget = \"{buff.SpellTarget}\"");
+                            sb.AppendLine($"                            }},");
+                        }
+                        sb.AppendLine($"                        }},");
+                    }
+                    
+                    // Add CastConditions if present
+                    if (ability.Value.CastConditions.Count > 0)
+                    {
+                        sb.AppendLine($"                        CastConditions = new List<string>");
+                        sb.AppendLine($"                        {{");
+                        foreach (var condition in ability.Value.CastConditions)
+                        {
+                            sb.AppendLine($"                            \"{condition}\",");
+                        }
+                        sb.AppendLine($"                        }}");
+                    }
+                    sb.AppendLine("                    },");
+                }
+                
+                sb.AppendLine("                }");
+                sb.AppendLine("            },");
+            }
+            
+            sb.AppendLine("        };");
+            sb.AppendLine();
+            sb.AppendLine("        public static VBloodStaticInfo GetVBlood(int guid) => _database.TryGetValue(guid, out var info) ? info : null;");
+            sb.AppendLine("        public static bool HasVBlood(int guid) => _database.ContainsKey(guid);");
+            sb.AppendLine("        public static int Count => _database.Count;");
+            sb.AppendLine("    }");
+            sb.AppendLine();
+            sb.AppendLine("    public class VBloodStaticInfo");
+            sb.AppendLine("    {");
+            sb.AppendLine("        public string Name { get; set; }");
+            sb.AppendLine("        public int Level { get; set; }");
+            sb.AppendLine("        public bool CanFly { get; set; }");
+            sb.AppendLine("        public HashSet<string> Features { get; set; }");
+            sb.AppendLine("        public Dictionary<int, AbilityStaticInfo> Abilities { get; set; }");
+            sb.AppendLine("    }");
+            sb.AppendLine();
+            sb.AppendLine("    public class AbilityStaticInfo");
+            sb.AppendLine("    {");
+            sb.AppendLine("        public AbilityCategory Category { get; set; }");
+            sb.AppendLine("        public int GUID { get; set; }");
+            sb.AppendLine("        public float CastTime { get; set; }");
+            sb.AppendLine("        public float PostCastTime { get; set; }");
+            sb.AppendLine("        public bool IsChanneled { get; set; }");
+            sb.AppendLine("        public bool IsCombo { get; set; }");
+            sb.AppendLine("        public int ComboLength { get; set; }");
+            sb.AppendLine("        public float Cooldown { get; set; }");
+            sb.AppendLine("        public int Charges { get; set; }");
+            sb.AppendLine("        public bool RequiresAnimation { get; set; }");
+            sb.AppendLine("        public bool RequiresFlight { get; set; }");
+            sb.AppendLine("        public string AnimationSequence { get; set; }");
+            sb.AppendLine("        public Dictionary<string, object> ExtraData { get; set; } = new Dictionary<string, object>();");
+            sb.AppendLine("    }");
+            sb.AppendLine("}");
+            
+            return sb.ToString();
+        }
+        */
+
         // ===== MODULAR ABILITY SYSTEM COMMANDS =====
         
         [Command("ability-slot-set", usage: "<BossName> <SlotName> <SourcePrefabGUID> <AbilityIndex> [enabled] [description]", description: "Configure a specific ability slot", adminOnly: true)]
@@ -805,6 +1379,46 @@ namespace BloodyBoss.Command
                         throw ctx.Error("Slot name cannot be empty");
                     }
                     
+                    // Validar compatibilidad de la habilidad usando el nuevo sistema
+                    var compatibilityResult = AbilityCompatibilitySystem.CheckAbilityCompatibility(
+                        boss.PrefabGUID, sourcePrefabGUID, abilityIndex);
+                    
+                    var bossInfo = VBloodDatabase.GetVBlood(boss.PrefabGUID);
+                    var sourceInfo = VBloodDatabase.GetVBlood(sourcePrefabGUID);
+                    
+                    if (!compatibilityResult.IsCompatible)
+                    {
+                        ctx.Reply($"❌ ERROR: This ability is incompatible with {bossInfo?.Name ?? "this boss"}");
+                        foreach (var error in compatibilityResult.Errors)
+                        {
+                            ctx.Reply($"├─ ⛔ {error}");
+                        }
+                        ctx.Reply($"└─ This ability cannot be used on this boss");
+                        return;
+                    }
+                    else if (compatibilityResult.Level != AbilityCompatibilitySystem.CompatibilityLevel.Perfect)
+                    {
+                        ctx.Reply($"⚠️ WARNING: Compatibility level: {compatibilityResult.Level}");
+                        foreach (var warning in compatibilityResult.Warnings)
+                        {
+                            ctx.Reply($"├─ ⚡ {warning}");
+                        }
+                        
+                        if (sourceInfo != null && sourceInfo.Abilities.TryGetValue(abilityIndex, out var abilityInfo))
+                        {
+                            ctx.Reply($"├─ Category: {abilityInfo.Category}");
+                            if (abilityInfo.CastTime > 0)
+                            {
+                                ctx.Reply($"├─ Cast Time: {abilityInfo.CastTime}s");
+                            }
+                            if (abilityInfo.SpawnedPrefabs.Count > 0)
+                            {
+                                ctx.Reply($"├─ Spawns: {abilityInfo.SpawnedPrefabs.Count} projectile(s)");
+                            }
+                        }
+                        ctx.Reply($"└─ The ability will work but may have visual or gameplay issues");
+                    }
+                    
                     // Crear o actualizar el slot
                     boss.CustomAbilities[slotName] = new CustomAbilitySlot(sourcePrefabGUID, abilityIndex, enabled, description);
                     Database.saveDatabase();
@@ -813,7 +1427,8 @@ namespace BloodyBoss.Command
                     ctx.Reply($"├─ Source PrefabGUID: {sourcePrefabGUID}");
                     ctx.Reply($"├─ Ability Index: {abilityIndex}");
                     ctx.Reply($"├─ Enabled: {(enabled ? "✅ Yes" : "❌ No")}");
-                    ctx.Reply($"└─ Description: {(string.IsNullOrEmpty(description) ? "None" : description)}");
+                    ctx.Reply($"├─ Description: {(string.IsNullOrEmpty(description) ? "None" : description)}");
+                    ctx.Reply($"└─ Compatibility: {GetCompatibilityIcon(compatibilityResult.Level)} {compatibilityResult.Level}");
                     
                     var knownVBloods = AbilitySwapSystem.GetKnownVBloodPrefabs();
                     var vbloodName = knownVBloods.FirstOrDefault(x => x.Value == sourcePrefabGUID).Key ?? "Unknown VBlood";

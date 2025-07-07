@@ -82,6 +82,36 @@ namespace BloodyBoss.Systems
                     return false;
                 }
                 
+                // Verificar compatibilidad antes de proceder
+                if (PluginConfig.EnableAbilityCompatibilityCheck.Value)
+                {
+                    Plugin.Logger.LogInfo("Checking ability compatibility...");
+                    
+                    // Verificar compatibilidad general entre los VBloods
+                    bool isCompatible = true;
+                    var scanner = VBloodPrefabScanner.GetAllVBloods();
+                    
+                    // Verificar cada slot de habilidad
+                    if (scanner.ContainsKey(sourcePrefabGUID.GuidHash))
+                    {
+                        var sourceVBlood = scanner[sourcePrefabGUID.GuidHash];
+                        foreach (var abilitySlot in sourceVBlood.Abilities.Keys)
+                        {
+                            if (!VBloodPrefabScanner.IsAbilityCompatible(targetPrefabGUID.GuidHash, sourcePrefabGUID.GuidHash, abilitySlot))
+                            {
+                                Plugin.Logger.LogWarning($"Ability at slot {abilitySlot} may not be compatible");
+                                isCompatible = false;
+                            }
+                        }
+                    }
+                    
+                    if (!isCompatible && PluginConfig.StrictCompatibilityMode.Value)
+                    {
+                        Plugin.Logger.LogError("Ability swap blocked due to compatibility issues (strict mode enabled)");
+                        return false;
+                    }
+                }
+                
                 // Obtener la entidad fuente del prefab
                 if (!Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(sourcePrefabGUID, out Entity sourceEntity))
                 {
@@ -398,66 +428,71 @@ namespace BloodyBoss.Systems
         }
         
         /// <summary>
-        /// Lista algunos PrefabGUIDs de VBloods conocidos para testing
+        /// Returns known VBlood prefabs from the complete VBloodDatabase.
         /// </summary>
         public static Dictionary<string, int> GetKnownVBloodPrefabs()
         {
-            return new Dictionary<string, int>
+            var vbloods = new Dictionary<string, int>();
+            
+            try
             {
-                // Tier 1 VBloods (1-30)
-                { "Alpha Wolf", -1905691330 },
-                { "Keely the Frost Archer", 1124739871 },
-                { "Rufus the Foreman", -2039908510 },
-                { "Errol the Stonebreaker", 1106149033 },
-                { "Lidia the Chaos Archer", -544439708 },
-                { "Grayson the Armourer", 1437708069 },
-                { "Putrid Rat", -1391546313 },
-                { "Clive the Firestarter", -700632469 },
+                // Obtener todos los VBloods de la base de datos completa
+                var allVBloods = BloodyBoss.Data.VBloodDatabase.GetAllVBloods();
                 
-                // Tier 2 VBloods (30-50)
-                { "Polora the Feywalker", -1208888966 },
-                { "Ferocious Bear", 1301555881 },
-                { "Quincy the Bandit King", -1659822956 },
-                { "Nicholaus the Fallen", 1896428751 },
-                { "Beatrice the Tailor", -1942352521 },
-                { "Vincent the Frostbringer", 939467639 },
-                { "Christina the Sun Priestess", -99012450 },
-                { "Meredith the Bright Archer", -1065970933 },
+                foreach (var vblood in allVBloods)
+                {
+                    if (!string.IsNullOrEmpty(vblood.Value.Name))
+                    {
+                        // Agregar con el nombre completo
+                        vbloods[vblood.Value.Name] = vblood.Key;
+                        
+                        // También agregar versiones sin "the" para búsquedas más flexibles
+                        if (vblood.Value.Name.Contains(" the "))
+                        {
+                            var simplifiedName = vblood.Value.Name.Replace(" the ", " ");
+                            if (!vbloods.ContainsKey(simplifiedName))
+                            {
+                                vbloods[simplifiedName] = vblood.Key;
+                            }
+                        }
+                    }
+                }
                 
-                // Tier 3 VBloods (50-70)
-                { "Tristan the Vampire Knight", 1112948824 },
-                { "Leandra the Shadow Priestess", -1946493244 },
-                { "Terah the Geomancer", -203043163 },
-                { "Mairwyn the Elementalist", 226082683 },
-                { "Raziel the Shepherd", -680831417 },
-                { "Ungora the Spider Queen", 1666186131 },
-                { "Willfred the Werewolf Chief", -1007062401 },
-                { "Frostmaw the Mountain Terror", 24378719 },
+                Plugin.Logger.LogInfo($"Loaded {vbloods.Count} VBloods from database");
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.LogError($"Error loading VBloods from database: {ex.Message}");
                 
-                // Tier 4 VBloods (70-80)
-                { "Gorecrusher the Behemoth", 914043867 },
-                { "Winged Horror", 1233988687 },
-                { "The Winged Horror", 1233988687 }, // Alias
-                { "Terrorclaw the Ogre", 577478542 },
-                { "Cyril the Cursed Smith", -1347412392 }, // Also known as Octavian
-                { "Octavian the Militia Captain", -1347412392 },
-                { "Jade the Vampire Hunter", -2025101517 },
-                { "Bane the Shadowblade", 1896428751 },
-                
-                // Tier 5 VBloods (80+)
-                { "Solarus the Immaculate", -1905691330 },
-                { "Dracula", -327335305 },
-                { "Adam the Firstborn", -1137513024 },
-                { "The Baron of Blood", -327335305 }, // Dracula alias
-                { "Manticore", 1945956671 },
-                { "The Manticore", 1945956671 }, // Alias
-                
-                // Special/Boss VBloods
-                { "Behemoth", 914043867 },
-                { "Forest Wolf VBlood", -1905691330 }, // Common mod base
-                { "Undead Commander", 1233988687 },
-                { "Cursed Wanderer", 577478542 },
-            };
+                // Fallback al diccionario estático si falla
+                return new Dictionary<string, int>
+                {
+                    { "Alpha Wolf", -1905691330 },
+                    { "Solarus the Immaculate", -740796338 },
+                    { "Vincent the Frostbringer", 939467639 },
+                    { "Christina the Sun Priestess", -99012450 },
+                    { "Dracula", -327335305 },
+                    { "Vampire Dracula", -327335305 },
+                    { "Tristan the Vampire Hunter", 1112948824 },
+                    { "Beatrice the Tailor", 297942716 },
+                    { "Gorecrusher the Behemoth", -1936575244 },
+                    { "Terrorclaw the Ogre", 2054432370 },
+                    { "Nightmarshal Styx", 1124739990 },
+                    { "Adam the Firstborn", -203043163 },
+                    { "Raziel the Shepherd", -680831417 },
+                    { "The Duke of Balaton", -1018894152 },
+                    { "Azariel the Sunbringer", -1144062226 },
+                    { "Willfred the Werewolf", -260770077 },
+                    { "Jade the Vampire Hunter", 476186894 },
+                    { "Frostmaw the Mountain Terror", 24378719 },
+                    { "Morian the Stormwing Matriarch", 685266977 },
+                    { "Clive the Firestarter", 1896428751 },
+                    { "Nicholaus the Fallen", 153390636 }
+                };
+            }
+            
+            return vbloods;
         }
+        
     }
 }
