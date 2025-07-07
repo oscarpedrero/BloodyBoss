@@ -394,73 +394,56 @@ Legendary = Nightmare
 
 ## 🔧 Maintenance Examples
 
-### Daily Server Maintenance Routine
+### Daily Server Maintenance Commands
+
+For daily maintenance, run these commands:
 
 ```bash
-#!/bin/bash
-# Daily BloodyBoss maintenance script
-
-echo "Starting BloodyBoss maintenance..."
-
-# Clean up any stuck icons
+# Clean up any stuck map icons
 .bb clearallicons
 
-# Check status of all bosses
-.bb list | while read boss; do
-    if [[ $boss == *"Boss"* ]]; then
-        boss_name=$(echo $boss | cut -d' ' -f2-)
-        .bb status "$boss_name"
-    fi
-done
+# Check the list of all configured bosses
+.bb list
 
-# Reload configuration to ensure consistency
+# Check individual boss status (run for each boss)
+.bb status "Boss Name"
+
+# Reload configuration if needed
 .bb reload
-
-echo "BloodyBoss maintenance complete!"
 ```
 
-### Weekly Reset Routine
+**Tip:** Server admins can create scripts to automate these commands if desired.
+
+### Weekly Reset Commands
+
+For weekly resets of progressive difficulty:
 
 ```bash
-#!/bin/bash
-# Weekly reset for progressive difficulty
-
-echo "Starting weekly reset..."
-
-# Reset all progressive difficulty counters
+# Reset progressive difficulty for specific bosses
 .bb resetkills "Weekly Boss 1"
 .bb resetkills "Weekly Boss 2" 
 .bb resetkills "Weekly Boss 3"
 
-# Clear any stuck icons
+# Or reset all bosses at once
+.bb resetkills
+
+# Clear any stuck map icons
 .bb clearallicons
 
-# Reload database
+# Reload configuration
 .bb reload
-
-echo "Weekly reset complete!"
 ```
 
-### Backup and Restore
+### Configuration Backup
 
-```bash
-#!/bin/bash
-# Backup BloodyBoss configuration
+Important files to backup regularly:
 
-BACKUP_DIR="/path/to/backups/$(date +%Y%m%d_%H%M%S)"
-mkdir -p "$BACKUP_DIR"
-
-# Backup configuration files
-cp BepInEx/config/BloodyBoss.cfg "$BACKUP_DIR/"
-cp -r BepInEx/config/BloodyBoss/ "$BACKUP_DIR/"
-
-echo "Backup created at: $BACKUP_DIR"
-
-# To restore:
-# cp "$BACKUP_DIR/BloodyBoss.cfg" BepInEx/config/
-# cp -r "$BACKUP_DIR/BloodyBoss/" BepInEx/config/
-# .bb reload
 ```
+BepInEx/config/BloodyBoss.cfg         # Main configuration
+BepInEx/config/BloodyBoss/Database.json  # Boss database
+```
+
+**Backup Tip:** Create regular backups of these files before major changes.
 
 ## 📊 Performance Optimization Examples
 
