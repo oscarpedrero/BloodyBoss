@@ -23,7 +23,7 @@ Boss increases damage and speed when reaching health thresholds.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> enrage --hp 25 --damage 1.5 --movement 1.3 --attack-speed 1.4
+.bb mechanic add <BossName> enrage "--hp 25 --damage 1.5 --movement 1.3 --attack-speed 1.4"
 ```
 
 #### 2. **Shield**
@@ -36,7 +36,7 @@ Boss gains temporary damage immunity or absorption.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> shield --hp 50 --type immune --duration 10
+.bb mechanic add <BossName> shield "--hp 50 --type immune --duration 10"
 ```
 
 #### 3. **Absorb**
@@ -50,7 +50,7 @@ Boss absorbs incoming damage and converts it to health or energy.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> absorb --hp 30 --percent 50 --convert true --duration 15
+.bb mechanic add <BossName> absorb "--hp 30 --percent 50 --convert true --duration 15"
 ```
 
 #### 4. **Reflect**
@@ -63,7 +63,7 @@ Boss reflects damage back to attackers.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> reflect --hp 40 --percent 30 --type all --duration 10
+.bb mechanic add <BossName> reflect "--hp 40 --percent 30 --type all --duration 10"
 ```
 
 ### Summon & Minion Mechanics
@@ -79,7 +79,7 @@ Boss summons additional enemies to assist.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> summon --hp 75 --prefab -1905691330 --count 3 --pattern circle
+.bb mechanic add <BossName> summon "--hp 75 --prefab -1905691330 --count 3 --pattern circle"
 ```
 
 #### 6. **Clone**
@@ -93,7 +93,7 @@ Boss creates copies of itself with reduced stats.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> clone --hp 50 --count 2 --health 25 --damage 50
+.bb mechanic add <BossName> clone "--hp 50 --count 2 --health 25 --damage 50"
 ```
 
 ### Healing & Recovery
@@ -109,7 +109,7 @@ Boss heals itself or allies.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> heal --hp 25 --amount 20% --type channel --duration 5
+.bb mechanic add <BossName> heal "--hp 25 --amount 20% --type channel --duration 5"
 ```
 
 ### Crowd Control Mechanics
@@ -124,7 +124,7 @@ Stuns all players in range.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> stun --hp 60 --radius 15 --duration 2
+.bb mechanic add <BossName> stun "--hp 60 --radius 15 --duration 2"
 ```
 
 #### 9. **Fear**
@@ -137,7 +137,7 @@ Causes players to flee in terror.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> fear --hp 40 --radius 20 --duration 3
+.bb mechanic add <BossName> fear "--hp 40 --radius 20 --duration 3"
 ```
 
 #### 10. **Root**
@@ -150,7 +150,7 @@ Roots players in place.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> root --hp 70 --radius 10 --duration 4
+.bb mechanic add <BossName> root "--hp 70 --radius 10 --duration 4"
 ```
 
 #### 11. **Silence**
@@ -162,7 +162,7 @@ Prevents players from casting abilities.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> silence --hp 55 --radius 15 --duration 3
+.bb mechanic add <BossName> silence "--hp 55 --radius 15 --duration 3"
 ```
 
 #### 12. **Slow**
@@ -175,7 +175,7 @@ Reduces player movement and attack speed.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> slow --hp 80 --radius 25 --percent 50 --duration 5
+.bb mechanic add <BossName> slow "--hp 80 --radius 25 --percent 50 --duration 5"
 ```
 
 ### Movement & Positioning
@@ -190,7 +190,7 @@ Boss teleports to different locations.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> teleport --hp 35 --type to_farthest --range 30
+.bb mechanic add <BossName> teleport "--hp 35 --type to_farthest --range 30"
 ```
 
 #### 14. **Pull**
@@ -203,7 +203,7 @@ Pulls players toward the boss.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> pull --hp 65 --radius 30 --force 10
+.bb mechanic add <BossName> pull "--hp 65 --radius 30 --force 10"
 ```
 
 #### 15. **Knockback**
@@ -216,7 +216,7 @@ Knocks players away from the boss.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> knockback --hp 45 --radius 15 --force 20
+.bb mechanic add <BossName> knockback "--hp 45 --radius 15 --force 20"
 ```
 
 ### Area Control
@@ -233,7 +233,7 @@ Creates damaging areas on the battlefield.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> aoe --hp 70 --type fire --radius 5 --dps 50 --duration 20
+.bb mechanic add <BossName> aoe "--hp 70 --type fire --radius 5 --dps 50 --duration 20"
 ```
 
 #### 17. **Trap**
@@ -247,7 +247,7 @@ Places traps that trigger when players approach.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> trap --hp 55 --type explosive --count 5 --damage 500
+.bb mechanic add <BossName> trap "--hp 55 --type explosive --count 5 --damage 500"
 ```
 
 ### Debuff Mechanics
@@ -263,7 +263,7 @@ Applies stacking curses to players.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> curse --hp 40 --type weakness --stacks 5 --effect 10
+.bb mechanic add <BossName> curse "--hp 40 --type weakness --stacks 5 --effect 10"
 ```
 
 #### 19. **DoT (Damage over Time)**
@@ -277,7 +277,7 @@ Applies damage over time effects.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> dot --hp 60 --type bleed --damage 25 --rate 1 --duration 10
+.bb mechanic add <BossName> dot "--hp 60 --type bleed --damage 25 --rate 1 --duration 10"
 ```
 
 #### 20. **Weaken**
@@ -290,7 +290,7 @@ Reduces player stats.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> weaken --hp 50 --stat damage --percent 30 --duration 8
+.bb mechanic add <BossName> weaken "--hp 50 --stat damage --percent 30 --duration 8"
 ```
 
 ### Special Mechanics
@@ -305,7 +305,7 @@ Takes control of a player temporarily.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> mindcontrol --hp 30 --duration 5 --count 1
+.bb mechanic add <BossName> mindcontrol "--hp 30 --duration 5 --count 1"
 ```
 
 #### 22. **Phase**
@@ -318,7 +318,7 @@ Transitions boss to a different combat phase.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> phase --hp 50 --number 2 --reset true
+.bb mechanic add <BossName> phase "--hp 50 --number 2 --reset true"
 ```
 
 #### 23. **Vision**
@@ -331,7 +331,7 @@ Reduces player vision/increases darkness.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> vision --hp 35 --reduction 80 --duration 10
+.bb mechanic add <BossName> vision "--hp 35 --reduction 80 --duration 10"
 ```
 
 #### 24. **Buff Steal**
@@ -344,7 +344,7 @@ Steals buffs from players and applies them to boss.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> buffsteal --hp 45 --count 3 --all true
+.bb mechanic add <BossName> buffsteal "--hp 45 --count 3 --all true"
 ```
 
 #### 25. **Dispel**
@@ -357,7 +357,7 @@ Removes buffs from players or debuffs from boss.
 
 **Command:**
 ```bash
-.bb mechanic add <BossName> dispel --hp 65 --target players --count 5 --type buffs
+.bb mechanic add <BossName> dispel "--hp 65 --target players --count 5 --type buffs"
 ```
 
 ## 🛠️ Command Reference
@@ -366,7 +366,7 @@ Removes buffs from players or debuffs from boss.
 
 #### Add Mechanic
 ```bash
-.bb mechanic add <BossName> <MechanicType> [options]
+.bb mechanic add <BossName> <MechanicType> "[options]"
 ```
 
 #### List Mechanics
@@ -405,26 +405,26 @@ Removes buffs from players or debuffs from boss.
 
 ### Health-Based Triggers
 ```bash
---hp <percentage>        # Trigger at health percentage
---hp-below <percentage>  # Trigger below health
---hp-above <percentage>  # Trigger above health
+"--hp <percentage>"        # Trigger at health percentage
+"--hp-below <percentage>"  # Trigger below health
+"--hp-above <percentage>"  # Trigger above health
 ```
 
 ### Time-Based Triggers
 ```bash
---time <seconds>         # Trigger after X seconds
---repeat <seconds>       # Repeat every X seconds
+"--time <seconds>"         # Trigger after X seconds
+"--repeat <seconds>"       # Repeat every X seconds
 ```
 
 ### Player-Based Triggers
 ```bash
---players <count>        # Trigger with X players nearby
---players-min <count>    # Minimum players required
+"--players <count>"        # Trigger with X players nearby
+"--players-min <count>"    # Minimum players required
 ```
 
 ### Combined Triggers
 ```bash
---hp 50 --players 3      # Trigger at 50% HP AND 3+ players
+"--hp 50 --players 3"      # Trigger at 50% HP AND 3+ players
 ```
 
 ## 📝 Example Boss Configurations
@@ -432,25 +432,25 @@ Removes buffs from players or debuffs from boss.
 ### Basic Enrage Boss
 ```bash
 .bb create "EnrageBoss" -327335305 100 5 1800
-.bb mechanic add "EnrageBoss" enrage --hp 25 --damage 2.0 --movement 1.5
-.bb mechanic add "EnrageBoss" aoe --hp 50 --type fire --radius 10 --dps 100
+.bb mechanic add "EnrageBoss" enrage "--hp 25 --damage 2.0 --movement 1.5"
+.bb mechanic add "EnrageBoss" aoe "--hp 50 --type fire --radius 10 --dps 100"
 ```
 
 ### Summoner Boss
 ```bash
 .bb create "SummonerBoss" -99214611 90 4 2400
-.bb mechanic add "SummonerBoss" summon --time 60 --repeat 60 --prefab -1905691330 --count 3
-.bb mechanic add "SummonerBoss" shield --hp 50 --type absorb --amount 5000
-.bb mechanic add "SummonerBoss" heal --hp 25 --amount 30% --type channel
+.bb mechanic add "SummonerBoss" summon "--time 60 --repeat 60 --prefab -1905691330 --count 3"
+.bb mechanic add "SummonerBoss" shield "--hp 50 --type absorb --amount 5000"
+.bb mechanic add "SummonerBoss" heal "--hp 25 --amount 30% --type channel"
 ```
 
 ### Control Boss
 ```bash
 .bb create "ControlBoss" 1112948824 95 6 3000
-.bb mechanic add "ControlBoss" stun --hp 80 --radius 20 --duration 2
-.bb mechanic add "ControlBoss" fear --hp 60 --radius 25 --duration 3
-.bb mechanic add "ControlBoss" mindcontrol --hp 40 --duration 5
-.bb mechanic add "ControlBoss" pull --hp 20 --radius 30 --force 15
+.bb mechanic add "ControlBoss" stun "--hp 80 --radius 20 --duration 2"
+.bb mechanic add "ControlBoss" fear "--hp 60 --radius 25 --duration 3"
+.bb mechanic add "ControlBoss" mindcontrol "--hp 40 --duration 5"
+.bb mechanic add "ControlBoss" pull "--hp 20 --radius 30 --force 15"
 ```
 
 ## ⚠️ Current Limitations
