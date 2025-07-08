@@ -181,6 +181,102 @@ namespace BloodyBoss.Command
             }
         }
 
+        [Command("mechanic-config", usage: "<BossName> <MechanicIndex> <Parameters>", description: "Configure mechanic parameters", adminOnly: true)]
+        public static void ConfigureMechanic(ChatCommandContext ctx, string bossName, int mechanicIndex, string parameters = "")
+        {
+            try
+            {
+                if (!Database.GetBoss(bossName, out var boss))
+                {
+                    throw ctx.Error($"Boss '{bossName}' not found.");
+                }
+
+                if (mechanicIndex < 0 || mechanicIndex >= boss.Mechanics.Count)
+                {
+                    throw ctx.Error($"Invalid mechanic index. Boss has {boss.Mechanics.Count} mechanics (0-{boss.Mechanics.Count - 1}).");
+                }
+
+                var mechanic = boss.Mechanics[mechanicIndex];
+                
+                // If no parameters provided, show current configuration
+                if (string.IsNullOrWhiteSpace(parameters))
+                {
+                    ctx.Reply($"⚙️ {mechanic.Type} mechanic configuration:");
+                    ctx.Reply($"├─ Index: {mechanicIndex}");
+                    ctx.Reply($"├─ Enabled: {(mechanic.Enabled ? "Yes ✅" : "No ❌")}");
+                    ctx.Reply($"├─ Trigger: {mechanic.GetDescription()}");
+                    ctx.Reply($"└─ Parameters:");
+                    
+                    foreach (var param in mechanic.Parameters)
+                    {
+                        ctx.Reply($"   ├─ {param.Key}: {param.Value}");
+                    }
+                    
+                    ctx.Reply($"");
+                    ctx.Reply($"Usage: .bb mechanic-config \"{bossName}\" {mechanicIndex} \"param1=value1 param2=value2 ...\"");
+                    return;
+                }
+
+                // Parse parameters string
+                var paramPairs = parameters.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                var updatedParams = new List<string>();
+                
+                foreach (var pair in paramPairs)
+                {
+                    var parts = pair.Split('=', 2);
+                    if (parts.Length != 2)
+                    {
+                        ctx.Reply($"⚠️ Invalid format: '{pair}'. Use parameter=value");
+                        continue;
+                    }
+
+                    var key = parts[0].Trim();
+                    var value = parts[1].Trim();
+
+                    // Handle different value types
+                    object typedValue = value;
+                    
+                    // Try parse as bool
+                    if (value.Equals("true", StringComparison.OrdinalIgnoreCase))
+                        typedValue = true;
+                    else if (value.Equals("false", StringComparison.OrdinalIgnoreCase))
+                        typedValue = false;
+                    // Try parse as int
+                    else if (int.TryParse(value, out int intValue))
+                        typedValue = intValue;
+                    // Try parse as float
+                    else if (float.TryParse(value, out float floatValue))
+                        typedValue = floatValue;
+                    // Keep as string otherwise (remove quotes if present)
+                    else
+                        typedValue = value.Trim('"', '\'');
+                    
+                    mechanic.Parameters[key] = typedValue;
+                    updatedParams.Add($"{key}={typedValue}");
+                }
+
+                Database.saveDatabase();
+                
+                ctx.Reply($"✅ Updated {mechanic.Type} mechanic parameters:");
+                foreach (var update in updatedParams)
+                {
+                    ctx.Reply($"   ├─ {update}");
+                }
+                
+                // Show example for stun mechanic
+                if (mechanic.Type == "stun")
+                {
+                    ctx.Reply($"");
+                    ctx.Reply($"📝 Example for stun:");
+                    ctx.Reply($".bb mechanic-config \"{bossName}\" {mechanicIndex} \"target=nearest duration=3 mark_duration=2.5 max_targets=2 announcement='The void gazes upon you!' flash_before_stun=true\"");
+                }
+            }
+            catch (Exception e)
+            {
+                throw ctx.Error($"Error configuring mechanic: {e.Message}");
+            }
+        }
+
         [Command("mechanic-clear", usage: "<BossName>", description: "Remove all mechanics from a boss", adminOnly: true)]
         public static void ClearMechanics(ChatCommandContext ctx, string bossName)
         {

@@ -97,6 +97,11 @@ public class Plugin : BasePlugin
                     // VBloodComponentDebugger.DebugVBloodComponents();
                     // Logger.LogWarning("=== VBlood Component Debugger Completed ===");
                     
+                    // Ejecutar análisis de buffs
+                    Logger.LogWarning("=== Starting Buff Analysis ===");
+                    BuffAnalyzer.AnalyzeAllBuffs();
+                    Logger.LogWarning("=== Buff Analysis Completed ===");
+                    
                     scanExecuted = true;
                 }
             }, 5f);

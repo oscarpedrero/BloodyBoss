@@ -7,9 +7,12 @@ using ProjectM;
 using Bloody.Core;
 using Bloody.Core.GameData.v1;
 using Bloody.Core.Models.v1;
+using Bloody.Core.API.v1;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Collections;
+using System.Linq;
+using ProjectM.Shared;
 
 namespace BloodyBoss.Systems.Mechanics
 {
@@ -23,14 +26,18 @@ namespace BloodyBoss.Systems.Mechanics
                 return;
 
             // Get parameters
-            var slowType = GetParameter<string>(parameters, "slow_type", "movement");
-            var amount = GetParameter<float>(parameters, "amount", 50f);
-            var duration = GetParameter<float>(parameters, "duration", 5f);
             var radius = GetParameter<float>(parameters, "radius", 15f);
             var announcement = GetParameter<string>(parameters, "announcement", "🐌 Time slows down!");
+            
+            // New mechanic: Minimum players required in range
+            var minPlayersRequired = GetParameter<int>(parameters, "min_players", 0);
+            var globalRadius = GetParameter<float>(parameters, "global_radius", 50f);
 
             var bossPos = bossEntity.Read<LocalToWorld>().Position;
-            ApplySlowInArea(bossPos, radius, amount, duration, slowType);
+            
+            // Apply slow effect with min players mechanic
+            ApplySlowWithMinPlayers(bossEntity, bossPos, radius, 
+                minPlayersRequired, globalRadius);
 
             // Send announcement
             if (!string.IsNullOrEmpty(announcement))
@@ -39,79 +46,142 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref announcementRef);
             }
 
-            Plugin.Logger.LogInfo($"Slow mechanic executed: {amount}% {slowType} slow for {duration}s");
+            Plugin.Logger.LogInfo($"Slow mechanic executed in radius {radius}m");
         }
 
-        private void ApplySlowInArea(float3 center, float radius, float amount, float duration, string slowType)
+        private void ApplySlowWithMinPlayers(Entity bossEntity, float3 bossPos, float radius,
+            int minPlayersRequired, float globalRadius)
         {
             var radiusSq = radius * radius;
-            var users = GameData.Users.Online;
-
+            var globalRadiusSq = globalRadius * globalRadius;
+            var users = GameData.Users.Online.ToList();
+            var playersInRange = new List<UserModel>();
+            var allPlayersInGlobalRange = new List<UserModel>();
+            
+            // First count players in normal range and global range
             foreach (var user in users)
             {
                 if (user.Character.Entity.Has<LocalToWorld>())
                 {
                     var pos = user.Character.Entity.Read<LocalToWorld>().Position;
-                    if (math.distancesq(center, pos) <= radiusSq)
+                    var distSq = math.distancesq(bossPos, pos);
+                    
+                    if (distSq <= radiusSq)
                     {
-                        ApplySlow(user.Character.Entity, amount, slowType);
+                        playersInRange.Add(user);
+                    }
+                    
+                    if (distSq <= globalRadiusSq)
+                    {
+                        allPlayersInGlobalRange.Add(user);
                     }
                 }
             }
-        }
-
-        private void ApplySlow(Entity target, float amount, string slowType)
-        {
-            PrefabGUID slowBuff;
             
-            switch (slowType.ToLower())
+            // Check if minimum players requirement is met
+            if (minPlayersRequired > 0 && playersInRange.Count < minPlayersRequired)
             {
-                case "movement":
-                    slowBuff = new PrefabGUID(-1376368117); // Movement slow
-                    break;
-                case "attack":
-                    slowBuff = new PrefabGUID(-30951541); // Attack speed slow
-                    break;
-                case "cast":
-                    slowBuff = new PrefabGUID(1934754107); // Cast speed slow
-                    break;
-                default:
-                    slowBuff = new PrefabGUID(-1376368117); // Default to movement slow
-                    break;
+                // Not enough players in range! Global punishment!
+                Plugin.Logger.LogInfo($"Only {playersInRange.Count}/{minPlayersRequired} players in range! GLOBAL SLOW ACTIVATED!");
+                
+                // Send warning to all players
+                var warningMsg = $"⚠️ NOT ENOUGH PLAYERS IN RANGE! {playersInRange.Count}/{minPlayersRequired} - GLOBAL SLOW ACTIVE!";
+                var warningRef = (FixedString512Bytes)warningMsg;
+                ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref warningRef);
+                
+                // Slow ALL players in global radius
+                foreach (var user in allPlayersInGlobalRange)
+                {
+                    ApplySlowToPlayer(user.Character.Entity);
+                }
+                
+                Plugin.Logger.LogInfo($"GLOBAL SLOW: Slowed {allPlayersInGlobalRange.Count} players!");
             }
-
-            BuffCharacter(target, slowBuff);
-            Plugin.Logger.LogDebug($"Applied {amount}% {slowType} slow to entity");
+            else
+            {
+                // Normal slow from players in range
+                Plugin.Logger.LogInfo($"Normal slow: {playersInRange.Count} players in range");
+                
+                foreach (var user in playersInRange)
+                {
+                    ApplySlowToPlayer(user.Character.Entity);
+                }
+                
+                Plugin.Logger.LogInfo($"Slowed {playersInRange.Count} players");
+            }
         }
 
-        private void BuffCharacter(Entity character, PrefabGUID buffGuid)
+        private void ApplySlowToPlayer(Entity target)
         {
-            var des = new ApplyBuffDebugEvent()
-            {
-                BuffPrefabGUID = buffGuid,
-            };
+            // Apply actual slow buff
+            var slowBuff = new PrefabGUID(2072256768); // Buff_General_Slow - This actually slows!
+            BuffCharacter(target, slowBuff);
+            
+            // Apply visual effect
+            var energyDrainVisual = new PrefabGUID(178387762); // AB_Blood_VampiricCurse_Buff_Lesser
+            BuffCharacter(target, energyDrainVisual);
+            
+            Plugin.Logger.LogDebug($"Applied slow to player");
+        }
 
-            var fromCharacter = new FromCharacter()
+        private void BuffCharacter(Entity character, PrefabGUID buffGuid, float duration = 0f)
+        {
+            try
             {
-                User = character,
-                Character = character,
-            };
+                var des = new ApplyBuffDebugEvent()
+                {
+                    BuffPrefabGUID = buffGuid,
+                };
 
-            var debugSystem = Core.SystemsCore.DebugEventsSystem;
-            debugSystem.ApplyBuff(fromCharacter, des);
+                var fromCharacter = new FromCharacter()
+                {
+                    User = character,
+                    Character = character,
+                };
+
+                var debugSystem = Core.SystemsCore.DebugEventsSystem;
+                debugSystem.ApplyBuff(fromCharacter, des);
+                
+                // If duration specified, remove buff after duration
+                if (duration > 0)
+                {
+                    CoroutineHandler.StartGenericCoroutine(() =>
+                    {
+                        RemoveBuff(character, buffGuid);
+                    }, duration);
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.LogWarning($"Failed to apply buff: {ex.Message}");
+            }
+        }
+        
+        private void RemoveBuff(Entity character, PrefabGUID buffGuid)
+        {
+            try
+            {
+                if (BuffUtility.TryGetBuff(Core.SystemsCore.EntityManager, character, buffGuid, out Entity buffEntity))
+                {
+                    DestroyUtility.Destroy(Core.SystemsCore.EntityManager, buffEntity);
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.LogWarning($"Failed to remove buff: {ex.Message}");
+            }
         }
 
         public bool Validate(Dictionary<string, object> parameters)
         {
-            var amount = GetParameter<float>(parameters, "amount", 50f);
-            var duration = GetParameter<float>(parameters, "duration", 5f);
+            var radius = GetParameter<float>(parameters, "radius", 15f);
             
-            return amount > 0 && amount <= 100 && duration > 0 && duration <= 30;
+            return radius > 0 && radius <= 50;
         }
 
         public string GetDescription()
         {
-            return "Slows movement, attack speed, or casting speed";
+            return "Slows players - energy theft mechanic";
         }
 
         public bool CanApply(Entity bossEntity)

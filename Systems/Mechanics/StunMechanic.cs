@@ -8,15 +8,29 @@ using ProjectM;
 using Bloody.Core;
 using Bloody.Core.GameData.v1;
 using Bloody.Core.Models.v1;
+using Bloody.Core.API.v1;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Collections;
+using UnityEngine;
+using ProjectM.Shared;
+using ProjectM.Gameplay.Scripting;
+using Stunlock.Network;
+using Bloody.Core.Helper.v1;
 
 namespace BloodyBoss.Systems.Mechanics
 {
     public class StunMechanic : IMechanic
     {
         public string Type => "stun";
+        
+        // Visual effect PrefabGUIDs
+        private readonly PrefabGUID HOLY_BEAM_TARGET = new PrefabGUID(-1848432780);  // AB_Militia_BishopOfDunley_HolyBeam_TargetBuff_Buff - visible mark
+        private readonly PrefabGUID STUN_IMPACT = new PrefabGUID(-1369764436);  // Buff_General_Stun_ImpactFX
+        private readonly PrefabGUID STUN_DEBUFF = new PrefabGUID(355774169);  // Buff_General_Stun
+        
+        // Track active marks
+        private readonly Dictionary<Entity, Entity> _activeMarks = new Dictionary<Entity, Entity>();
 
         public void Execute(Entity bossEntity, Dictionary<string, object> parameters, World world)
         {
@@ -25,18 +39,17 @@ namespace BloodyBoss.Systems.Mechanics
 
             // Get parameters
             var target = GetParameter<string>(parameters, "target", "nearest");
-            var duration = GetParameter<float>(parameters, "duration", 2f);
+            var stunDuration = GetParameter<float>(parameters, "duration", 3f);
+            var markDuration = GetParameter<float>(parameters, "mark_duration", 2.5f);
             var radius = GetParameter<float>(parameters, "radius", 0f);
             var maxTargets = GetParameter<int>(parameters, "max_targets", 1);
-            var announcement = GetParameter<string>(parameters, "announcement", "⚡ Stunning attack!");
+            var announcement = GetParameter<string>(parameters, "announcement", "👁️ The boss's psychic gaze locks onto its target!");
+            var flashBeforeStun = GetParameter<bool>(parameters, "flash_before_stun", true);
+            var canBeCleansed = GetParameter<bool>(parameters, "can_be_cleansed", true);
+            var markEffect = GetParameter<string>(parameters, "mark_effect", "auto");
 
             var bossPos = bossEntity.Read<LocalToWorld>().Position;
             var targets = GetTargets(bossPos, target, radius, maxTargets);
-
-            foreach (var targetEntity in targets)
-            {
-                ApplyStun(targetEntity, duration);
-            }
 
             // Send announcement
             if (!string.IsNullOrEmpty(announcement))
@@ -45,7 +58,133 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref announcementRef);
             }
 
-            Plugin.Logger.LogInfo($"Stun mechanic executed: {targets.Count} targets stunned for {duration}s");
+            foreach (var targetEntity in targets)
+            {
+                ApplyPsychicMark(targetEntity, markDuration, stunDuration, flashBeforeStun, markEffect);
+            }
+
+            Plugin.Logger.LogInfo($"Psychic stun mechanic executed: {targets.Count} targets marked for {markDuration}s before {stunDuration}s stun");
+        }
+
+        private void ApplyPsychicMark(Entity target, float markDuration, float stunDuration, bool flashBeforeStun, string markEffect)
+        {
+            try
+            {
+                // Use floating eye as default mark effect
+                var markBuff = new PrefabGUID(1520432556); // AB_Militia_HoundMaster_QuickShot_Buff - Floating Eye
+                
+                // If specific effect requested, use that instead
+                if (markEffect != "auto" && int.TryParse(markEffect, out int specificGuid))
+                {
+                    markBuff = new PrefabGUID(specificGuid);
+                    Plugin.Logger.LogInfo($"Using custom mark effect: {specificGuid}");
+                }
+                
+                // Apply the mark
+                try
+                {
+                    BuffCharacter(target, markBuff);
+                    Plugin.Logger.LogInfo($"Applied mark buff {markBuff} to player for {markDuration}s");
+                    
+                    // Remove the mark just before applying stun
+                    CoroutineHandler.StartGenericCoroutine(() =>
+                    {
+                        RemoveBuff(target, markBuff);
+                    }, markDuration - 0.1f);
+                }
+                catch (Exception ex)
+                {
+                    Plugin.Logger.LogWarning($"Failed to apply mark buff: {ex.Message}");
+                }
+                
+                // Track the mark
+                _activeMarks[target] = target;
+                
+                // Send warning message to all players
+                if (target.Has<PlayerCharacter>())
+                {
+                    var playerName = target.Read<PlayerCharacter>().Name.ToString();
+                    var warningMsg = $"⚠️ {playerName} is being targeted! Stun incoming in {markDuration:F1} seconds!";
+                    var warningRef = (FixedString512Bytes)warningMsg;
+                    ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref warningRef);
+                    
+                    Plugin.Logger.LogInfo(warningMsg);
+                }
+                
+                // Schedule the stun application
+                CoroutineHandler.StartGenericCoroutine(() =>
+                {
+                    Plugin.Logger.LogInfo($"Applying stun now after {markDuration}s delay");
+                    ApplyStunWithImpact(target, stunDuration);
+                    
+                    // Clean up mark
+                    if (_activeMarks.ContainsKey(target))
+                    {
+                        _activeMarks.Remove(target);
+                    }
+                }, markDuration);
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.LogError($"Failed to apply psychic mark: {ex.Message}");
+            }
+        }
+        
+        private void ApplyStunWithImpact(Entity target, float duration)
+        {
+            try
+            {
+                if (!target.Has<Health>() || target.Read<Health>().IsDead)
+                    return;
+                
+                var targetPos = target.Read<LocalToWorld>().Position;
+                
+                // Apply stun with impact effect
+                BuffCharacter(target, STUN_IMPACT);
+                
+                // Apply screen shake to nearby players
+                ApplyScreenShakeNearby(targetPos, 15f, 0.5f, 0.3f);
+                
+                // Apply the actual stun buff
+                CoroutineHandler.StartGenericCoroutine(() =>
+                {
+                    BuffCharacter(target, STUN_DEBUFF);
+                }, 0.1f);
+                
+                Plugin.Logger.LogInfo($"Applied stun to entity for {duration}s with impact effects");
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.LogError($"Failed to apply stun with impact: {ex.Message}");
+            }
+        }
+        
+        
+        private void ApplyScreenShakeNearby(float3 position, float radius, float intensity, float duration)
+        {
+            try
+            {
+                var radiusSq = radius * radius;
+                var users = GameData.Users.Online.ToList();
+                
+                foreach (var user in users)
+                {
+                    if (user.Character.Entity.Has<LocalToWorld>())
+                    {
+                        var playerPos = user.Character.Entity.Read<LocalToWorld>().Position;
+                        if (math.distancesq(position, playerPos) <= radiusSq)
+                        {
+                            // Apply screen shake effect
+                            // This would need proper implementation based on V Rising's camera system
+                            Plugin.Logger.LogDebug($"Applied screen shake to player at distance {math.distance(position, playerPos)}");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.LogWarning($"Failed to apply screen shake: {ex.Message}");
+            }
         }
 
         private List<Entity> GetTargets(float3 bossPos, string targetType, float radius, int maxTargets)
@@ -161,14 +300,6 @@ namespace BloodyBoss.Systems.Mechanics
                        .ToList();
         }
 
-        private void ApplyStun(Entity target, float duration)
-        {
-            var stunBuff = new PrefabGUID(355774169); // Buff_General_Stun
-            BuffCharacter(target, stunBuff);
-            
-            Plugin.Logger.LogDebug($"Applied stun to entity for {duration}s");
-        }
-
         private void BuffCharacter(Entity character, PrefabGUID buffGuid)
         {
             var des = new ApplyBuffDebugEvent()
@@ -185,11 +316,31 @@ namespace BloodyBoss.Systems.Mechanics
             var debugSystem = Core.SystemsCore.DebugEventsSystem;
             debugSystem.ApplyBuff(fromCharacter, des);
         }
+        
+        private void RemoveBuff(Entity character, PrefabGUID buffGuid)
+        {
+            try
+            {
+                if (BuffUtility.TryGetBuff(Core.SystemsCore.EntityManager, character, buffGuid, out Entity buffEntity))
+                {
+                    DestroyUtility.Destroy(Core.SystemsCore.EntityManager, buffEntity);
+                    Plugin.Logger.LogDebug($"Removed buff {buffGuid} from character");
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.LogWarning($"Failed to remove buff: {ex.Message}");
+            }
+        }
 
         public bool Validate(Dictionary<string, object> parameters)
         {
-            var duration = GetParameter<float>(parameters, "duration", 2f);
+            var duration = GetParameter<float>(parameters, "duration", 3f);
             if (duration <= 0 || duration > 10)
+                return false;
+
+            var markDuration = GetParameter<float>(parameters, "mark_duration", 2.5f);
+            if (markDuration <= 0 || markDuration > 10)
                 return false;
 
             return true;
@@ -197,7 +348,7 @@ namespace BloodyBoss.Systems.Mechanics
 
         public string GetDescription()
         {
-            return "Stuns players preventing all actions";
+            return "Marks players with a psychic eye before stunning them";
         }
 
         public bool CanApply(Entity bossEntity)
