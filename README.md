@@ -299,6 +299,13 @@ When dynamic scaling is enabled, players will see announcements like:
 - When two bosses with identical PrefabGUIDs die simultaneously, only one may grant rewards
 - Boss icons may occasionally persist on the map after boss death (use `.bb clearallicons` to fix)
 
+## 🔧 Fixed Issues
+
+- **Boss Y-coordinate (height) spawning** - Fixed in v2.1.0 with BloodyCore v2.0.0
+  - Bosses now correctly spawn at the specified Y coordinate when structures are present
+  - V Rising has a natural height limit (~5 units) for NPCs on terrain
+  - Bosses will spawn at higher elevations when placed on castle floors or elevated structures
+
 ## 📊 Performance Notes
 
 - ✅ **Optimized timer system** - Uses numeric comparisons instead of string parsing

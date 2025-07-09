@@ -146,7 +146,7 @@ namespace BloodyBoss.DB.Models
             // Mantener siempre el PrefabGUID original para la apariencia
             var spawnPrefabGUID = new PrefabGUID(PrefabGUID);
             
-            SpawnSystem.SpawnUnitWithCallback(sender, spawnPrefabGUID, new(validX, validZ), Lifetime + 30, (Entity e) => {
+            SpawnSystem.SpawnUnitWithCallback(sender, spawnPrefabGUID, new float3(validX, y, validZ), Lifetime + 30, (Entity e) => {
                 
                 bossEntity = e;
                 ModifyBoss(sender, e);
@@ -188,6 +188,11 @@ namespace BloodyBoss.DB.Models
 
         public bool Spawn(Entity sender, float locationX, float locationZ)
         {
+            return Spawn(sender, locationX, y, locationZ);
+        }
+        
+        public bool Spawn(Entity sender, float locationX, float locationY, float locationZ)
+        {
             // Verificar y obtener posición válida para spawn
             var (validX, validZ, usedOriginal) = GetValidSpawnPosition(locationX, locationZ);
             
@@ -199,10 +204,17 @@ namespace BloodyBoss.DB.Models
             // Mantener siempre el PrefabGUID original para la apariencia
             var spawnPrefabGUID = new PrefabGUID(PrefabGUID);
             
-            SpawnSystem.SpawnUnitWithCallback(sender, spawnPrefabGUID, new(validX, validZ), Lifetime + 30, (Entity e) => {
+            // Store the Y temporarily to use in ModifyBoss
+            var originalY = y;
+            y = locationY;
+            
+            SpawnSystem.SpawnUnitWithCallback(sender, spawnPrefabGUID, new float3(validX, locationY, validZ), Lifetime + 30, (Entity e) => {
 
                 bossEntity = e;
                 ModifyBoss(sender, e);
+                
+                // Restore original Y after spawn
+                y = originalY;
                 
                 // Initialize boss mechanics system
                 BossMechanicSystem.InitializeBossMechanics(e, this);
@@ -321,6 +333,16 @@ namespace BloodyBoss.DB.Models
         public void ModifyBoss(Entity user, Entity boss)
         {
             AssetName = Plugin.SystemsCore.PrefabCollectionSystem._PrefabDataLookup[new PrefabGUID(PrefabGUID)].AssetName.ToString();
+            
+            // Log spawn position after a small delay to ensure position is updated
+            CoroutineHandler.StartFrameCoroutine(() => {
+                if (boss.Has<LocalToWorld>())
+                {
+                    var ltw = boss.Read<LocalToWorld>();
+                    Plugin.Logger.LogInfo($"Boss {name}: Spawned at position ({ltw.Position.x:F2}, {ltw.Position.y:F2}, {ltw.Position.z:F2})");
+                }
+            }, 5, 1); // Solo ejecutar 1 vez
+            
             var players = GameData.Users.Online.ToList().Count;
             var unit = boss.Read<UnitLevel>();
             unit.Level = new ModifiableInt(level);
@@ -627,7 +649,8 @@ namespace BloodyBoss.DB.Models
                     {
                         Plugin.Logger.LogInfo("Spawn Random Boss");
                         bossRandom = Database.BOSSES[Random.Next(Database.BOSSES.Count)];
-                        bossRandom.Spawn(user,x,z);
+                        // Use the random boss position with its own Y coordinate
+                        bossRandom.Spawn(user, bossRandom.x, bossRandom.y, bossRandom.z);
                         bossRandom.bossSpawn = true;
                         Database.saveDatabase();
                     } else
@@ -1168,6 +1191,7 @@ namespace BloodyBoss.DB.Models
                 Plugin.Logger.LogError($"Error applying modular abilities: {ex.Message}");
             }
         }
+        
     }
     
     /// <summary>
