@@ -5,6 +5,7 @@ using BloodyBoss.DB;
 using BloodyBoss.DB.Models;
 using BloodyBoss.Exceptions;
 using BloodyBoss.Configuration;
+using BloodyBoss.Systems;
 using System;
 using Unity.Transforms;
 using Unity.Mathematics;
@@ -88,7 +89,7 @@ namespace BloodyBoss.Command
             }
             catch (Exception e)
             {
-                Plugin.Logger.LogError($"Error in teleport command: {e}");
+                Plugin.BLogger.Error(LogCategory.Command, $"Error in teleport command: {e}");
                 throw;
             }
         }

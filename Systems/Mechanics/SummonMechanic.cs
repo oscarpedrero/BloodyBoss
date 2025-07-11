@@ -47,7 +47,7 @@ namespace BloodyBoss.Systems.Mechanics
                     SetupSummonedAdd(addEntity, bossEntity, despawnOnBossDeath);
                     spawnedAdds.Add(addEntity);
                     
-                    Plugin.Logger.LogInfo($"Spawned add at position {position}");
+                    Plugin.BLogger.Info(LogCategory.Mechanic, $"Spawned add at position {position}");
                 });
             }
 
@@ -58,7 +58,7 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(entityManager, ref announcementRef);
             }
             
-            Plugin.Logger.LogInfo($"Summon mechanic executed: Spawned {count} adds in {pattern} pattern");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Summon mechanic executed: Spawned {count} adds in {pattern} pattern");
         }
 
         private List<float2> CalculateSpawnPositions(float3 center, int count, string pattern)

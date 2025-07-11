@@ -42,7 +42,7 @@ namespace BloodyBoss.Systems
                 mechanic.Reset();
             }
             
-            Plugin.Logger.LogInfo($"Initialized mechanics for boss {boss.name} with {boss.Mechanics.Count} mechanics");
+            Plugin.BLogger.Debug(LogCategory.Boss, $"Initialized mechanics for boss {boss.name} with {boss.Mechanics.Count} mechanics");
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace BloodyBoss.Systems
 
             if (triggeredMechanics.Count > 0)
             {
-                Plugin.Logger.LogInfo($"HP Check: Boss {boss.name} at {currentHpPercent:F1}% HP (was {previousHpPercent:F1}%) - Found {triggeredMechanics.Count} mechanics to trigger");
+                Plugin.BLogger.Debug(LogCategory.Mechanic, $"Boss {boss.name} at {currentHpPercent:F1}% HP - {triggeredMechanics.Count} mechanics triggered");
             }
 
             foreach (var mechanic in triggeredMechanics)
@@ -126,24 +126,18 @@ namespace BloodyBoss.Systems
                 var implementation = MechanicFactory.GetMechanic(mechanic.Type);
                 if (implementation == null)
                 {
-                    Plugin.Logger.LogWarning($"No implementation found for mechanic type: {mechanic.Type}");
+                    Plugin.BLogger.Warning(LogCategory.Boss, $"No implementation found for mechanic type: {mechanic.Type}");
                     return;
                 }
 
                 if (!implementation.CanApply(bossEntity))
                 {
-                    Plugin.Logger.LogWarning($"Cannot apply {mechanic.Type} mechanic to entity");
+                    Plugin.BLogger.Warning(LogCategory.Boss, $"Cannot apply {mechanic.Type} mechanic to entity");
                     return;
                 }
 
-                Plugin.Logger.LogWarning($"[MECHANIC-EXECUTE] === EXECUTING {mechanic.Type.ToUpper()} MECHANIC ===");
-                Plugin.Logger.LogWarning($"[MECHANIC-BOSS] Boss: {boss.name}");
-                Plugin.Logger.LogWarning($"[MECHANIC-TRIGGER] Trigger: {mechanic.GetDescription()}");
-                
-                // Send debug message to chat for testing
-                var debugMsg = $"🔧 DEBUG: {boss.name} triggered {mechanic.Type} mechanic! (Trigger: {mechanic.GetDescription()})";
-                var msgRef = (FixedString512Bytes)debugMsg;
-                ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref msgRef);
+                // Log mechanic execution (single line, debug level)
+                Plugin.BLogger.Debug(LogCategory.Mechanic, $"{boss.name} executing {mechanic.Type} mechanic @ {mechanic.GetDescription()}");
                 
                 // Execute the mechanic
                 implementation.Execute(bossEntity, mechanic.Parameters, Core.World);
@@ -156,7 +150,7 @@ namespace BloodyBoss.Systems
             }
             catch (Exception e)
             {
-                Plugin.Logger.LogError($"Error executing {mechanic.Type} mechanic: {e.Message}");
+                Plugin.BLogger.Error(LogCategory.Boss, $"Error executing {mechanic.Type} mechanic: {e.Message}");
             }
         }
 
@@ -191,7 +185,7 @@ namespace BloodyBoss.Systems
                 
                 if (crossedThreshold)
                 {
-                    Plugin.Logger.LogInfo($"[MECHANIC-THRESHOLD] Crossed threshold! {previousHpPercent:F1}% -> {currentHpPercent:F1}% (threshold: {mechanic.Trigger.Value}%)");
+                    Plugin.BLogger.Debug(LogCategory.Mechanic, $"Threshold crossed: {previousHpPercent:F1}% -> {currentHpPercent:F1}% (trigger: {mechanic.Trigger.Value}%)");
                     return mechanic.CanTriggerAgain();
                 }
             }

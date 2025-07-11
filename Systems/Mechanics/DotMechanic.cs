@@ -42,7 +42,7 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref announcementRef);
             }
 
-            Plugin.Logger.LogInfo($"DoT mechanic executed: {dotType} dealing {damagePerSecond} DPS for {duration}s");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"DoT mechanic executed: {dotType} dealing {damagePerSecond} DPS for {duration}s");
         }
 
         private void ApplyDotToTargets(float3 center, float radius, string dotType, float dps, float duration, string targetType)
@@ -97,7 +97,7 @@ namespace BloodyBoss.Systems.Mechanics
             }
 
             BuffCharacter(target, dotBuff);
-            Plugin.Logger.LogDebug($"Applied {dotType} DoT to entity: {dps} DPS for {duration}s");
+            Plugin.BLogger.Debug(LogCategory.Mechanic, $"Applied {dotType} DoT to entity: {dps} DPS for {duration}s");
         }
 
         private void BuffCharacter(Entity character, PrefabGUID buffGuid)

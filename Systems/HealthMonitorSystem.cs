@@ -40,13 +40,13 @@ namespace BloodyBoss.Systems
                         if (!_lastHealthCheck.ContainsKey(healthKey))
                         {
                             _lastHealthCheck[healthKey] = currentHpPercent;
-                            Plugin.Logger.LogInfo($"[HEALTH-MONITOR] Started monitoring boss {boss.name} at {currentHpPercent:F1}% HP");
+                            Plugin.BLogger.Info(LogCategory.System, $"[HEALTH-MONITOR] Started monitoring boss {boss.name} at {currentHpPercent:F1}% HP");
                         }
                         else if (Math.Abs(_lastHealthCheck[healthKey] - currentHpPercent) > 0.1f)
                         {
                             // Health changed
                             float previousHpPercent = _lastHealthCheck[healthKey];
-                            Plugin.Logger.LogWarning($"[HEALTH-MONITOR] Boss {boss.name} HP changed: {previousHpPercent:F1}% -> {currentHpPercent:F1}%");
+                            Plugin.BLogger.Warning(LogCategory.System, $"[HEALTH-MONITOR] Boss {boss.name} HP changed: {previousHpPercent:F1}% -> {currentHpPercent:F1}%");
                             
                             // Check mechanics - pass both previous and current HP
                             BossMechanicSystem.CheckHpThresholdMechanics(boss.bossEntity, boss, currentHpPercent, previousHpPercent);
@@ -58,7 +58,7 @@ namespace BloodyBoss.Systems
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"[HEALTH-MONITOR] Error: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.System, $"[HEALTH-MONITOR] Error: {ex.Message}");
             }
         }
         

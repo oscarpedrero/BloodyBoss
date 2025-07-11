@@ -2,6 +2,7 @@ using Bloody.Core;
 using BloodyBoss.DB;
 using BloodyBoss.DB.Models;
 using BloodyBoss.Utils;
+using BloodyBoss.Systems;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,11 +25,11 @@ namespace BloodyBoss.Command
         {
             try
             {
-                Plugin.Logger.LogInfo($"AddMechanic called: boss={bossName}, type={mechanicType}, args={args}");
+                Plugin.BLogger.Info(LogCategory.Command, $"AddMechanic called: boss={bossName}, type={mechanicType}, args={args}");
                 
                 if (!Database.GetBoss(bossName, out var boss))
                 {
-                    Plugin.Logger.LogWarning($"Boss not found: {bossName}");
+                    Plugin.BLogger.Warning(LogCategory.Command, $"Boss not found: {bossName}");
                     throw ctx.Error($"Boss '{bossName}' not found.");
                 }
 

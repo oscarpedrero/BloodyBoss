@@ -24,12 +24,12 @@ namespace BloodyBoss.Systems
             try
             {
                 _vbloodCache.Clear();
-                Plugin.Logger.LogInfo("Starting VBlood prefab scan...");
+                Plugin.BLogger.Info(LogCategory.System, "Starting VBlood prefab scan...");
                 
                 var prefabSystem = Plugin.SystemsCore?.PrefabCollectionSystem;
                 if (prefabSystem == null)
                 {
-                    Plugin.Logger.LogError("PrefabCollectionSystem not available");
+                    Plugin.BLogger.Error(LogCategory.System, "PrefabCollectionSystem not available");
                     return;
                 }
 
@@ -38,7 +38,7 @@ namespace BloodyBoss.Systems
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Error in VBlood prefab scan: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.System, $"Error in VBlood prefab scan: {ex.Message}");
             }
         }
 
@@ -46,12 +46,12 @@ namespace BloodyBoss.Systems
         {
             try
             {
-                Plugin.Logger.LogInfo("Using QueryComponents to find VBloods...");
+                Plugin.BLogger.Info(LogCategory.System, "Using QueryComponents to find VBloods...");
                 
                 // Usar el helper de BloodyCore
                 var vBloods = Bloody.Core.Helper.v1.QueryComponents.GetEntitiesByComponentTypes<VBloodUnit>(EntityQueryOptions.Default, true);
                 
-                Plugin.Logger.LogInfo($"QueryComponents found {vBloods.Length} VBlood entities");
+                Plugin.BLogger.Info(LogCategory.System, $"QueryComponents found {vBloods.Length} VBlood entities");
                 
                 foreach (var entity in vBloods)
                 {
@@ -72,7 +72,7 @@ namespace BloodyBoss.Systems
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Error in QueryComponents scan: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.System, $"Error in QueryComponents scan: {ex.Message}");
             }
         }
 
@@ -128,7 +128,7 @@ namespace BloodyBoss.Systems
                 catch
                 {
                     // Si falla GameData, usar análisis por nombre como fallback
-                    Plugin.Logger.LogDebug($"Could not use GameData.Npcs for {vbloodInfo.Name}, using name analysis");
+                    Plugin.BLogger.Debug(LogCategory.System, $"Could not use GameData.Npcs for {vbloodInfo.Name}, using name analysis");
                 }
 
                 // Obtener nivel
@@ -289,7 +289,7 @@ namespace BloodyBoss.Systems
                                         }
                                         catch (Exception ex) 
                                         {
-                                            Plugin.Logger.LogDebug($"Could not read AbilityCastTimeData from group: {ex.Message}");
+                                            Plugin.BLogger.Debug(LogCategory.System, $"Could not read AbilityCastTimeData from group: {ex.Message}");
                                         }
                                     }
                                     
@@ -299,7 +299,7 @@ namespace BloodyBoss.Systems
                                         try
                                         {
                                             var startAbilitiesBuffer = entityManager.GetBuffer<AbilityGroupStartAbilitiesBuffer>(abilityGroupEntity);
-                                            Plugin.Logger.LogDebug($"Found {startAbilitiesBuffer.Length} individual abilities in group");
+                                            Plugin.BLogger.Debug(LogCategory.System, $"Found {startAbilitiesBuffer.Length} individual abilities in group");
                                             
                                             // Analyze first individual ability (usually the main cast)
                                             if (startAbilitiesBuffer.Length > 0)
@@ -327,7 +327,7 @@ namespace BloodyBoss.Systems
                                         }
                                         catch (Exception ex)
                                         {
-                                            Plugin.Logger.LogDebug($"Could not analyze AbilityGroupStartAbilitiesBuffer: {ex.Message}");
+                                            Plugin.BLogger.Debug(LogCategory.System, $"Could not analyze AbilityGroupStartAbilitiesBuffer: {ex.Message}");
                                         }
                                     }
                                     
@@ -351,7 +351,7 @@ namespace BloodyBoss.Systems
                                             foreach (var field in stateFields)
                                             {
                                                 var fieldValue = field.GetValue(abilityState);
-                                                Plugin.Logger.LogDebug($"AbilityGroupState field: {field.Name} = {fieldValue}");
+                                                Plugin.BLogger.Debug(LogCategory.System, $"AbilityGroupState field: {field.Name} = {fieldValue}");
                                                 
                                                 // Store any interesting state fields
                                                 if (field.Name.ToLower().Contains("charges") && field.FieldType == typeof(int))
@@ -376,7 +376,7 @@ namespace BloodyBoss.Systems
                                             foreach (var field in comboFields)
                                             {
                                                 var fieldValue = field.GetValue(comboState);
-                                                Plugin.Logger.LogDebug($"Combo field: {field.Name} = {fieldValue}");
+                                                Plugin.BLogger.Debug(LogCategory.System, $"Combo field: {field.Name} = {fieldValue}");
                                                 
                                                 if (field.Name.ToLower().Contains("length") && field.FieldType == typeof(int))
                                                 {
@@ -398,7 +398,7 @@ namespace BloodyBoss.Systems
                                             foreach (var field in infoFields)
                                             {
                                                 var fieldValue = field.GetValue(groupInfo);
-                                                Plugin.Logger.LogDebug($"AbilityGroupInfo field: {field.Name} = {fieldValue}");
+                                                Plugin.BLogger.Debug(LogCategory.System, $"AbilityGroupInfo field: {field.Name} = {fieldValue}");
                                                 
                                                 // Extract specific fields we care about
                                                 if (field.Name.ToLower().Contains("minrange") && field.FieldType == typeof(float))
@@ -468,7 +468,7 @@ namespace BloodyBoss.Systems
                                                 if (field.Name.ToLower().Contains("cooldown") && field.FieldType == typeof(float))
                                                 {
                                                     abilityInfo.Cooldown = (float)fieldValue;
-                                                    Plugin.Logger.LogDebug($"Found Cooldown field '{field.Name}' with value: {fieldValue}");
+                                                    Plugin.BLogger.Debug(LogCategory.System, $"Found Cooldown field '{field.Name}' with value: {fieldValue}");
                                                 }
                                             }
                                         }
@@ -518,7 +518,7 @@ namespace BloodyBoss.Systems
                                 }
                                 catch (Exception ex)
                                 {
-                                    Plugin.Logger.LogDebug($"Could not check components for ability {abilityPrefabGuid.GuidHash}: {ex.Message}");
+                                    Plugin.BLogger.Debug(LogCategory.System, $"Could not check components for ability {abilityPrefabGuid.GuidHash}: {ex.Message}");
                                 }
                             }
                         }
@@ -527,12 +527,12 @@ namespace BloodyBoss.Systems
                     }
                     catch (Exception ex)
                     {
-                        Plugin.Logger.LogDebug($"Error extracting ability at slot {i}: {ex.Message}");
+                        Plugin.BLogger.Debug(LogCategory.System, $"Error extracting ability at slot {i}: {ex.Message}");
                     }
                 }
                 
                 // Log summary of extracted abilities with detailed info
-                Plugin.Logger.LogDebug($"Extracted {vbloodInfo.Abilities.Count} abilities for {vbloodInfo.Name}");
+                Plugin.BLogger.Debug(LogCategory.System, $"Extracted {vbloodInfo.Abilities.Count} abilities for {vbloodInfo.Name}");
                 foreach (var ability in vbloodInfo.Abilities.Values)
                 {
                     var details = new List<string>();
@@ -547,12 +547,12 @@ namespace BloodyBoss.Systems
                     if (ability.ExtraData.ContainsKey("BehaviorType")) details.Add($"Behavior:{ability.ExtraData["BehaviorType"]}");
                     
                     var detailsStr = details.Count > 0 ? $" [{string.Join(", ", details)}]" : "";
-                    Plugin.Logger.LogDebug($"  - Slot {ability.SlotIndex}: {ability.Name} ({ability.Category}){detailsStr}");
+                    Plugin.BLogger.Debug(LogCategory.System, $"  - Slot {ability.SlotIndex}: {ability.Name} ({ability.Category}){detailsStr}");
                 }
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Failed to extract abilities: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.System, $"Failed to extract abilities: {ex.Message}");
             }
         }
 
@@ -572,18 +572,18 @@ namespace BloodyBoss.Systems
                         if (field.Name.ToLower().Contains("maxcasttime") || field.Name == "MaxCastTime")
                         {
                             abilityInfo.CastTime = modFloat.Value;
-                            Plugin.Logger.LogInfo($"Found MaxCastTime: {modFloat.Value}");
+                            Plugin.BLogger.Info(LogCategory.System, $"Found MaxCastTime: {modFloat.Value}");
                         }
                         else if (field.Name.ToLower().Contains("postcast") || field.Name == "PostCastTime")
                         {
                             abilityInfo.PostCastTime = modFloat.Value;
-                            Plugin.Logger.LogInfo($"Found PostCastTime: {modFloat.Value}");
+                            Plugin.BLogger.Info(LogCategory.System, $"Found PostCastTime: {modFloat.Value}");
                         }
                     }
                     else if (field.Name == "HideCastBar" && field.FieldType == typeof(bool))
                     {
                         abilityInfo.HideCastBar = (bool)field.GetValue(castTimeData);
-                        Plugin.Logger.LogInfo($"Found HideCastBar: {abilityInfo.HideCastBar}");
+                        Plugin.BLogger.Info(LogCategory.System, $"Found HideCastBar: {abilityInfo.HideCastBar}");
                     }
                 }
                 catch { }
@@ -599,7 +599,7 @@ namespace BloodyBoss.Systems
                 
                 if (!prefabSystem._PrefabGuidToEntityMap.TryGetValue(individualAbilityGuid, out Entity individualAbilityEntity))
                 {
-                    Plugin.Logger.LogDebug($"Individual ability entity not found for {individualAbilityGuid.GuidHash}");
+                    Plugin.BLogger.Debug(LogCategory.System, $"Individual ability entity not found for {individualAbilityGuid.GuidHash}");
                     return;
                 }
                 
@@ -616,7 +616,7 @@ namespace BloodyBoss.Systems
                     }
                     catch (Exception ex)
                     {
-                        Plugin.Logger.LogDebug($"Could not read AbilityCastTimeData from individual ability: {ex.Message}");
+                        Plugin.BLogger.Debug(LogCategory.System, $"Could not read AbilityCastTimeData from individual ability: {ex.Message}");
                     }
                 }
                 
@@ -717,14 +717,14 @@ namespace BloodyBoss.Systems
                     if (typeName.Contains("ModifyMovementDuringCast"))
                     {
                         abilityInfo.CanMoveWhileCasting = true;
-                        Plugin.Logger.LogInfo($"Found movement during cast for ability");
+                        Plugin.BLogger.Info(LogCategory.System, $"Found movement during cast for ability");
                     }
                     
                     // Rotation during cast
                     if (typeName.Contains("ModifyRotationDuringCast"))
                     {
                         abilityInfo.CanRotateWhileCasting = true;
-                        Plugin.Logger.LogInfo($"Found rotation during cast for ability");
+                        Plugin.BLogger.Info(LogCategory.System, $"Found rotation during cast for ability");
                     }
                     
                     // Dash ability
@@ -818,7 +818,7 @@ namespace BloodyBoss.Systems
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogDebug($"Error analyzing individual ability: {ex.Message}");
+                Plugin.BLogger.Debug(LogCategory.System, $"Error analyzing individual ability: {ex.Message}");
             }
         }
 
@@ -862,14 +862,14 @@ namespace BloodyBoss.Systems
             
             if (boss == null || source == null)
             {
-                Plugin.Logger.LogWarning($"Cannot check compatibility: Boss or source VBlood not found");
+                Plugin.BLogger.Warning(LogCategory.System, $"Cannot check compatibility: Boss or source VBlood not found");
                 return false;
             }
             
             // Verificar si el source tiene esa habilidad
             if (!source.Abilities.ContainsKey(abilityIndex))
             {
-                Plugin.Logger.LogWarning($"Source VBlood {source.Name} doesn't have ability at index {abilityIndex}");
+                Plugin.BLogger.Warning(LogCategory.System, $"Source VBlood {source.Name} doesn't have ability at index {abilityIndex}");
                 return false;
             }
             
@@ -878,7 +878,7 @@ namespace BloodyBoss.Systems
             // Verificar compatibilidad de vuelo específica de la habilidad
             if (sourceAbility.RequiresFlight && !boss.CanFly)
             {
-                Plugin.Logger.LogWarning($"Incompatible: Ability {sourceAbility.Name} requires flight but {boss.Name} cannot fly");
+                Plugin.BLogger.Warning(LogCategory.System, $"Incompatible: Ability {sourceAbility.Name} requires flight but {boss.Name} cannot fly");
                 return false;
             }
             
@@ -890,21 +890,21 @@ namespace BloodyBoss.Systems
                 // Las habilidades de tipo Travel/Dash pueden requerir características específicas
                 if ((behaviorType == "Travel" || behaviorType == "Dash") && sourceAbility.RequiresFlight && !boss.CanFly)
                 {
-                    Plugin.Logger.LogWarning($"Incompatible: {behaviorType} ability requires flight capability");
+                    Plugin.BLogger.Warning(LogCategory.System, $"Incompatible: {behaviorType} ability requires flight capability");
                     return false;
                 }
                 
                 // Las habilidades de canalización pueden no funcionar bien en bosses que no las soporten
                 if (behaviorType == "Channeling")
                 {
-                    Plugin.Logger.LogInfo($"Info: Channeling ability {sourceAbility.Name} - ensure boss supports channeling animations");
+                    Plugin.BLogger.Info(LogCategory.System, $"Info: Channeling ability {sourceAbility.Name} - ensure boss supports channeling animations");
                 }
             }
             
             // Verificar compatibilidad de transformación
             if (source.Features.Contains("Werewolf") && !boss.Features.Contains("Werewolf"))
             {
-                Plugin.Logger.LogWarning($"Incompatible: {source.Name} has werewolf transformation but {boss.Name} is not a werewolf");
+                Plugin.BLogger.Warning(LogCategory.System, $"Incompatible: {source.Name} has werewolf transformation but {boss.Name} is not a werewolf");
                 return false;
             }
             
@@ -914,7 +914,7 @@ namespace BloodyBoss.Systems
             
             if (sourceIsBeast && !bossIsBeast)
             {
-                Plugin.Logger.LogWarning($"Warning: {source.Name} has beast abilities but {boss.Name} is not a beast - animations may not work properly");
+                Plugin.BLogger.Warning(LogCategory.System, $"Warning: {source.Name} has beast abilities but {boss.Name} is not a beast - animations may not work properly");
                 // No lo bloqueamos completamente, solo advertimos
             }
             
@@ -924,24 +924,24 @@ namespace BloodyBoss.Systems
             
             if (sourceIsHumanoid != bossIsHumanoid)
             {
-                Plugin.Logger.LogWarning($"Warning: Model type mismatch between {source.Name} and {boss.Name} - some abilities may not work properly");
+                Plugin.BLogger.Warning(LogCategory.System, $"Warning: Model type mismatch between {source.Name} and {boss.Name} - some abilities may not work properly");
             }
             
             // Verificar si es un GateBoss (tienen restricciones especiales)
             if (boss.Features.Contains("GateBoss"))
             {
-                Plugin.Logger.LogWarning($"Warning: {boss.Name} is a GateBoss - some abilities may be restricted");
+                Plugin.BLogger.Warning(LogCategory.System, $"Warning: {boss.Name} is a GateBoss - some abilities may be restricted");
             }
             
             // Información adicional sobre la habilidad
-            Plugin.Logger.LogInfo($"Ability compatibility check: {sourceAbility.Name} (Index: {abilityIndex})");
+            Plugin.BLogger.Info(LogCategory.System, $"Ability compatibility check: {sourceAbility.Name} (Index: {abilityIndex})");
             if (sourceAbility.ExtraData.ContainsKey("MinRange") && sourceAbility.ExtraData.ContainsKey("MaxRange"))
             {
-                Plugin.Logger.LogInfo($"  Range: {sourceAbility.ExtraData["MinRange"]}-{sourceAbility.ExtraData["MaxRange"]}");
+                Plugin.BLogger.Info(LogCategory.System, $"  Range: {sourceAbility.ExtraData["MinRange"]}-{sourceAbility.ExtraData["MaxRange"]}");
             }
             if (sourceAbility.IsCombo)
             {
-                Plugin.Logger.LogInfo($"  Combo ability with {sourceAbility.ComboLength} hits");
+                Plugin.BLogger.Info(LogCategory.System, $"  Combo ability with {sourceAbility.ComboLength} hits");
             }
             
             return true; // Permitimos la mayoría de combinaciones con advertencias

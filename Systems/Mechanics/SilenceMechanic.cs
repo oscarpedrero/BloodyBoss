@@ -38,7 +38,7 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref announcementRef);
             }
 
-            Plugin.Logger.LogInfo($"Silence mechanic executed: {duration}s silence in {radius} radius");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Silence mechanic executed: {duration}s silence in {radius} radius");
         }
 
         private void ApplySilenceInArea(float3 center, float radius, float duration, bool disableItems)
@@ -60,7 +60,7 @@ namespace BloodyBoss.Systems.Mechanics
                 }
             }
             
-            Plugin.Logger.LogInfo($"Silenced {silencedCount} players");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Silenced {silencedCount} players");
         }
 
         private void ApplySilence(Entity target, float duration, bool disableItems)
@@ -76,7 +76,7 @@ namespace BloodyBoss.Systems.Mechanics
                 BuffCharacter(target, itemDisableBuff);
             }
             
-            Plugin.Logger.LogDebug($"Applied silence to entity for {duration}s");
+            Plugin.BLogger.Debug(LogCategory.Mechanic, $"Applied silence to entity for {duration}s");
         }
 
         private void BuffCharacter(Entity character, PrefabGUID buffGuid)

@@ -45,7 +45,7 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref announcementRef);
             }
 
-            Plugin.Logger.LogInfo($"Fear mechanic executed: {targets.Count} targets feared for {duration}s");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Fear mechanic executed: {targets.Count} targets feared for {duration}s");
         }
 
         private List<Entity> GetTargetsInRadius(float3 center, float radius, int maxTargets, string targetType)
@@ -83,7 +83,7 @@ namespace BloodyBoss.Systems.Mechanics
             var fearBuff = new PrefabGUID(753231464); // Fear buff
             BuffCharacter(target, fearBuff);
             
-            Plugin.Logger.LogDebug($"Applied fear to entity for {duration}s");
+            Plugin.BLogger.Debug(LogCategory.Mechanic, $"Applied fear to entity for {duration}s");
         }
 
         private void BuffCharacter(Entity character, PrefabGUID buffGuid)

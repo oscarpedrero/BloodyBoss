@@ -58,7 +58,7 @@ namespace BloodyBoss.Systems
             scaledStats.PhysicalPower *= damageMultiplier;
             scaledStats.SpellPower *= damageMultiplier;
 
-            Plugin.Logger.LogInfo($"Boss {boss.name} scaled for {effectivePlayers} players: " +
+            Plugin.BLogger.Info(LogCategory.System, $"Boss {boss.name} scaled for {effectivePlayers} players: " +
                                 $"Damage x{damageMultiplier:F2} (Progressive: x{boss.CurrentDifficultyMultiplier:F2})");
 
             // Check if we need to announce a phase change
@@ -107,7 +107,7 @@ namespace BloodyBoss.Systems
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Error announcing phase change: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.System, $"Error announcing phase change: {ex.Message}");
             }
         }
 
@@ -223,7 +223,7 @@ namespace BloodyBoss.Systems
             
             ServerChatUtils.SendSystemMessageToAllClients(Plugin.SystemsCore.EntityManager, ref refMessage);
             
-            Plugin.Logger.LogInfo($"Phase announced: {boss.name} - {phase.Name} (Phase {phase.Phase})");
+            Plugin.BLogger.Info(LogCategory.System, $"Phase announced: {boss.name} - {phase.Name} (Phase {phase.Phase})");
         }
         
         private static string GetPhaseTemplate(PhaseInfo phase)
@@ -273,12 +273,12 @@ namespace BloodyBoss.Systems
 
                     bossEntity.Write(health);
 
-                    Plugin.Logger.LogInfo($"Boss health scaled to {newMaxHealth:F0} HP (x{healthMultiplier:F2})");
+                    Plugin.BLogger.Info(LogCategory.System, $"Boss health scaled to {newMaxHealth:F0} HP (x{healthMultiplier:F2})");
                 }
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Error applying health scaling: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.System, $"Error applying health scaling: {ex.Message}");
             }
         }
 

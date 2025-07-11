@@ -60,7 +60,7 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(entityManager, ref announcementRef);
             }
             
-            Plugin.Logger.LogInfo($"Shield mechanic applied: Type={shieldType}, Amount={shieldAmount}, Duration={duration}s");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Shield mechanic applied: Type={shieldType}, Amount={shieldAmount}, Duration={duration}s");
         }
 
         private void ApplyImmunityShield(Entity bossEntity, float duration, EntityManager entityManager)

@@ -20,7 +20,7 @@ namespace BloodyBoss.Systems
         {
             try
             {
-                Plugin.Logger.LogInfo($"Attempting to activate VBlood ability {vbloodPrefabGUID.GuidHash} on entity {targetEntity.Index}.{targetEntity.Version}");
+                Plugin.BLogger.Info(LogCategory.System, $"Attempting to activate VBlood ability {vbloodPrefabGUID.GuidHash} on entity {targetEntity.Index}.{targetEntity.Version}");
                 
                 // Usar la función nativa de V Rising para activar habilidades VBlood
                 var entityManager = Core.World.EntityManager;
@@ -38,17 +38,17 @@ namespace BloodyBoss.Systems
                         {
                             if (method.Name == "TryActivateVBloodAbility")
                             {
-                                Plugin.Logger.LogInfo($"Found VBlood activation method in {type.Name}: {method.Name}");
+                                Plugin.BLogger.Info(LogCategory.System, $"Found VBlood activation method in {type.Name}: {method.Name}");
                                 try
                                 {
                                     // Intentar invocar el método
                                     method.Invoke(null, new object[] { entityManager, vbloodPrefabGUID, true });
-                                    Plugin.Logger.LogInfo("VBlood ability activation attempted via reflection");
+                                    Plugin.BLogger.Info(LogCategory.System, "VBlood ability activation attempted via reflection");
                                     return true;
                                 }
                                 catch (Exception ex)
                                 {
-                                    Plugin.Logger.LogError($"Failed to invoke VBlood activation from {type.Name}: {ex.Message}");
+                                    Plugin.BLogger.Error(LogCategory.System, $"Failed to invoke VBlood activation from {type.Name}: {ex.Message}");
                                 }
                             }
                         }
@@ -59,12 +59,12 @@ namespace BloodyBoss.Systems
                     }
                 }
                 
-                Plugin.Logger.LogWarning("TryActivateVBloodAbility method not found in any ProjectM type");
+                Plugin.BLogger.Warning(LogCategory.System, "TryActivateVBloodAbility method not found in any ProjectM type");
                 return false;
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Error activating VBlood ability: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.System, $"Error activating VBlood ability: {ex.Message}");
                 return false;
             }
         }
@@ -73,19 +73,19 @@ namespace BloodyBoss.Systems
         {
             try
             {
-                Plugin.Logger.LogInfo($"Attempting ability swap from {sourcePrefabGUID.GuidHash} to {targetPrefabGUID.GuidHash}");
+                Plugin.BLogger.Info(LogCategory.System, $"Attempting ability swap from {sourcePrefabGUID.GuidHash} to {targetPrefabGUID.GuidHash}");
                 
                 // Verificar que las entidades existen
                 if (!Core.World.EntityManager.Exists(targetEntity))
                 {
-                    Plugin.Logger.LogError("Target entity does not exist");
+                    Plugin.BLogger.Error(LogCategory.System, "Target entity does not exist");
                     return false;
                 }
                 
                 // Verificar compatibilidad antes de proceder
                 if (PluginConfig.EnableAbilityCompatibilityCheck.Value)
                 {
-                    Plugin.Logger.LogInfo("Checking ability compatibility...");
+                    Plugin.BLogger.Info(LogCategory.System, "Checking ability compatibility...");
                     
                     // Verificar compatibilidad general entre los VBloods
                     bool isCompatible = true;
@@ -99,7 +99,7 @@ namespace BloodyBoss.Systems
                         {
                             if (!VBloodPrefabScanner.IsAbilityCompatible(targetPrefabGUID.GuidHash, sourcePrefabGUID.GuidHash, abilitySlot))
                             {
-                                Plugin.Logger.LogWarning($"Ability at slot {abilitySlot} may not be compatible");
+                                Plugin.BLogger.Warning(LogCategory.System, $"Ability at slot {abilitySlot} may not be compatible");
                                 isCompatible = false;
                             }
                         }
@@ -107,7 +107,7 @@ namespace BloodyBoss.Systems
                     
                     if (!isCompatible && PluginConfig.StrictCompatibilityMode.Value)
                     {
-                        Plugin.Logger.LogError("Ability swap blocked due to compatibility issues (strict mode enabled)");
+                        Plugin.BLogger.Error(LogCategory.System, "Ability swap blocked due to compatibility issues (strict mode enabled)");
                         return false;
                     }
                 }
@@ -115,28 +115,28 @@ namespace BloodyBoss.Systems
                 // Obtener la entidad fuente del prefab
                 if (!Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(sourcePrefabGUID, out Entity sourceEntity))
                 {
-                    Plugin.Logger.LogError($"Source prefab {sourcePrefabGUID.GuidHash} not found in collection");
+                    Plugin.BLogger.Error(LogCategory.System, $"Source prefab {sourcePrefabGUID.GuidHash} not found in collection");
                     return false;
                 }
                 
-                Plugin.Logger.LogInfo($"Found source entity: {sourceEntity.Index}.{sourceEntity.Version}");
+                Plugin.BLogger.Info(LogCategory.System, $"Found source entity: {sourceEntity.Index}.{sourceEntity.Version}");
                 
                 // Intentar copiar AbilityBar_Shared si existe
                 if (TryCopyAbilityBar(sourceEntity, targetEntity))
                 {
-                    Plugin.Logger.LogInfo("Successfully copied AbilityBar_Shared");
+                    Plugin.BLogger.Info(LogCategory.System, "Successfully copied AbilityBar_Shared");
                 }
                 
                 // Intentar copiar VBloodData si existe
                 if (TryCopyVBloodData(sourceEntity, targetEntity))
                 {
-                    Plugin.Logger.LogInfo("Successfully copied VBloodData");
+                    Plugin.BLogger.Info(LogCategory.System, "Successfully copied VBloodData");
                 }
                 
                 // Intentar copiar AbilityGroupSlotBuffer si existe
                 if (TryCopyAbilityGroups(sourceEntity, targetEntity))
                 {
-                    Plugin.Logger.LogInfo("Successfully copied AbilityGroups");
+                    Plugin.BLogger.Info(LogCategory.System, "Successfully copied AbilityGroups");
                 }
                 
                 // Intentar copiar componentes adicionales de habilidades
@@ -145,13 +145,13 @@ namespace BloodyBoss.Systems
                 // Intentar forzar que la entidad sea reconocida como el nuevo VBlood
                 TryForceVBloodTransformation(targetEntity, sourcePrefabGUID);
                 
-                Plugin.Logger.LogInfo("Ability swap completed");
+                Plugin.BLogger.Info(LogCategory.System, "Ability swap completed");
                 return true;
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Error swapping abilities: {ex.Message}");
-                Plugin.Logger.LogError($"Stack trace: {ex.StackTrace}");
+                Plugin.BLogger.Error(LogCategory.System, $"Error swapping abilities: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.System, $"Stack trace: {ex.StackTrace}");
                 return false;
             }
         }
@@ -163,7 +163,7 @@ namespace BloodyBoss.Systems
                 // Verificar si source tiene AbilityBar_Shared
                 if (!source.Has<AbilityBar_Shared>())
                 {
-                    Plugin.Logger.LogWarning("Source entity does not have AbilityBar_Shared component");
+                    Plugin.BLogger.Warning(LogCategory.System, "Source entity does not have AbilityBar_Shared component");
                     return false;
                 }
                 
@@ -176,12 +176,12 @@ namespace BloodyBoss.Systems
                 }
                 
                 target.Write(sourceAbilityBar);
-                Plugin.Logger.LogInfo("AbilityBar_Shared copied successfully");
+                Plugin.BLogger.Info(LogCategory.System, "AbilityBar_Shared copied successfully");
                 return true;
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Error copying AbilityBar: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.System, $"Error copying AbilityBar: {ex.Message}");
                 return false;
             }
         }
@@ -196,12 +196,12 @@ namespace BloodyBoss.Systems
                 
                 // Verificar usando reflection o métodos alternativos
                 // Para evitar errores de tipos no registrados, saltamos este paso por ahora
-                Plugin.Logger.LogInfo("VBloodData copy skipped (Il2Cpp type registration issue)");
+                Plugin.BLogger.Info(LogCategory.System, "VBloodData copy skipped (Il2Cpp type registration issue)");
                 return true; // Considerar como éxito para continuar con otros componentes
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Error copying VBloodData: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.System, $"Error copying VBloodData: {ex.Message}");
                 return false;
             }
         }
@@ -216,7 +216,7 @@ namespace BloodyBoss.Systems
                 // Verificar si source tiene AbilityGroupSlotBuffer usando EntityManager
                 if (!entityManager.HasBuffer<AbilityGroupSlotBuffer>(source))
                 {
-                    Plugin.Logger.LogWarning("Source entity does not have AbilityGroupSlotBuffer");
+                    Plugin.BLogger.Warning(LogCategory.System, "Source entity does not have AbilityGroupSlotBuffer");
                     return false;
                 }
                 
@@ -240,12 +240,12 @@ namespace BloodyBoss.Systems
                     targetBuffer.Add(sourceBuffer[i]);
                 }
                 
-                Plugin.Logger.LogInfo($"AbilityGroupSlotBuffer copied successfully ({sourceBuffer.Length} abilities)");
+                Plugin.BLogger.Info(LogCategory.System, $"AbilityGroupSlotBuffer copied successfully ({sourceBuffer.Length} abilities)");
                 return true;
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Error copying AbilityGroups: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.System, $"Error copying AbilityGroups: {ex.Message}");
                 return false;
             }
         }
@@ -282,7 +282,7 @@ namespace BloodyBoss.Systems
                         if (componentType != null)
                         {
                             // Aquí podríamos intentar copiar el componente si existe
-                            Plugin.Logger.LogInfo($"Found component type: {componentTypeName}");
+                            Plugin.BLogger.Info(LogCategory.System, $"Found component type: {componentTypeName}");
                             copiedComponents++;
                         }
                     }
@@ -295,11 +295,11 @@ namespace BloodyBoss.Systems
                 // Forzar actualización de AI y comportamiento
                 ForceAIRefresh(target);
                 
-                Plugin.Logger.LogInfo($"Additional ability components processed: {copiedComponents} types checked");
+                Plugin.BLogger.Info(LogCategory.System, $"Additional ability components processed: {copiedComponents} types checked");
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Error copying additional ability components: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.System, $"Error copying additional ability components: {ex.Message}");
             }
         }
         
@@ -317,14 +317,14 @@ namespace BloodyBoss.Systems
                     entity.Remove<AggroConsumer>();
                     entity.Add<AggroConsumer>();
                     entity.Write(aggro);
-                    Plugin.Logger.LogInfo("Refreshed AggroConsumer");
+                    Plugin.BLogger.Info(LogCategory.System, "Refreshed AggroConsumer");
                 }
                 
-                Plugin.Logger.LogInfo("AI refresh attempted");
+                Plugin.BLogger.Info(LogCategory.System, "AI refresh attempted");
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Error refreshing AI: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.System, $"Error refreshing AI: {ex.Message}");
             }
         }
         
@@ -332,17 +332,17 @@ namespace BloodyBoss.Systems
         {
             try
             {
-                Plugin.Logger.LogInfo($"Attempting VBlood transformation to {sourcePrefabGUID.GuidHash}");
+                Plugin.BLogger.Info(LogCategory.System, $"Attempting VBlood transformation to {sourcePrefabGUID.GuidHash}");
                 
                 // Intentar cambiar el PrefabGUID de la entidad para que sea reconocida como el nuevo VBlood
                 if (targetEntity.Has<PrefabGUID>())
                 {
                     var currentPrefab = targetEntity.Read<PrefabGUID>();
-                    Plugin.Logger.LogInfo($"Current PrefabGUID: {currentPrefab.GuidHash}");
+                    Plugin.BLogger.Info(LogCategory.System, $"Current PrefabGUID: {currentPrefab.GuidHash}");
                     
                     // Cambiar el PrefabGUID al del VBlood origen
                     targetEntity.Write(sourcePrefabGUID);
-                    Plugin.Logger.LogInfo($"PrefabGUID changed to: {sourcePrefabGUID.GuidHash}");
+                    Plugin.BLogger.Info(LogCategory.System, $"PrefabGUID changed to: {sourcePrefabGUID.GuidHash}");
                 }
                 
                 // Forzar refresh de componentes relacionados con VBlood
@@ -352,14 +352,14 @@ namespace BloodyBoss.Systems
                     targetEntity.Remove<VBloodUnit>();
                     targetEntity.Add<VBloodUnit>();
                     targetEntity.Write(vbloodUnit);
-                    Plugin.Logger.LogInfo("Refreshed VBloodUnit component");
+                    Plugin.BLogger.Info(LogCategory.System, "Refreshed VBloodUnit component");
                 }
                 
-                Plugin.Logger.LogInfo("VBlood transformation completed");
+                Plugin.BLogger.Info(LogCategory.System, "VBlood transformation completed");
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Error in VBlood transformation: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.System, $"Error in VBlood transformation: {ex.Message}");
             }
         }
         
@@ -456,16 +456,16 @@ namespace BloodyBoss.Systems
                         if (!vbloods.ContainsKey(vblood.Value.Name))
                         {
                             vbloods[vblood.Value.Name] = vblood.Key;
-                            Plugin.Logger.LogDebug($"No friendly name for {vblood.Key}, using internal name: {vblood.Value.Name}");
+                            Plugin.BLogger.Debug(LogCategory.System, $"No friendly name for {vblood.Key}, using internal name: {vblood.Value.Name}");
                         }
                     }
                 }
                 
-                Plugin.Logger.LogInfo($"Loaded {vbloods.Count} VBloods (with friendly names)");
+                Plugin.BLogger.Info(LogCategory.System, $"Loaded {vbloods.Count} VBloods (with friendly names)");
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Error loading VBloods: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.System, $"Error loading VBloods: {ex.Message}");
                 
                 // Fallback al diccionario estático si falla
                 return new Dictionary<string, int>

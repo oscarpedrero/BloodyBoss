@@ -63,7 +63,7 @@ namespace BloodyBoss.Systems.Mechanics
                 ApplyPsychicMark(targetEntity, markDuration, stunDuration, flashBeforeStun, markEffect);
             }
 
-            Plugin.Logger.LogInfo($"Psychic stun mechanic executed: {targets.Count} targets marked for {markDuration}s before {stunDuration}s stun");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Psychic stun mechanic executed: {targets.Count} targets marked for {markDuration}s before {stunDuration}s stun");
         }
 
         private void ApplyPsychicMark(Entity target, float markDuration, float stunDuration, bool flashBeforeStun, string markEffect)
@@ -77,14 +77,14 @@ namespace BloodyBoss.Systems.Mechanics
                 if (markEffect != "auto" && int.TryParse(markEffect, out int specificGuid))
                 {
                     markBuff = new PrefabGUID(specificGuid);
-                    Plugin.Logger.LogInfo($"Using custom mark effect: {specificGuid}");
+                    Plugin.BLogger.Debug(LogCategory.Mechanic, $"Using custom mark effect: {specificGuid}");
                 }
                 
                 // Apply the mark
                 try
                 {
                     BuffCharacter(target, markBuff);
-                    Plugin.Logger.LogInfo($"Applied mark buff {markBuff} to player for {markDuration}s");
+                    Plugin.BLogger.Debug(LogCategory.Mechanic, $"Applied mark buff {markBuff} to player for {markDuration}s");
                     
                     // Remove the mark just before applying stun
                     CoroutineHandler.StartGenericCoroutine(() =>
@@ -94,7 +94,7 @@ namespace BloodyBoss.Systems.Mechanics
                 }
                 catch (Exception ex)
                 {
-                    Plugin.Logger.LogWarning($"Failed to apply mark buff: {ex.Message}");
+                    Plugin.BLogger.Warning(LogCategory.Mechanic, $"Failed to apply mark buff: {ex.Message}");
                 }
                 
                 // Track the mark
@@ -108,13 +108,13 @@ namespace BloodyBoss.Systems.Mechanics
                     var warningRef = (FixedString512Bytes)warningMsg;
                     ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref warningRef);
                     
-                    Plugin.Logger.LogInfo(warningMsg);
+                    Plugin.BLogger.Info(LogCategory.Mechanic, warningMsg);
                 }
                 
                 // Schedule the stun application
                 CoroutineHandler.StartGenericCoroutine(() =>
                 {
-                    Plugin.Logger.LogInfo($"Applying stun now after {markDuration}s delay");
+                    Plugin.BLogger.Debug(LogCategory.Mechanic, $"Applying stun now after {markDuration}s delay");
                     ApplyStunWithImpact(target, stunDuration);
                     
                     // Clean up mark
@@ -126,7 +126,7 @@ namespace BloodyBoss.Systems.Mechanics
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Failed to apply psychic mark: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.Mechanic, "Failed to apply psychic mark", ex);
             }
         }
         
@@ -151,11 +151,11 @@ namespace BloodyBoss.Systems.Mechanics
                     BuffCharacter(target, STUN_DEBUFF);
                 }, 0.1f);
                 
-                Plugin.Logger.LogInfo($"Applied stun to entity for {duration}s with impact effects");
+                Plugin.BLogger.Debug(LogCategory.Mechanic, $"Applied stun to entity for {duration}s with impact effects");
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Failed to apply stun with impact: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.Mechanic, "Failed to apply stun with impact", ex);
             }
         }
         
@@ -176,14 +176,14 @@ namespace BloodyBoss.Systems.Mechanics
                         {
                             // Apply screen shake effect
                             // This would need proper implementation based on V Rising's camera system
-                            Plugin.Logger.LogDebug($"Applied screen shake to player at distance {math.distance(position, playerPos)}");
+                            Plugin.BLogger.Trace(LogCategory.Mechanic, $"Applied screen shake to player at distance {math.distance(position, playerPos)}");
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogWarning($"Failed to apply screen shake: {ex.Message}");
+                Plugin.BLogger.Warning(LogCategory.Mechanic, $"Failed to apply screen shake: {ex.Message}");
             }
         }
 
@@ -324,12 +324,12 @@ namespace BloodyBoss.Systems.Mechanics
                 if (BuffUtility.TryGetBuff(Core.SystemsCore.EntityManager, character, buffGuid, out Entity buffEntity))
                 {
                     DestroyUtility.Destroy(Core.SystemsCore.EntityManager, buffEntity);
-                    Plugin.Logger.LogDebug($"Removed buff {buffGuid} from character");
+                    Plugin.BLogger.Trace(LogCategory.Mechanic, $"Removed buff {buffGuid} from character");
                 }
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogWarning($"Failed to remove buff: {ex.Message}");
+                Plugin.BLogger.Warning(LogCategory.Mechanic, $"Failed to remove buff: {ex.Message}");
             }
         }
 

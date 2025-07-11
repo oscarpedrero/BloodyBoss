@@ -72,7 +72,7 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(entityManager, ref announcementRef);
             }
             
-            Plugin.Logger.LogInfo($"Heal mechanic applied: Amount={healAmount}, Type={healType}, Duration={duration}s");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Heal mechanic applied: Amount={healAmount}, Type={healType}, Duration={duration}s");
         }
 
         private void ApplyInstantHeal(Entity bossEntity, float healAmount, EntityManager entityManager)
@@ -83,7 +83,7 @@ namespace BloodyBoss.Systems.Mechanics
                 health.Value = Math.Min(health.Value + healAmount, health.MaxHealth._Value);
                 bossEntity.Write(health);
                 
-                Plugin.Logger.LogInfo($"Instant heal applied: {healAmount} HP");
+                Plugin.BLogger.Info(LogCategory.Mechanic, $"Instant heal applied: {healAmount} HP");
             }
         }
 
@@ -102,7 +102,7 @@ namespace BloodyBoss.Systems.Mechanics
             
             // TODO: Schedule heal after channel completes
             // For now, apply instant heal after simulating channel time
-            Plugin.Logger.LogInfo($"Channeled heal started: {healAmount} HP over {channelTime}s");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Channeled heal started: {healAmount} HP over {channelTime}s");
         }
 
         private void ApplyHealOverTime(Entity bossEntity, float totalHeal, float duration, EntityManager entityManager)
@@ -114,7 +114,7 @@ namespace BloodyBoss.Systems.Mechanics
             // Calculate heal per tick (assuming 1 tick per second)
             var healPerTick = totalHeal / duration;
             
-            Plugin.Logger.LogInfo($"Heal over time applied: {healPerTick} HP/s for {duration}s");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Heal over time applied: {healPerTick} HP/s for {duration}s");
         }
 
         private void ApplyHealVisual(Entity bossEntity, string effectName, EntityManager entityManager)

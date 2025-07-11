@@ -39,7 +39,7 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref announcementRef);
             }
 
-            Plugin.Logger.LogInfo($"Pull mechanic executed: Force {force} in {radius} radius");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Pull mechanic executed: Force {force} in {radius} radius");
         }
 
         private void PullPlayersToPosition(float3 targetPos, float radius, float force, bool stun, float stunDuration)
@@ -83,7 +83,7 @@ namespace BloodyBoss.Systems.Mechanics
                 }
             }
             
-            Plugin.Logger.LogInfo($"Pulled {pulledCount} players");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Pulled {pulledCount} players");
         }
 
         private void BuffCharacter(Entity character, PrefabGUID buffGuid)

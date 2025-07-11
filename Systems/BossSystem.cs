@@ -33,11 +33,11 @@ namespace BloodyBoss.Systems
             // Evitar múltiples timers
             if (isTimerRunning)
             {
-                Plugin.Logger.LogInfo("BloodyBoss timer already running, skipping...");
+                Plugin.BLogger.Debug(LogCategory.Timer, "BloodyBoss timer already running, skipping...");
                 return;
             }
 
-            Plugin.Logger.LogInfo("Starting BloodyBoss timer (independent of player connections)");
+            Plugin.BLogger.Info(LogCategory.System, "Starting BloodyBoss timer (independent of player connections)");
             
             bossAction = () =>
             {
@@ -46,13 +46,13 @@ namespace BloodyBoss.Systems
                     // Comprehensive null safety checks
                     if (Plugin.SystemsCore == null)
                     {
-                        Plugin.Logger.LogDebug("BossSystem timer: SystemsCore not ready yet, skipping...");
+                        Plugin.BLogger.Trace(LogCategory.Timer, "BossSystem timer: SystemsCore not ready yet, skipping...");
                         return;
                     }
                     
                     if (Plugin.SystemsCore.PrefabCollectionSystem == null)
                     {
-                        Plugin.Logger.LogDebug("BossSystem timer: Essential systems not ready yet, skipping...");
+                        Plugin.BLogger.Trace(LogCategory.Timer, "BossSystem timer: Essential systems not ready yet, skipping...");
                         return;
                     }
                     
@@ -66,7 +66,7 @@ namespace BloodyBoss.Systems
                         var spawnsBoss = Database.BOSSES.Where(x => x.Hour == currentTime && !x.IsPaused).ToList();
                         if (spawnsBoss.Count > 0)
                         {
-                            Plugin.Logger.LogInfo($"Found {spawnsBoss.Count} bosses to spawn at {currentTime}");
+                            Plugin.BLogger.Info(LogCategory.Spawn, $"Found {spawnsBoss.Count} bosses to spawn at {currentTime}");
                             foreach (var spawnBoss in spawnsBoss)
                             {
                                 Action actionSpawnDespawn = () =>
@@ -87,7 +87,7 @@ namespace BloodyBoss.Systems
                 }
                 catch (Exception ex)
                 {
-                    Plugin.Logger.LogError($"Error in BossSystem timer: {ex.Message}");
+                    Plugin.BLogger.Error(LogCategory.Timer, $"Error in BossSystem timer: {ex.Message}");
                 }
             };
 
@@ -96,7 +96,7 @@ namespace BloodyBoss.Systems
             // IMPORTANTE: Retrasar la primera ejecución 10 segundos para dar tiempo a que el mundo se inicialice
             bossTimer = new Timer(_ => bossAction?.Invoke(), null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(1));
             isTimerRunning = true;
-            Plugin.Logger.LogInfo("BloodyBoss timer started successfully (first check in 10 seconds)");
+            Plugin.BLogger.Info(LogCategory.Timer, "BloodyBoss timer started successfully (first check in 10 seconds)");
         }
 
         public static void StopTimer()
@@ -106,7 +106,7 @@ namespace BloodyBoss.Systems
                 bossTimer.Dispose();
                 bossTimer = null;
                 isTimerRunning = false;
-                Plugin.Logger.LogInfo("BloodyBoss timer stopped");
+                Plugin.BLogger.Info(LogCategory.Timer, "BloodyBoss timer stopped");
             }
         }
 
@@ -118,7 +118,7 @@ namespace BloodyBoss.Systems
             // Null safety check
             if (Plugin.SystemsCore?.EntityManager == null)
             {
-                Plugin.Logger.LogDebug("CheckBoss: EntityManager not ready");
+                Plugin.BLogger.Debug(LogCategory.Boss, "CheckBoss: EntityManager not ready");
                 return;
             }
             
@@ -148,7 +148,7 @@ namespace BloodyBoss.Systems
                     if (!BossTrackingSystem.TryGetBossByName(bossName, out trackedEntity))
                     {
                         // Boss not tracked yet, register it
-                        Plugin.Logger.LogInfo($"[CheckBoss] Found untracked boss {bossName}, registering for optimized tracking");
+                        Plugin.BLogger.Info(LogCategory.Boss, $"[CheckBoss] Found untracked boss {bossName}, registering for optimized tracking");
                         BossTrackingSystem.RegisterSpawnedBoss(entity, bossModel);
                         BossGameplayEventSystem.RegisterBoss(entity, bossModel);
                         
@@ -180,7 +180,7 @@ namespace BloodyBoss.Systems
         {
             if (PluginConfig.TeamBossEnable.Value)
             {
-                Plugin.Logger.LogWarning("Adding the same team to the boss");
+                Plugin.BLogger.Warning(LogCategory.Boss, "Adding the same team to the boss");
                 if (Database.TeamDefault == null)
                 {
                     var entityManager = Plugin.SystemsCore.EntityManager;
@@ -189,11 +189,11 @@ namespace BloodyBoss.Systems
                         Database.TeamDefault = entityManager.GetComponentData<Team>(boss);
                         Database.TeamReferenceDefault = entityManager.GetComponentData<TeamReference>(boss);
                     }
-                    Plugin.Logger.LogWarning("There is no team created, so we create the new Team");
+                    Plugin.BLogger.Warning(LogCategory.Boss, "There is no team created, so we create the new Team");
                 }
                 else
                 {
-                    Plugin.Logger.LogWarning("There is a team created, we are going to apply the same team to the boss.");
+                    Plugin.BLogger.Warning(LogCategory.Boss, "There is a team created, we are going to apply the same team to the boss.");
                     var entityManager = Plugin.SystemsCore.EntityManager;
                     if (!entityManager.Exists(boss))
                         return;
@@ -203,12 +203,12 @@ namespace BloodyBoss.Systems
                     var Team = Database.TeamDefault ?? new();
                     var TeamReference = Database.TeamReferenceDefault ?? new();
                     /*if (Team.Value == TeamActual.Value && TeamReference.Value.Value == TeamReferenceActual.Value.Value) {
-                        Plugin.Logger.LogWarning("You already have the same equipment applied, we skip this step.");
+                        Plugin.BLogger.Warning(LogCategory.Boss, "You already have the same equipment applied, we skip this step.");
                         return; 
                     }*/
                     entityManager.SetComponentData(boss, Team);
                     entityManager.SetComponentData(boss, TeamReference);
-                    Plugin.Logger.LogWarning("We apply the changes so that they are from the same team.");
+                    Plugin.BLogger.Warning(LogCategory.Boss, "We apply the changes so that they are from the same team.");
                 }
             }
         } 

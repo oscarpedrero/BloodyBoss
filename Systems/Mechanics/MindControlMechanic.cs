@@ -44,7 +44,7 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref announcementRef);
             }
 
-            Plugin.Logger.LogInfo($"Mind control mechanic executed on target for {duration}s");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Mind control mechanic executed on target for {duration}s");
         }
 
         private Entity SelectTarget(Entity bossEntity, string targetType)
@@ -122,7 +122,7 @@ namespace BloodyBoss.Systems.Mechanics
             var visualBuff = new PrefabGUID(-893140707); // Purple glow effect
             BuffCharacter(target, visualBuff);
             
-            Plugin.Logger.LogDebug($"Applied mind control to entity for {duration}s");
+            Plugin.BLogger.Debug(LogCategory.Mechanic, $"Applied mind control to entity for {duration}s");
         }
 
         private void BuffCharacter(Entity character, PrefabGUID buffGuid)

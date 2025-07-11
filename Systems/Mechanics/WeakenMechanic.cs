@@ -39,7 +39,7 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref announcementRef);
             }
 
-            Plugin.Logger.LogInfo($"Weaken mechanic executed: {weakenType} reduced by {amount}% for {duration}s");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Weaken mechanic executed: {weakenType} reduced by {amount}% for {duration}s");
         }
 
         private void ApplyWeakenEffect(float3 center, float radius, string weakenType, float amount, float duration, bool stackable)
@@ -61,7 +61,7 @@ namespace BloodyBoss.Systems.Mechanics
                 }
             }
             
-            Plugin.Logger.LogInfo($"Applied weaken effect to {affectedCount} players");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Applied weaken effect to {affectedCount} players");
         }
 
         private void ApplyWeakenDebuffs(Entity target, string weakenType, float amount, float duration, bool stackable)
@@ -105,7 +105,7 @@ namespace BloodyBoss.Systems.Mechanics
             var visualBuff = new PrefabGUID(-1464851863); // Weakness visual
             BuffCharacter(target, visualBuff);
             
-            Plugin.Logger.LogDebug($"Applied {weakenType} weaken effect reducing by {amount}%");
+            Plugin.BLogger.Debug(LogCategory.Mechanic, $"Applied {weakenType} weaken effect reducing by {amount}%");
         }
 
         private void BuffCharacter(Entity character, PrefabGUID buffGuid)

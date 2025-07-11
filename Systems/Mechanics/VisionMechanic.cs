@@ -39,7 +39,7 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref announcementRef);
             }
 
-            Plugin.Logger.LogInfo($"Vision mechanic executed: {visionType} for {duration}s at {intensity}% intensity");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Vision mechanic executed: {visionType} for {duration}s at {intensity}% intensity");
         }
 
         private void ApplyVisionEffect(float3 center, float radius, string visionType, float duration, float intensity)
@@ -61,7 +61,7 @@ namespace BloodyBoss.Systems.Mechanics
                 }
             }
             
-            Plugin.Logger.LogInfo($"Applied vision effect to {affectedCount} players");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Applied vision effect to {affectedCount} players");
         }
 
         private void ApplyVisionDebuff(Entity target, string visionType, float duration, float intensity)
@@ -96,7 +96,7 @@ namespace BloodyBoss.Systems.Mechanics
                 BuffCharacter(target, screenEffectBuff);
             }
             
-            Plugin.Logger.LogDebug($"Applied {visionType} vision effect for {duration}s");
+            Plugin.BLogger.Debug(LogCategory.Mechanic, $"Applied {visionType} vision effect for {duration}s");
         }
 
         private void BuffCharacter(Entity character, PrefabGUID buffGuid)

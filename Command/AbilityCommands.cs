@@ -397,7 +397,7 @@ namespace BloodyBoss.Command
                         foreach (var warning in compatResult.Warnings)
                         {
                             ctx.Reply($"  - {FontColorChatSystem.Yellow(warning)}");
-                            Plugin.Logger.LogDebug($"Ability compatibility warning: {warning}");
+                            Plugin.BLogger.Debug(LogCategory.Command, $"Ability compatibility warning: {warning}");
                         }
                     }
                 }
@@ -418,7 +418,7 @@ namespace BloodyBoss.Command
             catch (Exception e)
             {
                 ctx.Reply($"❌ Error configuring ability: {e.Message}");
-                Plugin.Logger.LogError($"Error in ability-slot command: {e}");
+                Plugin.BLogger.Error(LogCategory.Command, $"Error in ability-slot command: {e}");
             }
         }
 

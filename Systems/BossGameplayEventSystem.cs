@@ -38,12 +38,12 @@ namespace BloodyBoss.Systems
         {
             if (damageEvents.Length > 0)
             {
-                Plugin.Logger.LogInfo($"[BossGameplayEventSystem] OnDamageEvent called with {damageEvents.Length} damage events");
+                Plugin.BLogger.Trace(LogCategory.Damage, $"OnDamageEvent called with {damageEvents.Length} damage events");
             }
             
             foreach (var damageEvent in damageEvents)
             {
-                Plugin.Logger.LogDebug($"[BossGameplayEventSystem] Checking damage to entity {damageEvent.Target.Index}:{damageEvent.Target.Version}");
+                Plugin.BLogger.Trace(LogCategory.Damage, $"Checking damage to entity {damageEvent.Target.Index}:{damageEvent.Target.Version}");
                 
                 // Check if target is a tracked boss
                 if (!IsTrackedBoss(damageEvent.Target))
@@ -51,7 +51,7 @@ namespace BloodyBoss.Systems
                     continue;
                 }
                 
-                Plugin.Logger.LogInfo($"[BossGameplayEventSystem] Damage detected to tracked boss!");
+                Plugin.BLogger.Debug(LogCategory.Damage, "Damage detected to tracked boss!");
                 ProcessDamageEvent(damageEvent);
             }
         }
@@ -63,16 +63,16 @@ namespace BloodyBoss.Systems
         {
             try
             {
-                Plugin.Logger.LogInfo($"[BossGameplayEventSystem] ProcessDamageEvent called for entity {damageEvent.Target.Index}:{damageEvent.Target.Version}");
+                Plugin.BLogger.Debug(LogCategory.Damage, $"ProcessDamageEvent called for entity {damageEvent.Target.Index}:{damageEvent.Target.Version}");
                 
                 // Check if target is a tracked boss
                 if (!_trackedBosses.TryGetValue(damageEvent.Target, out var modelBoss))
                 {
-                    Plugin.Logger.LogDebug($"[BossGameplayEventSystem] Entity {damageEvent.Target.Index}:{damageEvent.Target.Version} is not a tracked boss");
+                    Plugin.BLogger.Trace(LogCategory.Damage, $"Entity {damageEvent.Target.Index}:{damageEvent.Target.Version} is not a tracked boss");
                     return;
                 }
                 
-                Plugin.Logger.LogInfo($"[BossGameplayEventSystem] Processing damage for tracked boss {modelBoss.name}");
+                Plugin.BLogger.Debug(LogCategory.Boss, $"Processing damage for tracked boss {modelBoss.name}");
                 
                 var entityManager = Plugin.SystemsCore.EntityManager;
                 
@@ -81,7 +81,7 @@ namespace BloodyBoss.Systems
                     !entityManager.HasComponent<Health>(damageEvent.Target) ||
                     !entityManager.HasComponent<NameableInteractable>(damageEvent.Target))
                 {
-                    Plugin.Logger.LogWarning($"[BossGameplayEventSystem] Boss entity no longer valid, removing from tracking");
+                    Plugin.BLogger.Warning(LogCategory.Boss, "Boss entity no longer valid, removing from tracking");
                     _trackedBosses.Remove(damageEvent.Target);
                     return;
                 }
@@ -90,7 +90,7 @@ namespace BloodyBoss.Systems
                 var nameable = entityManager.GetComponentData<NameableInteractable>(damageEvent.Target);
                 if (nameable.Name.Value != (modelBoss.nameHash + "bb"))
                 {
-                    Plugin.Logger.LogWarning($"[BossGameplayEventSystem] Entity name mismatch, removing from tracking");
+                    Plugin.BLogger.Warning(LogCategory.Boss, "Entity name mismatch, removing from tracking");
                     _trackedBosses.Remove(damageEvent.Target);
                     return;
                 }
@@ -107,7 +107,7 @@ namespace BloodyBoss.Systems
                     // Handle minion damage settings
                     if (!PluginConfig.MinionDamage.Value)
                     {
-                        Plugin.Logger.LogDebug($"[BossGameplayEventSystem] Non-player damage to boss, MinionDamage disabled");
+                        Plugin.BLogger.Trace(LogCategory.Damage, "Non-player damage to boss, MinionDamage disabled");
                     }
                     return;
                 }
@@ -132,18 +132,18 @@ namespace BloodyBoss.Systems
                 if (!_lastHpLog.ContainsKey(lastLogKey) || Math.Abs(_lastHpLog[lastLogKey] - hpBracket) >= 10)
                 {
                     var isVBlood = entityManager.HasComponent<VBloodUnit>(damageEvent.Target) ? "VBlood " : "";
-                    Plugin.Logger.LogInfo($"[BossGameplayEventSystem] {isVBlood}Boss {modelBoss.name} HP: {currentHpPercent:F1}% ({health.Value:F0}/{health.MaxHealth._Value:F0})");
+                    Plugin.BLogger.Info(LogCategory.Boss, $"{isVBlood}Boss {modelBoss.name} HP: {currentHpPercent:F1}% ({health.Value:F0}/{health.MaxHealth._Value:F0})");
                     _lastHpLog[lastLogKey] = hpBracket;
                 }
                 
                 // Check mechanics based on HP threshold
                 BossMechanicSystem.CheckHpThresholdMechanics(damageEvent.Target, modelBoss, currentHpPercent);
                 
-                Plugin.Logger.LogDebug($"[BossGameplayEventSystem] Damage processed successfully for {modelBoss.name}");
+                Plugin.BLogger.Trace(LogCategory.Damage, $"Damage processed successfully for {modelBoss.name}");
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"[BossGameplayEventSystem] Error processing boss damage: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.System, "Error processing boss damage", ex);
             }
         }
         
@@ -159,29 +159,29 @@ namespace BloodyBoss.Systems
                 
                 if (_trackedBosses.ContainsKey(bossEntity))
                 {
-                    Plugin.Logger.LogWarning($"[BossGameplayEventSystem] Boss {model.name} already registered, updating model");
+                    Plugin.BLogger.Debug(LogCategory.Boss, $"Boss {model.name} already registered, updating model");
                 }
                 
                 // Enforce maximum tracked bosses
                 if (_trackedBosses.Count >= MAX_TRACKED_BOSSES)
                 {
-                    Plugin.Logger.LogWarning($"[BossGameplayEventSystem] Maximum tracked bosses reached ({MAX_TRACKED_BOSSES}). Cleaning up invalid entries.");
+                    Plugin.BLogger.Warning(LogCategory.Boss, $"Maximum tracked bosses reached ({MAX_TRACKED_BOSSES}). Cleaning up invalid entries.");
                     ForceValidateTrackedBosses();
                     
                     // If still at limit after cleanup, skip registration
                     if (_trackedBosses.Count >= MAX_TRACKED_BOSSES)
                     {
-                        Plugin.Logger.LogError($"[BossGameplayEventSystem] Cannot register boss {model.name} - limit reached even after cleanup");
+                        Plugin.BLogger.Error(LogCategory.Boss, $"Cannot register boss {model.name} - limit reached even after cleanup");
                         return;
                     }
                 }
                 
                 _trackedBosses[bossEntity] = model;
-                Plugin.Logger.LogInfo($"[BossGameplayEventSystem] Registered boss {model.name} for damage tracking");
+                Plugin.BLogger.Debug(LogCategory.Boss, $"Registered boss {model.name} for damage tracking");
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"[BossGameplayEventSystem] Failed to register boss: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.Boss, "Failed to register boss", ex);
             }
         }
         
@@ -194,12 +194,12 @@ namespace BloodyBoss.Systems
             {
                 if (_trackedBosses.Remove(bossEntity))
                 {
-                    Plugin.Logger.LogInfo("[BossGameplayEventSystem] Unregistered boss from damage tracking");
+                    Plugin.BLogger.Info(LogCategory.Boss, "Unregistered boss from damage tracking");
                 }
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"[BossGameplayEventSystem] Failed to unregister boss: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.Boss, "Failed to unregister boss", ex);
             }
         }
         
@@ -226,7 +226,7 @@ namespace BloodyBoss.Systems
         {
             _trackedBosses.Clear();
             _lastHpLog.Clear();
-            Plugin.Logger.LogInfo("[BossGameplayEventSystem] Cleared all tracked bosses");
+            Plugin.BLogger.Info(LogCategory.Boss, "Cleared all tracked bosses");
         }
         
         /// <summary>
@@ -234,10 +234,10 @@ namespace BloodyBoss.Systems
         /// </summary>
         public static void DebugListTrackedBosses()
         {
-            Plugin.Logger.LogInfo($"[BossGameplayEventSystem] Currently tracking {_trackedBosses.Count} bosses:");
+            Plugin.BLogger.Debug(LogCategory.Boss, $"Currently tracking {_trackedBosses.Count} bosses:");
             foreach (var kvp in _trackedBosses)
             {
-                Plugin.Logger.LogInfo($"  - Entity {kvp.Key.Index}:{kvp.Key.Version} = Boss {kvp.Value.name}");
+                Plugin.BLogger.Debug(LogCategory.Boss, $"  - Entity {kvp.Key.Index}:{kvp.Key.Version} = Boss {kvp.Value.name}");
             }
         }
         
@@ -274,12 +274,12 @@ namespace BloodyBoss.Systems
                 if (!entityManager.Exists(entity))
                 {
                     entitiesToRemove.Add(entity);
-                    Plugin.Logger.LogDebug($"[BossGameplayEventSystem] Removing non-existent entity from tracking: {model.name}");
+                    Plugin.BLogger.Trace(LogCategory.Boss, $"Removing non-existent entity from tracking: {model.name}");
                 }
                 else if (!entityManager.HasComponent<Health>(entity))
                 {
                     entitiesToRemove.Add(entity);
-                    Plugin.Logger.LogDebug($"[BossGameplayEventSystem] Removing entity without Health component: {model.name}");
+                    Plugin.BLogger.Trace(LogCategory.Boss, $"Removing entity without Health component: {model.name}");
                 }
                 else
                 {
@@ -287,7 +287,7 @@ namespace BloodyBoss.Systems
                     if (health.Value <= 0)
                     {
                         entitiesToRemove.Add(entity);
-                        Plugin.Logger.LogDebug($"[BossGameplayEventSystem] Removing dead boss from tracking: {model.name}");
+                        Plugin.BLogger.Trace(LogCategory.Boss, $"Removing dead boss from tracking: {model.name}");
                     }
                 }
             }
@@ -299,7 +299,7 @@ namespace BloodyBoss.Systems
             
             if (entitiesToRemove.Count > 0)
             {
-                Plugin.Logger.LogInfo($"[BossGameplayEventSystem] Validated tracked bosses. Removed {entitiesToRemove.Count} invalid entries. Current count: {_trackedBosses.Count}");
+                Plugin.BLogger.Debug(LogCategory.Boss, $"Validated tracked bosses. Removed {entitiesToRemove.Count} invalid entries. Current count: {_trackedBosses.Count}");
             }
         }
         
@@ -317,7 +317,7 @@ namespace BloodyBoss.Systems
                 if (entityManager.HasComponent<NameableInteractable>(target))
                 {
                     var nameable = entityManager.GetComponentData<NameableInteractable>(target);
-                    Plugin.Logger.LogDebug($"[BossGameplayEventSystem] Damage to: {nameable.Name.Value}, Amount: {damage:F1}, Asset: {npcAssetName}");
+                    Plugin.BLogger.Trace(LogCategory.Damage, $"Damage to: {nameable.Name.Value}, Amount: {damage:F1}, Asset: {npcAssetName}");
                 }
                 
                 // Find matching bosses
@@ -325,7 +325,7 @@ namespace BloodyBoss.Systems
                 
                 if (modelBosses.Count > 0)
                 {
-                    Plugin.Logger.LogInfo($"[BossGameplayEventSystem] Found {modelBosses.Count} bosses matching asset: {npcAssetName}");
+                    Plugin.BLogger.Debug(LogCategory.Damage, $"Found {modelBosses.Count} bosses matching asset: {npcAssetName}");
                 }
                 
                 foreach (var modelBoss in modelBosses)
@@ -333,11 +333,11 @@ namespace BloodyBoss.Systems
                     if (modelBoss != null && modelBoss.GetBossEntity() && modelBoss.bossEntity.Has<NameableInteractable>())
                     {
                         NameableInteractable _nameableInteractable = modelBoss.bossEntity.Read<NameableInteractable>();
-                        Plugin.Logger.LogDebug($"[BossGameplayEventSystem] Checking boss entity: Expected name={modelBoss.nameHash}bb, Actual name={_nameableInteractable.Name.Value}");
+                        Plugin.BLogger.Trace(LogCategory.Damage, $"Checking boss entity: Expected name={modelBoss.nameHash}bb, Actual name={_nameableInteractable.Name.Value}");
                         
                         if (_nameableInteractable.Name.Value == (modelBoss.nameHash + "bb"))
                         {
-                            Plugin.Logger.LogInfo($"[BossGameplayEventSystem] MATCH! Processing damage for boss {modelBoss.name}");
+                            Plugin.BLogger.Debug(LogCategory.Damage, $"MATCH! Processing damage for boss {modelBoss.name}");
                             
                             // Register boss if not already tracked
                             if (!IsTrackedBoss(modelBoss.bossEntity))
@@ -356,7 +356,7 @@ namespace BloodyBoss.Systems
                                 var lastLogKey = $"{modelBoss.nameHash}_hp_log";
                                 if (!_lastHpLog.ContainsKey(lastLogKey) || Math.Abs(_lastHpLog[lastLogKey] - hpBracket) >= 10)
                                 {
-                                    Plugin.Logger.LogInfo($"[BossGameplayEventSystem] Boss {modelBoss.name} HP: {currentHpPercent:F1}% ({health.Value:F0}/{health.MaxHealth._Value:F0})");
+                                    Plugin.BLogger.Info(LogCategory.Boss, $"Boss {modelBoss.name} HP: {currentHpPercent:F1}% ({health.Value:F0}/{health.MaxHealth._Value:F0})");
                                     _lastHpLog[lastLogKey] = hpBracket;
                                 }
                                 
@@ -369,7 +369,7 @@ namespace BloodyBoss.Systems
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"[BossGameplayEventSystem] Error processing stat change event: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.System, "Error processing stat change event", ex);
             }
         }
         
@@ -389,12 +389,12 @@ namespace BloodyBoss.Systems
                 {
                     var owner = entityManager.GetComponentData<EntityOwner>(source);
                     attacker = owner.Owner;
-                    Plugin.Logger.LogDebug($"[BossGameplayEventSystem] Found attacker from Source EntityOwner: {attacker.Index}");
+                    Plugin.BLogger.Trace(LogCategory.Damage, $"Found attacker from Source EntityOwner: {attacker.Index}");
                 }
                 else if (source != Entity.Null)
                 {
                     attacker = source;
-                    Plugin.Logger.LogDebug($"[BossGameplayEventSystem] Using Source as attacker: {attacker.Index}");
+                    Plugin.BLogger.Trace(LogCategory.Damage, $"Using Source as attacker: {attacker.Index}");
                 }
                 
                 // Find matching bosses
@@ -408,7 +408,7 @@ namespace BloodyBoss.Systems
                         
                         if (_nameableInteractable.Name.Value == (modelBoss.nameHash + "bb"))
                         {
-                            Plugin.Logger.LogDebug($"[BossGameplayEventSystem] Target is boss {modelBoss.name}");
+                            Plugin.BLogger.Trace(LogCategory.Damage, $"Target is boss {modelBoss.name}");
                             
                             // Check if attacker is a player
                             if (attacker != Entity.Null && entityManager.HasComponent<PlayerCharacter>(attacker))
@@ -420,16 +420,16 @@ namespace BloodyBoss.Systems
                                     var playerName = user.CharacterName.ToString();
                                     
                                     modelBoss.AddKiller(playerName);
-                                    Plugin.Logger.LogInfo($"[BossGameplayEventSystem] Player {playerName} damaged boss {modelBoss.name}");
+                                    Plugin.BLogger.Debug(LogCategory.Damage, $"Player {playerName} damaged boss {modelBoss.name}");
                                 }
                                 catch (Exception ex)
                                 {
-                                    Plugin.Logger.LogError($"[BossGameplayEventSystem] Error getting player info: {ex.Message}");
+                                    Plugin.BLogger.Error(LogCategory.Damage, "Error getting player info", ex);
                                 }
                             }
                             else if (!PluginConfig.MinionDamage.Value && attacker != Entity.Null)
                             {
-                                Plugin.Logger.LogDebug($"[BossGameplayEventSystem] Skipping non-player damage (MinionDamage disabled)");
+                                Plugin.BLogger.Trace(LogCategory.Damage, "Skipping non-player damage (MinionDamage disabled)");
                             }
                         }
                     }
@@ -437,7 +437,7 @@ namespace BloodyBoss.Systems
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"[BossGameplayEventSystem] Error processing damage taken event: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.System, "Error processing damage taken event", ex);
             }
         }
 
@@ -463,7 +463,7 @@ namespace BloodyBoss.Systems
                     var playerModel = Bloody.Core.GameData.v1.GameData.Users.GetUserByCharacterName(user.CharacterName.ToString());
                     var vblood = prefabCollectionSystem._PrefabDataLookup[event_vblood.Source].AssetName;
                     
-                    Plugin.Logger.LogInfo($"[BossGameplayEventSystem] VBlood consumed: {vblood} by {user.CharacterName}");
+                    Plugin.BLogger.Info(LogCategory.Death, $"VBlood consumed: {vblood} by {user.CharacterName}");
                     
                     var modelBosses = Database.BOSSES.Where(x => x.AssetName == vblood.ToString() && x.bossSpawn == true).ToList();
                     foreach (var modelBoss in modelBosses)
@@ -482,7 +482,7 @@ namespace BloodyBoss.Systems
                                 var health = modelBoss.bossEntity.Read<Health>();
                                 if (health.IsDead || health.Value == 0)
                                 {
-                                    Plugin.Logger.LogInfo($"[BossGameplayEventSystem] VBlood boss {modelBoss.name} killed for first time");
+                                    Plugin.BLogger.Info(LogCategory.Death, $"VBlood boss {modelBoss.name} killed for first time");
                                     
                                     modelBoss.vbloodFirstKill = true;
                                     modelBoss.AddKiller(user.CharacterName.ToString());
@@ -505,7 +505,7 @@ namespace BloodyBoss.Systems
                 }
                 catch (Exception ex)
                 {
-                    Plugin.Logger.LogError($"[BossGameplayEventSystem] Error processing VBlood consumption: {ex.Message}");
+                    Plugin.BLogger.Error(LogCategory.System, "Error processing VBlood consumption", ex);
                 }
             }
         }
@@ -531,7 +531,7 @@ namespace BloodyBoss.Systems
                     var player = entityManager.GetComponentData<PlayerCharacter>(deathEvent.Killer);
                     var user = entityManager.GetComponentData<User>(player.UserEntity);
 
-                    Plugin.Logger.LogInfo($"[BossGameplayEventSystem] NPC death: {npc} killed by {user.CharacterName}");
+                    Plugin.BLogger.Debug(LogCategory.Death, $"NPC death: {npc} killed by {user.CharacterName}");
 
                     var modelBosses = Database.BOSSES.Where(x => x.AssetName == npc.ToString() && x.bossSpawn == true).ToList();
                     foreach (var modelBoss in modelBosses)
@@ -549,7 +549,7 @@ namespace BloodyBoss.Systems
                             var health = modelBoss.bossEntity.Read<Health>();
                             if (health.IsDead || health.Value == 0)
                             {
-                                Plugin.Logger.LogInfo($"[BossGameplayEventSystem] Boss {modelBoss.name} killed by {user.CharacterName}");
+                                Plugin.BLogger.Info(LogCategory.Death, $"Boss {modelBoss.name} killed by {user.CharacterName}");
                                 
                                 // Unregister from systems
                                 UnregisterBoss(modelBoss.bossEntity);
@@ -565,7 +565,7 @@ namespace BloodyBoss.Systems
                         }
                         catch (Exception ex)
                         {
-                            Plugin.Logger.LogError($"[BossGameplayEventSystem] Error processing boss death: {ex.Message}");
+                            Plugin.BLogger.Error(LogCategory.Death, "Error processing boss death", ex);
                             
                             // Handle entity not exist case
                             if (ex.Message.Contains("The entity does not exist"))
@@ -579,7 +579,7 @@ namespace BloodyBoss.Systems
                 }
                 catch (Exception ex)
                 {
-                    Plugin.Logger.LogError($"[BossGameplayEventSystem] Error processing death event: {ex.Message}");
+                    Plugin.BLogger.Error(LogCategory.System, "Error processing death event", ex);
                 }
             }
         }

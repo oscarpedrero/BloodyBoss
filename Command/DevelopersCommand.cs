@@ -38,9 +38,9 @@ namespace BloodyBoss.Command
                 }
                 
                 // Log to console for better readability
-                Plugin.Logger.LogInfo("================== BossEntityExtensions Test ==================");
-                Plugin.Logger.LogInfo($"Testing boss: {bossName}");
-                Plugin.Logger.LogInfo("==============================================================");
+                Plugin.BLogger.Info(LogCategory.Debug, "================== BossEntityExtensions Test ==================");
+                Plugin.BLogger.Info(LogCategory.Debug, $"Testing boss: {bossName}");
+                Plugin.BLogger.Info(LogCategory.Debug, "==============================================================");
                 
                 ctx.Reply($"🧪 Testing BossEntityExtensions for '{bossName}':");
                 ctx.Reply($"├─ Looking for spawned boss entities...");
@@ -60,47 +60,47 @@ namespace BloodyBoss.Command
                         {
                             found++;
                             ctx.Reply($"├─ ✅ Found boss entity!");
-                            Plugin.Logger.LogInfo($"[✓] Found boss entity for: {bossName}");
+                            Plugin.BLogger.Info(LogCategory.Debug, $"[✓] Found boss entity for: {bossName}");
                             
                             // Test health extensions
                             var (current, max) = entity.GetBossHealth();
                             var percentage = entity.GetBossHealthPercentage();
                             ctx.Reply($"├─ Health: {current:F0}/{max:F0} ({percentage:F1}%)");
-                            Plugin.Logger.LogInfo($"[Health] Current: {current:F0} / Max: {max:F0} ({percentage:F1}%)");
+                            Plugin.BLogger.Info(LogCategory.Debug, $"[Health] Current: {current:F0} / Max: {max:F0} ({percentage:F1}%)");
                             
                             // Test alive check
                             var isAlive = entity.IsBossAlive();
                             ctx.Reply($"├─ Is Alive: {isAlive}");
-                            Plugin.Logger.LogInfo($"[Status] Is Alive: {isAlive}");
+                            Plugin.BLogger.Info(LogCategory.Debug, $"[Status] Is Alive: {isAlive}");
                             
                             // Test position
                             var pos = entity.GetBossPosition();
                             ctx.Reply($"├─ Position: {pos.x:F1}, {pos.y:F1}, {pos.z:F1}");
-                            Plugin.Logger.LogInfo($"[Position] X: {pos.x:F1}, Y: {pos.y:F1}, Z: {pos.z:F1}");
+                            Plugin.BLogger.Info(LogCategory.Debug, $"[Position] X: {pos.x:F1}, Y: {pos.y:F1}, Z: {pos.z:F1}");
                             
                             // Test level
                             var level = entity.GetBossLevel();
                             ctx.Reply($"├─ Level: {level}");
-                            Plugin.Logger.LogInfo($"[Level] {level}");
+                            Plugin.BLogger.Info(LogCategory.Debug, $"[Level] {level}");
                             
                             // Test PrefabGUID check
                             var correctPrefab = entity.IsPrefabGUID(bossModel.PrefabGUID);
                             ctx.Reply($"├─ Correct Prefab: {correctPrefab}");
-                            Plugin.Logger.LogInfo($"[PrefabGUID] Matches expected: {correctPrefab} (Expected: {bossModel.PrefabGUID})");
+                            Plugin.BLogger.Info(LogCategory.Debug, $"[PrefabGUID] Matches expected: {correctPrefab} (Expected: {bossModel.PrefabGUID})");
                             
                             // Test team info
                             var (team, teamRef) = entity.GetBossTeam();
                             ctx.Reply($"├─ Team Value: {team.Value}");
-                            Plugin.Logger.LogInfo($"[Team] Value: {team.Value}, Reference: {teamRef.Value._Value}");
+                            Plugin.BLogger.Info(LogCategory.Debug, $"[Team] Value: {team.Value}, Reference: {teamRef.Value._Value}");
                             
                             // Test players in radius
                             var players = entity.GetPlayersInRadius(30f);
                             ctx.Reply($"├─ Players within 30m: {players.Count}");
-                            Plugin.Logger.LogInfo($"[Players] Within 30m radius: {players.Count}");
+                            Plugin.BLogger.Info(LogCategory.Debug, $"[Players] Within 30m radius: {players.Count}");
                             
                             // Despawn is now handled by LifeTime component
                             ctx.Reply($"└─ LifeTime: {bossModel.Lifetime}s");
-                            Plugin.Logger.LogInfo($"[Despawn] Using LifeTime system ({bossModel.Lifetime}s)");
+                            Plugin.BLogger.Info(LogCategory.Debug, $"[Despawn] Using LifeTime system ({bossModel.Lifetime}s)");
                         }
                     }
                 }
@@ -110,15 +110,15 @@ namespace BloodyBoss.Command
                 if (found == 0)
                 {
                     ctx.Reply($"└─ ❌ No spawned boss found. Spawn it first!");
-                    Plugin.Logger.LogWarning($"No spawned boss found for: {bossName}");
+                    Plugin.BLogger.Warning(LogCategory.Debug, $"No spawned boss found for: {bossName}");
                 }
                 
-                Plugin.Logger.LogInfo("================== Test Complete ==================");
+                Plugin.BLogger.Info(LogCategory.Debug, "================== Test Complete ==================");
             }
             catch (Exception e)
             {
-                Plugin.Logger.LogError($"Test failed: {e.Message}");
-                Plugin.Logger.LogError($"Stack trace: {e.StackTrace}");
+                Plugin.BLogger.Error(LogCategory.Debug, $"Test failed: {e.Message}");
+                Plugin.BLogger.Error(LogCategory.Debug, $"Stack trace: {e.StackTrace}");
                 throw ctx.Error($"Test failed: {e.Message}");
             }
         }
@@ -128,7 +128,7 @@ namespace BloodyBoss.Command
         {
             try
             {
-                Plugin.Logger.LogInfo("================== Find All BloodyBosses ==================");
+                Plugin.BLogger.Info(LogCategory.Debug, "================== Find All BloodyBosses ==================");
                 ctx.Reply($"🔍 Searching for all BloodyBoss entities...");
                 
                 var entities = QueryComponents.GetEntitiesByComponentTypes<NameableInteractable>(EntityQueryOptions.IncludeAll);
@@ -146,32 +146,32 @@ namespace BloodyBoss.Command
                         if (model != null)
                         {
                             ctx.Reply($"├─ {model.name}: {health:F1}% HP");
-                            Plugin.Logger.LogInfo($"[Boss #{count}] Name: {model.name}");
-                            Plugin.Logger.LogInfo($"  - Health: {health:F1}%");
-                            Plugin.Logger.LogInfo($"  - Position: ({pos.x:F1}, {pos.y:F1}, {pos.z:F1})");
-                            Plugin.Logger.LogInfo($"  - PrefabGUID: {model.PrefabGUID}");
-                            Plugin.Logger.LogInfo($"  - Level: {entity.GetBossLevel()}");
+                            Plugin.BLogger.Info(LogCategory.Debug, $"[Boss #{count}] Name: {model.name}");
+                            Plugin.BLogger.Info(LogCategory.Debug, $"  - Health: {health:F1}%");
+                            Plugin.BLogger.Info(LogCategory.Debug, $"  - Position: ({pos.x:F1}, {pos.y:F1}, {pos.z:F1})");
+                            Plugin.BLogger.Info(LogCategory.Debug, $"  - PrefabGUID: {model.PrefabGUID}");
+                            Plugin.BLogger.Info(LogCategory.Debug, $"  - Level: {entity.GetBossLevel()}");
                         }
                         else
                         {
                             var nameable = entity.Read<NameableInteractable>();
                             ctx.Reply($"├─ Unknown Boss (hash: {nameable.Name.Value})");
-                            Plugin.Logger.LogWarning($"[Unknown Boss] Hash: {nameable.Name.Value}");
-                            Plugin.Logger.LogWarning($"  - Health: {health:F1}%");
-                            Plugin.Logger.LogWarning($"  - Position: ({pos.x:F1}, {pos.y:F1}, {pos.z:F1})");
+                            Plugin.BLogger.Warning(LogCategory.Debug, $"[Unknown Boss] Hash: {nameable.Name.Value}");
+                            Plugin.BLogger.Warning(LogCategory.Debug, $"  - Health: {health:F1}%");
+                            Plugin.BLogger.Warning(LogCategory.Debug, $"  - Position: ({pos.x:F1}, {pos.y:F1}, {pos.z:F1})");
                         }
                     }
                 }
                 
                 entities.Dispose();
                 ctx.Reply($"└─ Total BloodyBosses found: {count}");
-                Plugin.Logger.LogInfo($"Total BloodyBosses found: {count}");
-                Plugin.Logger.LogInfo("================== Search Complete ==================");
+                Plugin.BLogger.Info(LogCategory.Debug, $"Total BloodyBosses found: {count}");
+                Plugin.BLogger.Info(LogCategory.Debug, "================== Search Complete ==================");
             }
             catch (Exception e)
             {
-                Plugin.Logger.LogError($"Find bosses error: {e.Message}");
-                Plugin.Logger.LogError($"Stack trace: {e.StackTrace}");
+                Plugin.BLogger.Error(LogCategory.Debug, $"Find bosses error: {e.Message}");
+                Plugin.BLogger.Error(LogCategory.Debug, $"Stack trace: {e.StackTrace}");
                 throw ctx.Error($"Error: {e.Message}");
             }
         }
@@ -188,8 +188,8 @@ namespace BloodyBoss.Command
         {
             try
             {
-                Plugin.Logger.LogInfo("================== Player Radius Detection Test ==================");
-                Plugin.Logger.LogInfo($"Testing radius: {radius}m");
+                Plugin.BLogger.Info(LogCategory.Debug, "================== Player Radius Detection Test ==================");
+                Plugin.BLogger.Info(LogCategory.Debug, $"Testing radius: {radius}m");
                 
                 var entities = QueryComponents.GetEntitiesByComponentTypes<NameableInteractable>(EntityQueryOptions.IncludeAll);
                 bool found = false;
@@ -204,12 +204,12 @@ namespace BloodyBoss.Command
                         var bossPos = entity.GetBossPosition();
                         
                         ctx.Reply($"🎯 Testing radius detection for '{bossName}':");
-                        Plugin.Logger.LogInfo($"Boss: {bossName}");
-                        Plugin.Logger.LogInfo($"Boss Position: ({bossPos.x:F1}, {bossPos.y:F1}, {bossPos.z:F1})");
+                        Plugin.BLogger.Info(LogCategory.Debug, $"Boss: {bossName}");
+                        Plugin.BLogger.Info(LogCategory.Debug, $"Boss Position: ({bossPos.x:F1}, {bossPos.y:F1}, {bossPos.z:F1})");
                         
                         var players = entity.GetPlayersInRadius(radius);
                         ctx.Reply($"├─ Players within {radius}m: {players.Count}");
-                        Plugin.Logger.LogInfo($"Players found within {radius}m: {players.Count}");
+                        Plugin.BLogger.Info(LogCategory.Debug, $"Players found within {radius}m: {players.Count}");
                         
                         for (int i = 0; i < players.Count; i++)
                         {
@@ -221,15 +221,15 @@ namespace BloodyBoss.Command
                                 var distance = Unity.Mathematics.math.distance(bossPos, playerPos);
                                 
                                 ctx.Reply($"├─ {name}: {distance:F1}m away");
-                                Plugin.Logger.LogInfo($"[Player {i+1}] {name}");
-                                Plugin.Logger.LogInfo($"  - Distance: {distance:F1}m");
-                                Plugin.Logger.LogInfo($"  - Position: ({playerPos.x:F1}, {playerPos.y:F1}, {playerPos.z:F1})");
+                                Plugin.BLogger.Info(LogCategory.Debug, $"[Player {i+1}] {name}");
+                                Plugin.BLogger.Info(LogCategory.Debug, $"  - Distance: {distance:F1}m");
+                                Plugin.BLogger.Info(LogCategory.Debug, $"  - Position: ({playerPos.x:F1}, {playerPos.y:F1}, {playerPos.z:F1})");
                             }
                         }
                         
                         if (players.Count == 0)
                         {
-                            Plugin.Logger.LogInfo("No players found in radius");
+                            Plugin.BLogger.Info(LogCategory.Debug, "No players found in radius");
                         }
                         break;
                     }
@@ -240,15 +240,15 @@ namespace BloodyBoss.Command
                 if (!found)
                 {
                     ctx.Reply($"❌ No BloodyBoss spawned to test with!");
-                    Plugin.Logger.LogWarning("No BloodyBoss entity found for radius test");
+                    Plugin.BLogger.Warning(LogCategory.Debug, "No BloodyBoss entity found for radius test");
                 }
                 
-                Plugin.Logger.LogInfo("================== Test Complete ==================");
+                Plugin.BLogger.Info(LogCategory.Debug, "================== Test Complete ==================");
             }
             catch (Exception e)
             {
-                Plugin.Logger.LogError($"Radius test error: {e.Message}");
-                Plugin.Logger.LogError($"Stack trace: {e.StackTrace}");
+                Plugin.BLogger.Error(LogCategory.Debug, $"Radius test error: {e.Message}");
+                Plugin.BLogger.Error(LogCategory.Debug, $"Stack trace: {e.StackTrace}");
                 throw ctx.Error($"Error: {e.Message}");
             }
         }
@@ -258,7 +258,7 @@ namespace BloodyBoss.Command
         {
             try
             {
-                Plugin.Logger.LogInfo("================== Performance Benchmark ==================");
+                Plugin.BLogger.Info(LogCategory.Debug, "================== Performance Benchmark ==================");
                 ctx.Reply($"⏱️ Starting performance benchmark...");
                 
                 var stopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -326,34 +326,34 @@ namespace BloodyBoss.Command
                 ctx.Reply($"└─ Position checks: {posTime}ms (valid {posCount})");
                 
                 // Log detailed results
-                Plugin.Logger.LogInfo("=== Benchmark Results ===");
-                Plugin.Logger.LogInfo($"Total entities scanned: {totalEntities}");
-                Plugin.Logger.LogInfo($"");
-                Plugin.Logger.LogInfo($"[IsBloodyBoss Check]");
-                Plugin.Logger.LogInfo($"  - Time: {findTime}ms");
-                Plugin.Logger.LogInfo($"  - Found: {bossCount}/{totalEntities} entities");
-                Plugin.Logger.LogInfo($"  - Performance: {(totalEntities > 0 ? (float)findTime/totalEntities : 0):F3}ms per entity");
-                Plugin.Logger.LogInfo($"");
-                Plugin.Logger.LogInfo($"[GetBossModel Check]");
-                Plugin.Logger.LogInfo($"  - Time: {modelTime}ms");
-                Plugin.Logger.LogInfo($"  - Found: {modelCount} models");
-                Plugin.Logger.LogInfo($"  - Success rate: {(bossCount > 0 ? (float)modelCount/bossCount*100 : 0):F1}%");
-                Plugin.Logger.LogInfo($"");
-                Plugin.Logger.LogInfo($"[IsBossAlive Check]");
-                Plugin.Logger.LogInfo($"  - Time: {healthTime}ms");
-                Plugin.Logger.LogInfo($"  - Alive: {aliveCount}/{bossCount}");
-                Plugin.Logger.LogInfo($"");
-                Plugin.Logger.LogInfo($"[GetBossPosition Check]");
-                Plugin.Logger.LogInfo($"  - Time: {posTime}ms");
-                Plugin.Logger.LogInfo($"  - Valid positions: {posCount}/{bossCount}");
-                Plugin.Logger.LogInfo($"");
-                Plugin.Logger.LogInfo($"Total benchmark time: {findTime + modelTime + healthTime + posTime}ms");
-                Plugin.Logger.LogInfo("================== Benchmark Complete ==================");
+                Plugin.BLogger.Info(LogCategory.Debug, "=== Benchmark Results ===");
+                Plugin.BLogger.Info(LogCategory.Debug, $"Total entities scanned: {totalEntities}");
+                Plugin.BLogger.Info(LogCategory.Debug, $"");
+                Plugin.BLogger.Info(LogCategory.Debug, $"[IsBloodyBoss Check]");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - Time: {findTime}ms");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - Found: {bossCount}/{totalEntities} entities");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - Performance: {(totalEntities > 0 ? (float)findTime/totalEntities : 0):F3}ms per entity");
+                Plugin.BLogger.Info(LogCategory.Debug, $"");
+                Plugin.BLogger.Info(LogCategory.Debug, $"[GetBossModel Check]");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - Time: {modelTime}ms");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - Found: {modelCount} models");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - Success rate: {(bossCount > 0 ? (float)modelCount/bossCount*100 : 0):F1}%");
+                Plugin.BLogger.Info(LogCategory.Debug, $"");
+                Plugin.BLogger.Info(LogCategory.Debug, $"[IsBossAlive Check]");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - Time: {healthTime}ms");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - Alive: {aliveCount}/{bossCount}");
+                Plugin.BLogger.Info(LogCategory.Debug, $"");
+                Plugin.BLogger.Info(LogCategory.Debug, $"[GetBossPosition Check]");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - Time: {posTime}ms");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - Valid positions: {posCount}/{bossCount}");
+                Plugin.BLogger.Info(LogCategory.Debug, $"");
+                Plugin.BLogger.Info(LogCategory.Debug, $"Total benchmark time: {findTime + modelTime + healthTime + posTime}ms");
+                Plugin.BLogger.Info(LogCategory.Debug, "================== Benchmark Complete ==================");
             }
             catch (Exception e)
             {
-                Plugin.Logger.LogError($"Benchmark failed: {e.Message}");
-                Plugin.Logger.LogError($"Stack trace: {e.StackTrace}");
+                Plugin.BLogger.Error(LogCategory.Debug, $"Benchmark failed: {e.Message}");
+                Plugin.BLogger.Error(LogCategory.Debug, $"Stack trace: {e.StackTrace}");
                 throw ctx.Error($"Benchmark failed: {e.Message}");
             }
         }
@@ -361,7 +361,7 @@ namespace BloodyBoss.Command
         [Command("validate-extensions", description: "Validate all extension methods work correctly", adminOnly: true)]
         public static void ValidateExtensions(ChatCommandContext ctx)
         {
-            Plugin.Logger.LogInfo("================== Extension Methods Validation ==================");
+            Plugin.BLogger.Info(LogCategory.Debug, "================== Extension Methods Validation ==================");
             ctx.Reply($"🔬 Validating BossEntityExtensions...");
             
             int tests = 0;
@@ -446,16 +446,16 @@ namespace BloodyBoss.Command
                 }
                 
                 // Log detailed results
-                Plugin.Logger.LogInfo("=== Validation Results ===");
-                Plugin.Logger.LogInfo(results.ToString());
-                Plugin.Logger.LogInfo($"Total: {passed}/{tests} passed ({(float)passed/tests*100:F1}%)");
-                Plugin.Logger.LogInfo("================== Validation Complete ==================");
+                Plugin.BLogger.Info(LogCategory.Debug, "=== Validation Results ===");
+                Plugin.BLogger.Info(LogCategory.Debug, results.ToString());
+                Plugin.BLogger.Info(LogCategory.Debug, $"Total: {passed}/{tests} passed ({(float)passed/tests*100:F1}%)");
+                Plugin.BLogger.Info(LogCategory.Debug, "================== Validation Complete ==================");
             }
             catch (Exception e)
             {
                 ctx.Reply($"❌ Validation error: {e.Message}");
-                Plugin.Logger.LogError($"Validation error: {e.Message}");
-                Plugin.Logger.LogError($"Stack trace: {e.StackTrace}");
+                Plugin.BLogger.Error(LogCategory.Debug, $"Validation error: {e.Message}");
+                Plugin.BLogger.Error(LogCategory.Debug, $"Stack trace: {e.StackTrace}");
             }
         }
         
@@ -464,8 +464,8 @@ namespace BloodyBoss.Command
         {
             try
             {
-                Plugin.Logger.LogInfo("================== BossComponents Test ==================");
-                Plugin.Logger.LogInfo($"Testing components for boss: {bossName}");
+                Plugin.BLogger.Info(LogCategory.Debug, "================== BossComponents Test ==================");
+                Plugin.BLogger.Info(LogCategory.Debug, $"Testing components for boss: {bossName}");
                 
                 ctx.Reply($"🧪 Testing BossComponents for '{bossName}':");
                 
@@ -474,7 +474,7 @@ namespace BloodyBoss.Command
                 var bossEntities = BossComponentsHelper.FindAllBossEntities(entityManager);
                 
                 ctx.Reply($"├─ Found {bossEntities.Count} boss entities total");
-                Plugin.Logger.LogInfo($"[Query Test] Found {bossEntities.Count} boss entities");
+                Plugin.BLogger.Info(LogCategory.Debug, $"[Query Test] Found {bossEntities.Count} boss entities");
                 
                 // Test 2: Check specific boss
                 Entity targetBoss = Entity.Null;
@@ -485,7 +485,7 @@ namespace BloodyBoss.Command
                     {
                         targetBoss = entity;
                         ctx.Reply($"├─ ✅ Found target boss: {bossName}");
-                        Plugin.Logger.LogInfo($"[Identifier Test] Found boss with identifier: {identifier}");
+                        Plugin.BLogger.Info(LogCategory.Debug, $"[Identifier Test] Found boss with identifier: {identifier}");
                         break;
                     }
                 }
@@ -495,7 +495,7 @@ namespace BloodyBoss.Command
                 if (targetBoss == Entity.Null)
                 {
                     ctx.Reply($"└─ ❌ Boss '{bossName}' not found!");
-                    Plugin.Logger.LogWarning($"Boss '{bossName}' not found in spawned entities");
+                    Plugin.BLogger.Warning(LogCategory.Debug, $"Boss '{bossName}' not found in spawned entities");
                     return;
                 }
                 
@@ -512,13 +512,13 @@ namespace BloodyBoss.Command
                 ctx.Reply($"├─   Spawn Time: {bossState.SpawnTime:HH:mm:ss}");
                 ctx.Reply($"├─   Difficulty: {bossState.DifficultyMultiplier:F2}x");
                 
-                Plugin.Logger.LogInfo($"[Boss State]");
-                Plugin.Logger.LogInfo($"  - Name: {bossState.BossName}");
-                Plugin.Logger.LogInfo($"  - NameHash: {bossState.NameHash}");
-                Plugin.Logger.LogInfo($"  - SpawnTime: {bossState.SpawnTime}");
-                Plugin.Logger.LogInfo($"  - IsPaused: {bossState.IsPaused}");
-                Plugin.Logger.LogInfo($"  - ConsecutiveSpawns: {bossState.ConsecutiveSpawns}");
-                Plugin.Logger.LogInfo($"  - DifficultyMultiplier: {bossState.DifficultyMultiplier}");
+                Plugin.BLogger.Info(LogCategory.Debug, $"[Boss State]");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - Name: {bossState.BossName}");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - NameHash: {bossState.NameHash}");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - SpawnTime: {bossState.SpawnTime}");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - IsPaused: {bossState.IsPaused}");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - ConsecutiveSpawns: {bossState.ConsecutiveSpawns}");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - DifficultyMultiplier: {bossState.DifficultyMultiplier}");
                 
                 // Test 4: Get combat stats
                 var combatStats = BossComponentsHelper.GetBossCombatStats(targetBoss);
@@ -526,40 +526,40 @@ namespace BloodyBoss.Command
                 ctx.Reply($"├─   Health: {combatStats.CurrentHealth:F0}/{combatStats.MaxHealth:F0} ({combatStats.HealthPercentage:F1}%)");
                 ctx.Reply($"├─   Power: Physical {combatStats.PhysicalPower:F1}, Spell {combatStats.SpellPower:F1}");
                 
-                Plugin.Logger.LogInfo($"[Combat Stats]");
-                Plugin.Logger.LogInfo($"  - Health: {combatStats.CurrentHealth}/{combatStats.MaxHealth} ({combatStats.HealthPercentage:F1}%)");
-                Plugin.Logger.LogInfo($"  - PhysicalPower: {combatStats.PhysicalPower}");
-                Plugin.Logger.LogInfo($"  - SpellPower: {combatStats.SpellPower}");
-                Plugin.Logger.LogInfo($"  - PhysicalResistance: {combatStats.PhysicalResistance}");
-                Plugin.Logger.LogInfo($"  - SpellResistance: {combatStats.SpellResistance}");
+                Plugin.BLogger.Info(LogCategory.Debug, $"[Combat Stats]");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - Health: {combatStats.CurrentHealth}/{combatStats.MaxHealth} ({combatStats.HealthPercentage:F1}%)");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - PhysicalPower: {combatStats.PhysicalPower}");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - SpellPower: {combatStats.SpellPower}");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - PhysicalResistance: {combatStats.PhysicalResistance}");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - SpellResistance: {combatStats.SpellResistance}");
                 
                 // Test 5: Check phase
                 var currentPhase = BossComponents.Phases.GetCurrentPhase(combatStats.HealthPercentage);
                 ctx.Reply($"├─ Current Phase: {currentPhase.PhaseNumber} ({currentPhase.HealthThreshold}% threshold)");
                 ctx.Reply($"└─ Phase Text: {currentPhase.AnnouncementText}");
                 
-                Plugin.Logger.LogInfo($"[Phase System]");
-                Plugin.Logger.LogInfo($"  - Current Phase: {currentPhase.PhaseNumber}");
-                Plugin.Logger.LogInfo($"  - Threshold: {currentPhase.HealthThreshold}%");
-                Plugin.Logger.LogInfo($"  - Announcement: {currentPhase.AnnouncementText}");
-                Plugin.Logger.LogInfo($"  - Last Announced: {bossState.LastAnnouncedPhase}");
+                Plugin.BLogger.Info(LogCategory.Debug, $"[Phase System]");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - Current Phase: {currentPhase.PhaseNumber}");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - Threshold: {currentPhase.HealthThreshold}%");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - Announcement: {currentPhase.AnnouncementText}");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - Last Announced: {bossState.LastAnnouncedPhase}");
                 
                 // Test 6: Spawn config
                 var spawnConfig = BossComponentsHelper.GetSpawnConfig(model);
-                Plugin.Logger.LogInfo($"[Spawn Config]");
-                Plugin.Logger.LogInfo($"  - PrefabGUID: {spawnConfig.PrefabGUID}");
-                Plugin.Logger.LogInfo($"  - Position: ({spawnConfig.Position.x:F1}, {spawnConfig.Position.y:F1}, {spawnConfig.Position.z:F1})");
-                Plugin.Logger.LogInfo($"  - Level: {spawnConfig.Level}");
-                Plugin.Logger.LogInfo($"  - Health Multiplier: {spawnConfig.HealthMultiplier}");
-                Plugin.Logger.LogInfo($"  - Damage Multiplier: {spawnConfig.DamageMultiplier}");
+                Plugin.BLogger.Info(LogCategory.Debug, $"[Spawn Config]");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - PrefabGUID: {spawnConfig.PrefabGUID}");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - Position: ({spawnConfig.Position.x:F1}, {spawnConfig.Position.y:F1}, {spawnConfig.Position.z:F1})");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - Level: {spawnConfig.Level}");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - Health Multiplier: {spawnConfig.HealthMultiplier}");
+                Plugin.BLogger.Info(LogCategory.Debug, $"  - Damage Multiplier: {spawnConfig.DamageMultiplier}");
                 
-                Plugin.Logger.LogInfo("================== Test Complete ==================");
+                Plugin.BLogger.Info(LogCategory.Debug, "================== Test Complete ==================");
             }
             catch (Exception e)
             {
                 ctx.Reply($"❌ Test failed: {e.Message}");
-                Plugin.Logger.LogError($"Component test error: {e.Message}");
-                Plugin.Logger.LogError($"Stack trace: {e.StackTrace}");
+                Plugin.BLogger.Error(LogCategory.Debug, $"Component test error: {e.Message}");
+                Plugin.BLogger.Error(LogCategory.Debug, $"Stack trace: {e.StackTrace}");
             }
         }
         
@@ -574,7 +574,7 @@ namespace BloodyBoss.Command
                     return;
                 }
                 
-                Plugin.Logger.LogInfo("================== Phase Transition Test ==================");
+                Plugin.BLogger.Info(LogCategory.Debug, "================== Phase Transition Test ==================");
                 
                 // Get phases for health percentage
                 var phase = BossComponents.Phases.GetCurrentPhase(healthPercent);
@@ -592,13 +592,13 @@ namespace BloodyBoss.Command
                     ctx.Reply($"{marker} Phase {p.PhaseNumber}: ≤{p.HealthThreshold}%");
                 }
                 
-                Plugin.Logger.LogInfo($"Health: {healthPercent}% → Phase {phase.PhaseNumber}");
-                Plugin.Logger.LogInfo("================== Test Complete ==================");
+                Plugin.BLogger.Info(LogCategory.Debug, $"Health: {healthPercent}% → Phase {phase.PhaseNumber}");
+                Plugin.BLogger.Info(LogCategory.Debug, "================== Test Complete ==================");
             }
             catch (Exception e)
             {
                 ctx.Reply($"❌ Test failed: {e.Message}");
-                Plugin.Logger.LogError($"Phase test error: {e.Message}");
+                Plugin.BLogger.Error(LogCategory.Debug, $"Phase test error: {e.Message}");
             }
         }
         
@@ -607,7 +607,7 @@ namespace BloodyBoss.Command
         {
             try
             {
-                Plugin.Logger.LogInfo("================== BossEntityFactory Test ==================");
+                Plugin.BLogger.Info(LogCategory.Debug, "================== BossEntityFactory Test ==================");
                 
                 // Get boss model
                 if (!Database.GetBoss(bossName, out BossEncounterModel model))
@@ -630,12 +630,12 @@ namespace BloodyBoss.Command
                 );
                 
                 ctx.Reply($"├─ Spawn position: ({spawnPos.x:F1}, {spawnPos.y:F1}, {spawnPos.z:F1})");
-                Plugin.Logger.LogInfo($"Spawning boss at: ({spawnPos.x:F1}, {spawnPos.y:F1}, {spawnPos.z:F1})");
+                Plugin.BLogger.Info(LogCategory.Debug, $"Spawning boss at: ({spawnPos.x:F1}, {spawnPos.y:F1}, {spawnPos.z:F1})");
                 
                 // Create boss using factory
                 BossEntityFactory.CreateBoss(model, ctx.Event.SenderCharacterEntity, spawnPos, (Entity bossEntity) =>
                 {
-                    Plugin.Logger.LogInfo($"[Factory] Boss entity created: {bossEntity.Index}:{bossEntity.Version}");
+                    Plugin.BLogger.Info(LogCategory.Debug, $"[Factory] Boss entity created: {bossEntity.Index}:{bossEntity.Version}");
                     
                     // Store entity reference for delayed verification
                     var entityIndex = bossEntity.Index;
@@ -651,7 +651,7 @@ namespace BloodyBoss.Command
                         var entityManager = Plugin.SystemsCore.EntityManager;
                         if (!entityManager.Exists(entity))
                         {
-                            Plugin.Logger.LogError("[Factory] Entity no longer exists!");
+                            Plugin.BLogger.Error(LogCategory.Debug, "[Factory] Entity no longer exists!");
                             return;
                         }
                         
@@ -660,55 +660,55 @@ namespace BloodyBoss.Command
                         {
                             var nameable = entityManager.GetComponentData<NameableInteractable>(entity);
                             var name = nameable.Name.Value;
-                            Plugin.Logger.LogInfo($"[Factory] Entity name: '{name}'");
+                            Plugin.BLogger.Info(LogCategory.Debug, $"[Factory] Entity name: '{name}'");
                             
                             if (name.EndsWith("bb") || name.EndsWith("ibb"))
                             {
-                                Plugin.Logger.LogInfo($"[Factory] Boss verified!");
-                                Plugin.Logger.LogInfo($"  - Name: {model.name}");
+                                Plugin.BLogger.Info(LogCategory.Debug, $"[Factory] Boss verified!");
+                                Plugin.BLogger.Info(LogCategory.Debug, $"  - Name: {model.name}");
                                 
                                 // Get health
                                 if (entityManager.HasComponent<Health>(entity))
                                 {
                                     var health = entityManager.GetComponentData<Health>(entity);
                                     var percentage = (health.Value / health.MaxHealth.Value) * 100f;
-                                    Plugin.Logger.LogInfo($"  - Health: {percentage:F1}%");
+                                    Plugin.BLogger.Info(LogCategory.Debug, $"  - Health: {percentage:F1}%");
                                 }
                                 
                                 // Get level
                                 if (entityManager.HasComponent<UnitLevel>(entity))
                                 {
                                     var unitLevel = entityManager.GetComponentData<UnitLevel>(entity);
-                                    Plugin.Logger.LogInfo($"  - Level: {unitLevel.Level._Value}");
+                                    Plugin.BLogger.Info(LogCategory.Debug, $"  - Level: {unitLevel.Level._Value}");
                                 }
                                 
                                 // Get position
                                 if (entityManager.HasComponent<LocalToWorld>(entity))
                                 {
                                     var ltw = entityManager.GetComponentData<LocalToWorld>(entity);
-                                    Plugin.Logger.LogInfo($"  - Position: ({ltw.Position.x:F1}, {ltw.Position.y:F1}, {ltw.Position.z:F1})");
+                                    Plugin.BLogger.Info(LogCategory.Debug, $"  - Position: ({ltw.Position.x:F1}, {ltw.Position.y:F1}, {ltw.Position.z:F1})");
                                 }
                             }
                             else
                             {
-                                Plugin.Logger.LogError($"[Factory] Entity name doesn't match boss pattern: '{name}'");
+                                Plugin.BLogger.Error(LogCategory.Debug, $"[Factory] Entity name doesn't match boss pattern: '{name}'");
                             }
                         }
                         else
                         {
-                            Plugin.Logger.LogError("[Factory] Entity has no NameableInteractable component!");
+                            Plugin.BLogger.Error(LogCategory.Debug, "[Factory] Entity has no NameableInteractable component!");
                         }
                     }, 5, 1); // Wait 5 frames
                 });
                 
                 ctx.Reply($"└─ ✅ Factory spawn initiated!");
-                Plugin.Logger.LogInfo("================== Test Complete ==================");
+                Plugin.BLogger.Info(LogCategory.Debug, "================== Test Complete ==================");
             }
             catch (Exception e)
             {
                 ctx.Reply($"❌ Factory test failed: {e.Message}");
-                Plugin.Logger.LogError($"Factory test error: {e.Message}");
-                Plugin.Logger.LogError($"Stack trace: {e.StackTrace}");
+                Plugin.BLogger.Error(LogCategory.Debug, $"Factory test error: {e.Message}");
+                Plugin.BLogger.Error(LogCategory.Debug, $"Stack trace: {e.StackTrace}");
             }
         }
         
@@ -748,7 +748,7 @@ namespace BloodyBoss.Command
             catch (Exception ex)
             {
                 ctx.Reply($"Error testing time: {ex.Message}");
-                Plugin.Logger.LogError($"Time test error: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.Debug, $"Time test error: {ex.Message}");
             }
         }
     }

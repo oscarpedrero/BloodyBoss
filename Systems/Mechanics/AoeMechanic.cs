@@ -103,16 +103,16 @@ namespace BloodyBoss.Systems.Mechanics
                 // Use the same effect as the damage phase but on the boss during casting
                 var bossEffect = GetBossEffectForType(aoeType);
                 BuffCharacter(bossEntity, new PrefabGUID(bossEffect), delay * 0.8f);
-                Plugin.Logger.LogInfo($"Boss is casting {aoeType} AoE ability...");
+                Plugin.BLogger.Info(LogCategory.Mechanic, $"Boss is casting {aoeType} AoE ability...");
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogWarning($"Failed to apply boss casting visual: {ex.Message}");
+                Plugin.BLogger.Warning(LogCategory.Mechanic, $"Failed to apply boss casting visual: {ex.Message}");
                 // Continue execution - don't crash the game
             }
             
             // Schedule the actual damage after delay
-            Plugin.Logger.LogInfo($"Scheduling {aoeType} AoE ability in {delay} seconds...");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Scheduling {aoeType} AoE ability in {delay} seconds...");
             
             // Store positions and parameters to avoid world context issues
             var savedPositions = positions.ToList();
@@ -124,14 +124,14 @@ namespace BloodyBoss.Systems.Mechanics
             {
                 try
                 {
-                    Plugin.Logger.LogInfo($"Executing {savedAoeType} AoE ability now!");
+                    Plugin.BLogger.Info(LogCategory.Mechanic, $"Executing {savedAoeType} AoE ability now!");
                     
                     // Apply visual burst effect to boss
                     if (bossEntity.Exists() && bossEntity.Has<Health>())
                     {
                         var bossEffect = GetBossEffectForType(savedAoeType);
                         BuffCharacter(bossEntity, new PrefabGUID(bossEffect), 1f);
-                        Plugin.Logger.LogInfo($"Applied {savedAoeType} visual effect to boss");
+                        Plugin.BLogger.Info(LogCategory.Mechanic, $"Applied {savedAoeType} visual effect to boss");
                     }
                     
                     // Apply damage safely
@@ -142,11 +142,11 @@ namespace BloodyBoss.Systems.Mechanics
                 }
                 catch (Exception ex)
                 {
-                    Plugin.Logger.LogError($"Error in AoE execution: {ex.Message}");
+                    Plugin.BLogger.Error(LogCategory.Mechanic, $"Error in AoE execution: {ex.Message}");
                 }
             }, delay);
 
-            Plugin.Logger.LogInfo($"AoE mechanic prepared: {aoeType} attack, {damage} damage, delay: {delay}s");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"AoE mechanic prepared: {aoeType} attack, {damage} damage, delay: {delay}s");
         }
 
         private List<float3> CalculateAoePositions(float3 center, float radius, int count, string pattern, bool targetPlayers)
@@ -277,13 +277,13 @@ namespace BloodyBoss.Systems.Mechanics
                         
                         // REMOVED: Don't apply the damage effect during warning phase!
                         
-                        Plugin.Logger.LogDebug($"Applied telegraph warning to player at distance {math.sqrt(distanceSq):F1}");
+                        Plugin.BLogger.Debug(LogCategory.Mechanic, $"Applied telegraph warning to player at distance {math.sqrt(distanceSq):F1}");
                     }
                 }
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Failed to apply telegraph effect: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.Mechanic, $"Failed to apply telegraph effect: {ex.Message}");
             }
         }
 
@@ -291,7 +291,7 @@ namespace BloodyBoss.Systems.Mechanics
         {
             try
             {
-                Plugin.Logger.LogDebug($"Applying {aoeType} damage effect at {position}");
+                Plugin.BLogger.Debug(LogCategory.Mechanic, $"Applying {aoeType} damage effect at {position}");
                 
                 // Apply initial damage and visual effects to affected players
                 ApplyAreaDamageWithEffects(position, radius, damage, aoeType);
@@ -311,7 +311,7 @@ namespace BloodyBoss.Systems.Mechanics
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Failed to apply damage effect: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.Mechanic, $"Failed to apply damage effect: {ex.Message}");
             }
         }
         
@@ -350,18 +350,18 @@ namespace BloodyBoss.Systems.Mechanics
                         BuffCharacter(user.Character.Entity, new PrefabGUID(effectGuid), 1f);
                         
                         hitCount++;
-                        Plugin.Logger.LogDebug($"Dealt {finalDamage:F1} {aoeType} damage to player at distance {distance:F1}");
+                        Plugin.BLogger.Debug(LogCategory.Mechanic, $"Dealt {finalDamage:F1} {aoeType} damage to player at distance {distance:F1}");
                     }
                 }
                 
                 if (hitCount > 0)
                 {
-                    Plugin.Logger.LogInfo($"AoE hit {hitCount} players for {damage} damage");
+                    Plugin.BLogger.Info(LogCategory.Mechanic, $"AoE hit {hitCount} players for {damage} damage");
                 }
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Failed to apply area damage: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.Mechanic, $"Failed to apply area damage: {ex.Message}");
             }
         }
         
@@ -392,18 +392,18 @@ namespace BloodyBoss.Systems.Mechanics
                         DealDamage(user.Character.Entity, finalDamage, aoeType);
                         hitCount++;
                         
-                        Plugin.Logger.LogDebug($"Dealt {finalDamage:F1} {aoeType} damage to player at distance {distance:F1}");
+                        Plugin.BLogger.Debug(LogCategory.Mechanic, $"Dealt {finalDamage:F1} {aoeType} damage to player at distance {distance:F1}");
                     }
                 }
                 
                 if (hitCount > 0)
                 {
-                    Plugin.Logger.LogInfo($"AoE hit {hitCount} players for {damage} damage");
+                    Plugin.BLogger.Info(LogCategory.Mechanic, $"AoE hit {hitCount} players for {damage} damage");
                 }
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Failed to apply area damage: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.Mechanic, $"Failed to apply area damage: {ex.Message}");
             }
         }
         
@@ -420,11 +420,11 @@ namespace BloodyBoss.Systems.Mechanics
                 target.Write(health);
                 
                 // Log damage type for debugging
-                Plugin.Logger.LogDebug($"Applied {damage} {damageType} damage to entity");
+                Plugin.BLogger.Debug(LogCategory.Mechanic, $"Applied {damage} {damageType} damage to entity");
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Failed to apply damage: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.Mechanic, $"Failed to apply damage: {ex.Message}");
             }
         }
 
@@ -500,7 +500,7 @@ namespace BloodyBoss.Systems.Mechanics
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogWarning($"Failed to apply buff: {ex.Message}");
+                Plugin.BLogger.Warning(LogCategory.Mechanic, $"Failed to apply buff: {ex.Message}");
             }
         }
         
@@ -515,7 +515,7 @@ namespace BloodyBoss.Systems.Mechanics
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogWarning($"Failed to remove buff: {ex.Message}");
+                Plugin.BLogger.Warning(LogCategory.Mechanic, $"Failed to remove buff: {ex.Message}");
             }
         }
         
@@ -552,7 +552,7 @@ namespace BloodyBoss.Systems.Mechanics
                 if (bossEntity.Exists() && bossEntity.Has<Health>())
                 {
                     BuffCharacter(bossEntity, new PrefabGUID(bossEffect), 1f);
-                    Plugin.Logger.LogInfo($"Applied {aoeType} visual effect to boss");
+                    Plugin.BLogger.Info(LogCategory.Mechanic, $"Applied {aoeType} visual effect to boss");
                 }
                 
                 // Skip VBlood cast animations for now - they cause world context issues
@@ -560,7 +560,7 @@ namespace BloodyBoss.Systems.Mechanics
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Failed to create visual burst: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.Mechanic, $"Failed to create visual burst: {ex.Message}");
             }
         }
         
@@ -614,13 +614,13 @@ namespace BloodyBoss.Systems.Mechanics
                     SpawnSystem.SpawnUnitWithCallback(source, new PrefabGUID(1520432556), // Floating eye
                         new float2(pos.x, pos.z), 0.3f + (i * 0.1f), (Entity effect) =>
                     {
-                        Plugin.Logger.LogDebug($"Created {aoeType} trail effect");
+                        Plugin.BLogger.Debug(LogCategory.Mechanic, $"Created {aoeType} trail effect");
                     });
                 }
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogWarning($"Failed to spawn projectile: {ex.Message}");
+                Plugin.BLogger.Warning(LogCategory.Mechanic, $"Failed to spawn projectile: {ex.Message}");
             }
         }
         

@@ -155,13 +155,13 @@ namespace BloodyBoss.Systems
             if (result.IsCompatible)
             {
                 // Agregar información sobre la habilidad
-                Plugin.Logger.LogInfo($"Ability transfer: {sourceAbility.Category} ability from {sourceInfo.Name} to {bossInfo.Name}");
+                Plugin.BLogger.Info(LogCategory.System, $"Ability transfer: {sourceAbility.Category} ability from {sourceInfo.Name} to {bossInfo.Name}");
                 if (sourceAbility.CastTime > 0)
-                    Plugin.Logger.LogInfo($"  Cast time: {sourceAbility.CastTime}s (post: {sourceAbility.PostCastTime}s)");
+                    Plugin.BLogger.Info(LogCategory.System, $"  Cast time: {sourceAbility.CastTime}s (post: {sourceAbility.PostCastTime}s)");
                 if (sourceAbility.IsCombo)
-                    Plugin.Logger.LogInfo($"  Combo: {sourceAbility.ComboLength} hits");
+                    Plugin.BLogger.Info(LogCategory.System, $"  Combo: {sourceAbility.ComboLength} hits");
                 if (sourceAbility.SpawnedPrefabs.Count > 0)
-                    Plugin.Logger.LogInfo($"  Spawns: {string.Join(", ", sourceAbility.SpawnedPrefabs.Select(s => s.SpawnName))}");
+                    Plugin.BLogger.Info(LogCategory.System, $"  Spawns: {string.Join(", ", sourceAbility.SpawnedPrefabs.Select(s => s.SpawnName))}");
             }
 
             return result;

@@ -39,7 +39,7 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref announcementRef);
             }
 
-            Plugin.Logger.LogInfo($"Knockback mechanic executed: Force {force} in {radius} radius");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Knockback mechanic executed: Force {force} in {radius} radius");
         }
 
         private void KnockbackPlayersFromPosition(float3 center, float radius, float force, float upwardForce, float damage)
@@ -91,7 +91,7 @@ namespace BloodyBoss.Systems.Mechanics
                 }
             }
             
-            Plugin.Logger.LogInfo($"Knocked back {knockedCount} players");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Knocked back {knockedCount} players");
         }
 
         private void BuffCharacter(Entity character, PrefabGUID buffGuid)

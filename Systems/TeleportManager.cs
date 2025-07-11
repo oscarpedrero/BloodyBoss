@@ -58,7 +58,7 @@ namespace BloodyBoss.Systems
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Error checking teleport cost: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.System, $"Error checking teleport cost: {ex.Message}");
                 costInfo = "Error checking teleport cost";
                 return false;
             }
@@ -79,7 +79,7 @@ namespace BloodyBoss.Systems
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Error consuming teleport cost: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.System, $"Error consuming teleport cost: {ex.Message}");
                 return false;
             }
         }

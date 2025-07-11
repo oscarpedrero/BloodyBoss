@@ -46,7 +46,7 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref announcementRef);
             }
 
-            Plugin.Logger.LogInfo($"Slow mechanic executed in radius {radius}m");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Slow mechanic executed in radius {radius}m");
         }
 
         private void ApplySlowWithMinPlayers(Entity bossEntity, float3 bossPos, float radius,
@@ -82,7 +82,7 @@ namespace BloodyBoss.Systems.Mechanics
             if (minPlayersRequired > 0 && playersInRange.Count < minPlayersRequired)
             {
                 // Not enough players in range! Global punishment!
-                Plugin.Logger.LogInfo($"Only {playersInRange.Count}/{minPlayersRequired} players in range! GLOBAL SLOW ACTIVATED!");
+                Plugin.BLogger.Info(LogCategory.Mechanic, $"Only {playersInRange.Count}/{minPlayersRequired} players in range! GLOBAL SLOW ACTIVATED!");
                 
                 // Send warning to all players
                 var warningMsg = $"⚠️ NOT ENOUGH PLAYERS IN RANGE! {playersInRange.Count}/{minPlayersRequired} - GLOBAL SLOW ACTIVE!";
@@ -95,19 +95,19 @@ namespace BloodyBoss.Systems.Mechanics
                     ApplySlowToPlayer(user.Character.Entity);
                 }
                 
-                Plugin.Logger.LogInfo($"GLOBAL SLOW: Slowed {allPlayersInGlobalRange.Count} players!");
+                Plugin.BLogger.Info(LogCategory.Mechanic, $"GLOBAL SLOW: Slowed {allPlayersInGlobalRange.Count} players!");
             }
             else
             {
                 // Normal slow from players in range
-                Plugin.Logger.LogInfo($"Normal slow: {playersInRange.Count} players in range");
+                Plugin.BLogger.Info(LogCategory.Mechanic, $"Normal slow: {playersInRange.Count} players in range");
                 
                 foreach (var user in playersInRange)
                 {
                     ApplySlowToPlayer(user.Character.Entity);
                 }
                 
-                Plugin.Logger.LogInfo($"Slowed {playersInRange.Count} players");
+                Plugin.BLogger.Info(LogCategory.Mechanic, $"Slowed {playersInRange.Count} players");
             }
         }
 
@@ -121,7 +121,7 @@ namespace BloodyBoss.Systems.Mechanics
             var energyDrainVisual = new PrefabGUID(178387762); // AB_Blood_VampiricCurse_Buff_Lesser
             BuffCharacter(target, energyDrainVisual);
             
-            Plugin.Logger.LogDebug($"Applied slow to player");
+            Plugin.BLogger.Debug(LogCategory.Mechanic, $"Applied slow to player");
         }
 
         private void BuffCharacter(Entity character, PrefabGUID buffGuid, float duration = 0f)
@@ -153,7 +153,7 @@ namespace BloodyBoss.Systems.Mechanics
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogWarning($"Failed to apply buff: {ex.Message}");
+                Plugin.BLogger.Warning(LogCategory.Mechanic, $"Failed to apply buff: {ex.Message}");
             }
         }
         
@@ -168,7 +168,7 @@ namespace BloodyBoss.Systems.Mechanics
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogWarning($"Failed to remove buff: {ex.Message}");
+                Plugin.BLogger.Warning(LogCategory.Mechanic, $"Failed to remove buff: {ex.Message}");
             }
         }
 

@@ -51,7 +51,7 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref announcementRef);
             }
 
-            Plugin.Logger.LogInfo($"Dispel mechanic executed: {dispelType} dispel on {target}");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Dispel mechanic executed: {dispelType} dispel on {target}");
         }
 
         private void DispelFromPlayers(float3 center, float radius, string dispelType, int maxDispels)
@@ -77,7 +77,7 @@ namespace BloodyBoss.Systems.Mechanics
                 }
             }
             
-            Plugin.Logger.LogInfo($"Dispelled {totalDispelled} buffs from players");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Dispelled {totalDispelled} buffs from players");
         }
 
         private int DispelBuffs(Entity target, string dispelType, int maxDispels)
@@ -144,7 +144,7 @@ namespace BloodyBoss.Systems.Mechanics
             var cleanseVisual = new PrefabGUID(-1044788755); // Holy cleanse effect
             BuffNPC(bossEntity, cleanseVisual);
             
-            Plugin.Logger.LogDebug("Boss cleansed of debuffs");
+            Plugin.BLogger.Debug(LogCategory.Mechanic, "Boss cleansed of debuffs");
         }
 
         private void BuffNPC(Entity entity, PrefabGUID buffGuid)

@@ -99,7 +99,7 @@ namespace BloodyBoss.Systems
         /// </summary>
         private static void ProcessCorrelatedDamage(Entity target, DamageRecord record)
         {
-            Plugin.Logger.LogInfo($"[DamageCorrelation] Correlated damage - Target: {target.Index}, Damage: {record.Damage:F1}, Attacker: {record.Attacker.Index}");
+            Plugin.BLogger.Info(LogCategory.Damage, $"[DamageCorrelation] Correlated damage - Target: {target.Index}, Damage: {record.Damage:F1}, Attacker: {record.Attacker.Index}");
             
             // Remove from cache after processing
             _damageCache.Remove(target);
@@ -131,7 +131,7 @@ namespace BloodyBoss.Systems
                     // Log incomplete records for debugging
                     if (!kvp.Value.HasDamageInfo || !kvp.Value.HasAttackerInfo)
                     {
-                        Plugin.Logger.LogDebug($"[DamageCorrelation] Expired incomplete record - Target: {kvp.Key.Index}, HasDamage: {kvp.Value.HasDamageInfo}, HasAttacker: {kvp.Value.HasAttackerInfo}");
+                        Plugin.BLogger.Debug(LogCategory.Damage, $"[DamageCorrelation] Expired incomplete record - Target: {kvp.Key.Index}, HasDamage: {kvp.Value.HasDamageInfo}, HasAttacker: {kvp.Value.HasAttackerInfo}");
                     }
                 }
             }
@@ -143,7 +143,7 @@ namespace BloodyBoss.Systems
             
             if (keysToRemove.Count > 0)
             {
-                Plugin.Logger.LogDebug($"[DamageCorrelation] Cleaned up {keysToRemove.Count} expired records");
+                Plugin.BLogger.Debug(LogCategory.Damage, $"[DamageCorrelation] Cleaned up {keysToRemove.Count} expired records");
             }
         }
         
@@ -165,7 +165,7 @@ namespace BloodyBoss.Systems
                 _damageCache.Remove(sortedEntries[i].Key);
             }
             
-            Plugin.Logger.LogWarning($"[DamageCorrelation] Cache size limit exceeded. Removed {entriesToRemove} oldest entries. Current size: {_damageCache.Count}");
+            Plugin.BLogger.Warning(LogCategory.Damage, $"[DamageCorrelation] Cache size limit exceeded. Removed {entriesToRemove} oldest entries. Current size: {_damageCache.Count}");
         }
         
         /// <summary>

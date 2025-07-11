@@ -48,7 +48,7 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref announcementRef);
             }
 
-            Plugin.Logger.LogInfo($"Clone mechanic executed: {count} clones with {healthPercent}% HP");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Clone mechanic executed: {count} clones with {healthPercent}% HP");
         }
 
         private List<float2> CalculateClonePositions(float3 center, int count)
@@ -102,7 +102,7 @@ namespace BloodyBoss.Systems.Mechanics
                     cloneEntity.Write(lifeTime);
                 }
                 
-                Plugin.Logger.LogInfo($"Clone spawned at {position} with {healthPercent}% HP");
+                Plugin.BLogger.Info(LogCategory.Mechanic, $"Clone spawned at {position} with {healthPercent}% HP");
             });
         }
 

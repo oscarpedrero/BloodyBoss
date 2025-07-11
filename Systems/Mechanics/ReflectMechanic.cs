@@ -36,7 +36,7 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref announcementRef);
             }
 
-            Plugin.Logger.LogInfo($"Reflect mechanic executed: {reflectPercent}% {reflectType} damage reflection for {duration}s");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Reflect mechanic executed: {reflectPercent}% {reflectType} damage reflection for {duration}s");
         }
 
         private void ApplyReflect(Entity bossEntity, string reflectType, float percent, float duration, int maxReflects, string visualEffect)
@@ -73,7 +73,7 @@ namespace BloodyBoss.Systems.Mechanics
                 BuffNPC(bossEntity, damageReduction);
             }
             
-            Plugin.Logger.LogDebug($"Applied {reflectType} reflect at {percent}% for {duration}s");
+            Plugin.BLogger.Debug(LogCategory.Mechanic, $"Applied {reflectType} reflect at {percent}% for {duration}s");
         }
 
         private void ApplyVisualEffect(Entity bossEntity, string effectName)

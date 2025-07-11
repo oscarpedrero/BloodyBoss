@@ -30,14 +30,14 @@ namespace BloodyBoss.Hooks
             var _entityManager = __instance.EntityManager;
             var _prefabCollectionSystem = Plugin.SystemsCore.PrefabCollectionSystem;
             
-            Plugin.Logger.LogDebug($"[DAMAGE-DETECTION] Execute");
+            Plugin.BLogger.Debug(LogCategory.Hook, $"[DAMAGE-DETECTION] Execute");
 
             // Usar _Query para acceder a StatChangeEvent
             var statChangeEvents = __instance._Query.ToComponentDataArray<StatChangeEvent>(Allocator.Temp);
             
             if (statChangeEvents.Length > 0)
             {
-                Plugin.Logger.LogDebug($"[DAMAGE-DETECTION] Found {statChangeEvents.Length} stat change events");
+                Plugin.BLogger.Debug(LogCategory.Hook, $"[DAMAGE-DETECTION] Found {statChangeEvents.Length} stat change events");
             }
             
             foreach (var statChangeEvent in statChangeEvents)
@@ -49,7 +49,7 @@ namespace BloodyBoss.Hooks
                 var target = statChangeEvent.Entity;
                 var damage = System.Math.Abs(statChangeEvent.Change);
                 
-                Plugin.Logger.LogDebug($"[DAMAGE-DETECTION] Health change - Target: {target.Index}, Damage: {damage:F1}");
+                Plugin.BLogger.Debug(LogCategory.Hook, $"[DAMAGE-DETECTION] Health change - Target: {target.Index}, Damage: {damage:F1}");
                 
                 // Record damage for correlation
                 DamageCorrelationSystem.RecordDamage(target, damage);
@@ -61,7 +61,7 @@ namespace BloodyBoss.Hooks
                 
                 if (!_prefabCollectionSystem._PrefabDataLookup.TryGetValue(targetPrefab, out var prefabData))
                 {
-                    Plugin.Logger.LogDebug($"[DAMAGE-DETECTION] PrefabGUID {targetPrefab.GuidHash} not found in lookup");
+                    Plugin.BLogger.Debug(LogCategory.Hook, $"[DAMAGE-DETECTION] PrefabGUID {targetPrefab.GuidHash} not found in lookup");
                     continue;
                 }
                 

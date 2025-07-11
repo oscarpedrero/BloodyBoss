@@ -72,7 +72,7 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(entityManager, ref announcementRef);
             }
             
-            Plugin.Logger.LogInfo($"Teleport mechanic executed: Type={teleportType}, Range={range}");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Teleport mechanic executed: Type={teleportType}, Range={range}");
         }
 
         private float3 GetRandomPosition(float3 center, float range)

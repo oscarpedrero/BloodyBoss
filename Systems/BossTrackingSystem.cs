@@ -48,7 +48,7 @@ namespace BloodyBoss.Systems
         {
             if (_activeBosses.ContainsKey(entity))
             {
-                Plugin.Logger.LogWarning($"[BossTracking] Boss {model.name} already registered, updating");
+                Plugin.BLogger.Debug(LogCategory.Boss, $"[BossTracking] Boss {model.name} already registered, updating");
             }
             
             var tracked = new TrackedBoss
@@ -64,7 +64,7 @@ namespace BloodyBoss.Systems
             _activeBosses[entity] = tracked;
             _bossesByName[model.name] = entity;
             
-            Plugin.Logger.LogInfo($"[BossTracking] Registered boss {model.name} for optimized tracking. Active bosses: {_activeBosses.Count}");
+            Plugin.BLogger.Debug(LogCategory.Boss, $"[BossTracking] Registered boss {model.name} for optimized tracking. Active bosses: {_activeBosses.Count}");
         }
         
         /// <summary>
@@ -76,7 +76,7 @@ namespace BloodyBoss.Systems
             {
                 _bossesByName.Remove(tracked.Model.name);
                 _activeBosses.Remove(entity);
-                Plugin.Logger.LogInfo($"[BossTracking] Unregistered boss {tracked.Model.name}. Active bosses: {_activeBosses.Count}");
+                Plugin.BLogger.Info(LogCategory.Boss, $"[BossTracking] Unregistered boss {tracked.Model.name}. Active bosses: {_activeBosses.Count}");
             }
         }
         
@@ -102,7 +102,7 @@ namespace BloodyBoss.Systems
                 }
                 catch (Exception ex)
                 {
-                    Plugin.Logger.LogError($"[BossTracking] Error in UpdateActiveBosses: {ex.Message}");
+                    Plugin.BLogger.Error(LogCategory.Boss, $"[BossTracking] Error in UpdateActiveBosses: {ex.Message}");
                 }
             });
         }
@@ -121,7 +121,7 @@ namespace BloodyBoss.Systems
                 // Validate entity still exists
                 if (!entityManager.Exists(entity))
                 {
-                    Plugin.Logger.LogInfo($"[BossTracking] Boss {tracked.Model.name} entity no longer exists (despawned by LifeTime)");
+                    Plugin.BLogger.Info(LogCategory.Boss, $"[BossTracking] Boss {tracked.Model.name} entity no longer exists (despawned by LifeTime)");
                     entitiesToRemove.Add(entity);
                     
                     // Perform cleanup since entity was despawned (not killed)
@@ -198,7 +198,7 @@ namespace BloodyBoss.Systems
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"[BossTracking] Error checking mechanics: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.Boss, $"[BossTracking] Error checking mechanics: {ex.Message}");
             }
         }
         
@@ -217,7 +217,7 @@ namespace BloodyBoss.Systems
         {
             _activeBosses.Clear();
             _bossesByName.Clear();
-            Plugin.Logger.LogInfo("[BossTracking] Cleared all tracked bosses");
+            Plugin.BLogger.Info(LogCategory.Boss, "[BossTracking] Cleared all tracked bosses");
         }
     }
 }

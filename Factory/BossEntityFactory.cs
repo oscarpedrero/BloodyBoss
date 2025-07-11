@@ -116,7 +116,7 @@ namespace BloodyBoss.Factory
             model.bossSpawn = true;
             model.LastSpawn = DateTime.Now;
             
-            Plugin.Logger.LogInfo($"Boss {model.name}: Entity configured successfully");
+            Plugin.BLogger.Info(LogCategory.Boss, $"Boss {model.name}: Entity configured successfully");
         }
         
         /// <summary>
@@ -181,7 +181,7 @@ namespace BloodyBoss.Factory
                 bossEntity.Write(unitStats);
             }
             
-            Plugin.Logger.LogInfo($"Boss {model.name}: Health x{healthMultiplier:F2}, Damage x{damageMultiplier:F2}");
+            Plugin.BLogger.Info(LogCategory.Boss, $"Boss {model.name}: Health x{healthMultiplier:F2}, Damage x{damageMultiplier:F2}");
         }
         
         /// <summary>
@@ -276,7 +276,7 @@ namespace BloodyBoss.Factory
                 if (Plugin.SystemsCore.EntityManager.Exists(bossEntity) && Plugin.SystemsCore.EntityManager.HasComponent<LocalToWorld>(bossEntity))
                 {
                     var ltw = Plugin.SystemsCore.EntityManager.GetComponentData<LocalToWorld>(bossEntity);
-                    Plugin.Logger.LogInfo($"Boss {model.name}: Final position ({ltw.Position.x:F2}, {ltw.Position.y:F2}, {ltw.Position.z:F2})");
+                    Plugin.BLogger.Info(LogCategory.Boss, $"Boss {model.name}: Final position ({ltw.Position.x:F2}, {ltw.Position.y:F2}, {ltw.Position.z:F2})");
                 }
             };
             ActionScheduler.RunActionOnceAfterDelay(actionPosition, 0.1);
@@ -296,12 +296,12 @@ namespace BloodyBoss.Factory
                 {
                     var dropTableBuffer = boss.ReadBuffer<DropTableBuffer>();
                     dropTableBuffer.Clear();
-                    Plugin.Logger.LogInfo("Boss drop table cleared");
+                    Plugin.BLogger.Info(LogCategory.Boss, "Boss drop table cleared");
                 }
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Failed to clear drop table: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.Boss, $"Failed to clear drop table: {ex.Message}");
             }
         }
         
@@ -334,12 +334,12 @@ namespace BloodyBoss.Factory
                     nameable.Name = new FixedString64Bytes(model.nameHash + "ibb");
                     e.Write(nameable);
                     
-                    Plugin.Logger.LogInfo($"Boss {model.name}: Map icon added");
+                    Plugin.BLogger.Info(LogCategory.Boss, $"Boss {model.name}: Map icon added");
                 });
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Failed to add map icon: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.Boss, $"Failed to add map icon: {ex.Message}");
             }
         }
         

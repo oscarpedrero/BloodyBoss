@@ -36,6 +36,7 @@ That's it! Your boss will spawn automatically at 8 PM server time.
 
 ### Reference Guides
 
+- **[Configuration Guide](CONFIGURATION.md)** - Complete BloodyBoss.cfg documentation
 - **[Boss Mechanics List](BOSS-MECHANICS.md)** - All available mechanics explained
 - **[VBlood Abilities Database](VBLOOD-ABILITIES.md)** - Complete ability reference
 - **[Boss Abilities Guide](BOSS-ABILITIES.md)** - Understanding ability slots

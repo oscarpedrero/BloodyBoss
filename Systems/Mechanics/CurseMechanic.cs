@@ -40,7 +40,7 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref announcementRef);
             }
 
-            Plugin.Logger.LogInfo($"Curse mechanic executed: {curseType} curse for {duration}s");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Curse mechanic executed: {curseType} curse for {duration}s");
         }
 
         private void ApplyCurse(Entity bossEntity, string curseType, string target, float duration, bool spreadable, float spreadRadius, int stackLimit)
@@ -133,7 +133,7 @@ namespace BloodyBoss.Systems.Mechanics
                 BuffCharacter(target, contagionBuff);
             }
             
-            Plugin.Logger.LogDebug($"Applied {curseType} curse for {duration}s (spreadable: {spreadable})");
+            Plugin.BLogger.Debug(LogCategory.Mechanic, $"Applied {curseType} curse for {duration}s (spreadable: {spreadable})");
         }
 
         private void BuffCharacter(Entity character, PrefabGUID buffGuid)

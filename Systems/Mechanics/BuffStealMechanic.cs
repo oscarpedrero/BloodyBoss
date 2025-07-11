@@ -40,7 +40,7 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref announcementRef);
             }
 
-            Plugin.Logger.LogInfo($"Buff steal mechanic executed: Stealing up to {maxSteals} buffs");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Buff steal mechanic executed: Stealing up to {maxSteals} buffs");
         }
 
         private void StealBuffsFromPlayers(Entity bossEntity, string targetType, int maxSteals, bool stealFromAll, bool applyDebuff)
@@ -96,11 +96,11 @@ namespace BloodyBoss.Systems.Mechanics
                         BuffCharacter(user.Character.Entity, weaknessBuff);
                     }
                     
-                    Plugin.Logger.LogDebug($"Stole {buffsToSteal.Count} buffs from player");
+                    Plugin.BLogger.Debug(LogCategory.Mechanic, $"Stole {buffsToSteal.Count} buffs from player");
                 }
             }
             
-            Plugin.Logger.LogInfo($"Total buffs stolen: {stolenCount}");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Total buffs stolen: {stolenCount}");
         }
 
         private bool IsPositiveBuff(PrefabGUID buffGuid)

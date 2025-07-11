@@ -46,7 +46,7 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref announcementRef);
             }
 
-            Plugin.Logger.LogInfo($"Root mechanic executed: {targets.Count} targets rooted for {duration}s");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Root mechanic executed: {targets.Count} targets rooted for {duration}s");
         }
 
         private List<Entity> SelectTargets(float3 bossPos, string targetType, int maxTargets)
@@ -123,7 +123,7 @@ namespace BloodyBoss.Systems.Mechanics
                 BuffCharacter(target, dotBuff);
             }
             
-            Plugin.Logger.LogDebug($"Applied {visualEffect} root to entity for {duration}s");
+            Plugin.BLogger.Debug(LogCategory.Mechanic, $"Applied {visualEffect} root to entity for {duration}s");
         }
 
         private void BuffCharacter(Entity character, PrefabGUID buffGuid)

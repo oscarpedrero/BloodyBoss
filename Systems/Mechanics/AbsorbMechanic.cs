@@ -77,7 +77,7 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref announcementRef);
             }
 
-            Plugin.Logger.LogInfo($"Absorb mechanic executed: {absorbType} absorption of {amount}");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Absorb mechanic executed: {absorbType} absorption of {amount}");
         }
 
         private void PerformInstantAbsorb(Entity bossEntity, float3 bossPos, string absorbType, float amount, float radius,
@@ -120,7 +120,7 @@ namespace BloodyBoss.Systems.Mechanics
             if (minPlayersRequired > 0 && playersInRange.Count < minPlayersRequired)
             {
                 // Not enough players in range! Global punishment!
-                Plugin.Logger.LogInfo($"Only {playersInRange.Count}/{minPlayersRequired} players in range! GLOBAL DRAIN ACTIVATED!");
+                Plugin.BLogger.Info(LogCategory.Mechanic, $"Only {playersInRange.Count}/{minPlayersRequired} players in range! GLOBAL DRAIN ACTIVATED!");
                 
                 // Send warning to all players
                 var warningMsg = $"⚠️ NOT ENOUGH PLAYERS IN RANGE! {playersInRange.Count}/{minPlayersRequired} - GLOBAL DRAIN ACTIVE!";
@@ -140,12 +140,12 @@ namespace BloodyBoss.Systems.Mechanics
                     BuffCharacter(user.Character.Entity, new PrefabGUID(drainEffect), 3f);
                 }
                 
-                Plugin.Logger.LogInfo($"GLOBAL DRAIN: Absorbed {totalAbsorbed} {absorbType} from {allPlayersInGlobalRange.Count} players!");
+                Plugin.BLogger.Info(LogCategory.Mechanic, $"GLOBAL DRAIN: Absorbed {totalAbsorbed} {absorbType} from {allPlayersInGlobalRange.Count} players!");
             }
             else
             {
                 // Normal absorption from players in range
-                Plugin.Logger.LogInfo($"Normal absorption: {playersInRange.Count} players in range");
+                Plugin.BLogger.Info(LogCategory.Mechanic, $"Normal absorption: {playersInRange.Count} players in range");
                 
                 foreach (var user in playersInRange)
                 {
@@ -162,7 +162,7 @@ namespace BloodyBoss.Systems.Mechanics
                     CreateAbsorptionBeam(user.Character.Entity, bossEntity, bossPos, pos);
                 }
                 
-                Plugin.Logger.LogInfo($"Absorbed {totalAbsorbed} {absorbType} from {playersInRange.Count} players");
+                Plugin.BLogger.Info(LogCategory.Mechanic, $"Absorbed {totalAbsorbed} {absorbType} from {playersInRange.Count} players");
             }
         }
 
@@ -186,10 +186,10 @@ namespace BloodyBoss.Systems.Mechanics
             var tickRate = 1f; // Absorb every second
             var ticks = (int)(duration / tickRate);
             
-            Plugin.Logger.LogInfo($"Starting continuous {absorbType} absorption: {amountPerSecond}/s for {duration}s");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Starting continuous {absorbType} absorption: {amountPerSecond}/s for {duration}s");
             if (minPlayersRequired > 0)
             {
-                Plugin.Logger.LogInfo($"Minimum {minPlayersRequired} players required in range or global drain activates!");
+                Plugin.BLogger.Info(LogCategory.Mechanic, $"Minimum {minPlayersRequired} players required in range or global drain activates!");
             }
             
             // Schedule periodic absorption
@@ -237,7 +237,7 @@ namespace BloodyBoss.Systems.Mechanics
                         var healthBoostBuff = new PrefabGUID(636617116); // Blood_Vampire_Buff_Leech_SelfHeal
                         BuffCharacter(boss, healthBoostBuff, 15f); // 15 seconds of boosted health
                         
-                        Plugin.Logger.LogDebug($"Boss absorbed {actualAbsorbed} health, temporary boost applied");
+                        Plugin.BLogger.Debug(LogCategory.Mechanic, $"Boss absorbed {actualAbsorbed} health, temporary boost applied");
                     }
                     break;
                     
@@ -265,7 +265,7 @@ namespace BloodyBoss.Systems.Mechanics
                         {
                             DestroyUtility.Destroy(Core.SystemsCore.EntityManager, buffEntity);
                             shieldsRemoved++;
-                            Plugin.Logger.LogDebug($"Removed shield buff {shieldGuid} from player");
+                            Plugin.BLogger.Debug(LogCategory.Mechanic, $"Removed shield buff {shieldGuid} from player");
                         }
                     }
                     
@@ -281,11 +281,11 @@ namespace BloodyBoss.Systems.Mechanics
                         var realShieldBuff = new PrefabGUID(-1605515615); // AB_Blood_BloodRage_SpellMod_Buff_Shield
                         BuffCharacter(boss, realShieldBuff); // Duration is controlled by the buff
                         
-                        Plugin.Logger.LogDebug($"Boss stole {shieldsRemoved} shields and gained REAL damage absorbing shield!");
+                        Plugin.BLogger.Debug(LogCategory.Mechanic, $"Boss stole {shieldsRemoved} shields and gained REAL damage absorbing shield!");
                     }
                     else
                     {
-                        Plugin.Logger.LogDebug($"No shields to steal from player");
+                        Plugin.BLogger.Debug(LogCategory.Mechanic, $"No shields to steal from player");
                     }
                     
                     // Return a fixed value for feedback (not actual absorption amount)
@@ -332,11 +332,11 @@ namespace BloodyBoss.Systems.Mechanics
             {
                 // Simply intensify the drain effect on the player
                 // The visual connection is implied by the matching effects on player and boss
-                Plugin.Logger.LogDebug($"Absorption link established between player and boss");
+                Plugin.BLogger.Debug(LogCategory.Mechanic, $"Absorption link established between player and boss");
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogWarning($"Failed to create absorption beam: {ex.Message}");
+                Plugin.BLogger.Warning(LogCategory.Mechanic, $"Failed to create absorption beam: {ex.Message}");
             }
         }
         
@@ -369,7 +369,7 @@ namespace BloodyBoss.Systems.Mechanics
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogWarning($"Failed to apply buff: {ex.Message}");
+                Plugin.BLogger.Warning(LogCategory.Mechanic, $"Failed to apply buff: {ex.Message}");
             }
         }
         
@@ -384,7 +384,7 @@ namespace BloodyBoss.Systems.Mechanics
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogWarning($"Failed to remove buff: {ex.Message}");
+                Plugin.BLogger.Warning(LogCategory.Mechanic, $"Failed to remove buff: {ex.Message}");
             }
         }
 

@@ -40,7 +40,7 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref announcementRef);
             }
 
-            Plugin.Logger.LogInfo($"Trap mechanic executed: {count} {trapType} traps in {pattern} pattern");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Trap mechanic executed: {count} {trapType} traps in {pattern} pattern");
         }
 
         private void SpawnTraps(float3 center, string trapType, string pattern, int count, float damage, float radius, float triggerDelay)
@@ -52,7 +52,7 @@ namespace BloodyBoss.Systems.Mechanics
                 SpawnTrap(pos, trapType, damage, triggerDelay);
             }
             
-            Plugin.Logger.LogDebug($"Spawned {positions.Count} traps");
+            Plugin.BLogger.Debug(LogCategory.Mechanic, $"Spawned {positions.Count} traps");
         }
 
         private List<float3> GenerateTrapPositions(float3 center, string pattern, int count, float radius)
@@ -167,7 +167,7 @@ namespace BloodyBoss.Systems.Mechanics
             var debugSystem = Core.SystemsCore.DebugEventsSystem;
             debugSystem.ApplyBuff(fromCharacter, des);
             
-            Plugin.Logger.LogDebug($"Spawned {trapType} trap at {position}");
+            Plugin.BLogger.Debug(LogCategory.Mechanic, $"Spawned {trapType} trap at {position}");
         }
 
         public bool Validate(Dictionary<string, object> parameters)

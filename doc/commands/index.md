@@ -14,6 +14,10 @@ Welcome to the comprehensive command reference for BloodyBoss. This documentatio
 - [**Ability System**](abilities.md) - Copy and mix abilities from VBloods
 - [**Mechanic System**](mechanics.md) - Add combat mechanics and phases
 - [**Debug Commands**](debug.md) - Testing and troubleshooting tools
+- [**Logging System**](logging.md) - Control log verbosity and categories
+
+### Configuration
+- [**Configuration Guide**](../CONFIGURATION.md) - Complete BloodyBoss.cfg documentation
 
 ## 🚀 Quick Start
 

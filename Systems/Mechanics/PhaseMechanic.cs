@@ -55,7 +55,7 @@ namespace BloodyBoss.Systems.Mechanics
                 ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref announcementRef);
             }
 
-            Plugin.Logger.LogInfo($"Phase mechanic executed: {phaseName}");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Phase mechanic executed: {phaseName}");
         }
 
         private void BuffNPC(Entity entity, PrefabGUID buffGuid)

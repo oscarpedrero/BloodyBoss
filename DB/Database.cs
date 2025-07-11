@@ -2,6 +2,7 @@
 using Bloody.Core;
 using BloodyBoss.DB.Models;
 using BloodyBoss.Exceptions;
+using BloodyBoss.Systems;
 using ProjectM;
 using Stunlock.Core;
 using System;
@@ -45,7 +46,7 @@ namespace BloodyBoss.DB
         {
             if (!Directory.Exists(ConfigPath)) Directory.CreateDirectory(ConfigPath);
             if (!File.Exists(BOSSESListFile)) File.WriteAllText(BOSSESListFile, "[]");
-            Plugin.Logger.LogDebug($"Create Database: OK");
+            Plugin.BLogger.Debug(LogCategory.Database, $"Create Database: OK");
             return true;
         }
 
@@ -55,12 +56,12 @@ namespace BloodyBoss.DB
             {
                 var jsonOutPut = JsonSerializer.Serialize(BOSSES, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(BOSSESListFile, jsonOutPut);
-                Plugin.Logger.LogDebug($"Save Database: OK");
+                Plugin.BLogger.Debug(LogCategory.Database, $"Save Database: OK");
                 return true;
             }
             catch (Exception error)
             {
-                Plugin.Logger.LogError($"Error SaveDatabase: {error.Message}");
+                Plugin.BLogger.Error(LogCategory.Database, $"Error SaveDatabase: {error.Message}");
                 return false;
             }
         }
@@ -71,12 +72,12 @@ namespace BloodyBoss.DB
             {
                 string json = File.ReadAllText(BOSSESListFile);
                 BOSSES = JsonSerializer.Deserialize<List<BossEncounterModel>>(json);
-                Plugin.Logger.LogDebug($"Load Database: OK");
+                Plugin.BLogger.Debug(LogCategory.Database, $"Load Database: OK");
                 return true;
             }
             catch (Exception error)
             {
-                Plugin.Logger.LogError($"Error LoadDatabase: {error.Message}");
+                Plugin.BLogger.Error(LogCategory.Database, $"Error LoadDatabase: {error.Message}");
                 return false;
             }
         }

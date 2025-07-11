@@ -79,6 +79,13 @@ namespace BloodyBoss.Configuration
         public static ConfigEntry<bool> StrictCompatibilityMode { get; private set; }
         public static ConfigEntry<bool> LogCompatibilityWarnings { get; private set; }
         public static ConfigEntry<bool> AllowCrossTypeAbilities { get; private set; }
+        
+        // Logging Configuration
+        public static ConfigEntry<string> GlobalLogLevel { get; private set; }
+        public static ConfigEntry<string> CategoryLogLevels { get; private set; }
+        public static ConfigEntry<string> DisabledLogCategories { get; private set; }
+        public static ConfigEntry<bool> LogToFile { get; private set; }
+        public static ConfigEntry<string> LogFilePath { get; private set; }
 
         public static void Initialize()
         {
@@ -159,6 +166,13 @@ namespace BloodyBoss.Configuration
             StrictCompatibilityMode = _mainConfig.Bind("Ability Compatibility", "StrictMode", false, "Block ability swaps if incompatibilities are detected (false = allow with warnings)");
             LogCompatibilityWarnings = _mainConfig.Bind("Ability Compatibility", "LogWarnings", true, "Log compatibility warnings to server console");
             AllowCrossTypeAbilities = _mainConfig.Bind("Ability Compatibility", "AllowCrossType", false, "Allow abilities across different creature types (e.g., vampire abilities on beasts)");
+            
+            // Logging Configuration
+            GlobalLogLevel = _mainConfig.Bind("Logging", "GlobalLogLevel", "Warning", "Global log level: None, Error, Warning, Info, Debug, Trace");
+            CategoryLogLevels = _mainConfig.Bind("Logging", "CategoryLogLevels", "Boss:Warning,Damage:Warning,Hook:Warning,Timer:Warning,Mechanic:Warning,Spawn:Info,Death:Info,Reward:Info,System:Warning", "Specific log levels per category (format: Category1:Level,Category2:Level). Categories: System, Boss, Damage, Mechanic, Command, Database, Hook, Timer, Spawn, Death, Reward, Debug");
+            DisabledLogCategories = _mainConfig.Bind("Logging", "DisabledCategories", "Debug,Timer,Hook", "Comma-separated list of disabled log categories");
+            LogToFile = _mainConfig.Bind("Logging", "LogToFile", false, "Enable logging to a separate file");
+            LogFilePath = _mainConfig.Bind("Logging", "LogFilePath", "BepInEx/logs/BloodyBoss.log", "Path for the log file (relative to game root)");
         }
         public static void Destroy()
         {

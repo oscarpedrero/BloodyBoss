@@ -139,7 +139,7 @@ namespace BloodyBoss.DB.Models
             
             if (!usedOriginal)
             {
-                Plugin.Logger.LogInfo($"Boss {name}: Spawn position adjusted to avoid castle territory");
+                Plugin.BLogger.Info(LogCategory.Boss, $"Boss {name}: Spawn position adjusted to avoid castle territory");
             }
             
             // Mantener siempre el PrefabGUID original para la apariencia
@@ -151,7 +151,7 @@ namespace BloodyBoss.DB.Models
                 ModifyBoss(sender, e);
                 
                 // Log spawn position once after boss is created
-                Plugin.Logger.LogInfo($"Boss {name}: Spawned at position ({validX:F2}, {y:F2}, {validZ:F2})");
+                Plugin.BLogger.Info(LogCategory.Boss, $"Boss {name}: Spawned at position ({validX:F2}, {y:F2}, {validZ:F2})");
                 
                 // Registration happens inside ModifyBoss now
                 
@@ -203,7 +203,7 @@ namespace BloodyBoss.DB.Models
             
             if (!usedOriginal)
             {
-                Plugin.Logger.LogInfo($"Boss {name}: Spawn position adjusted to avoid castle territory");
+                Plugin.BLogger.Info(LogCategory.Boss, $"Boss {name}: Spawn position adjusted to avoid castle territory");
             }
             
             // Mantener siempre el PrefabGUID original para la apariencia
@@ -272,11 +272,11 @@ namespace BloodyBoss.DB.Models
         public bool DropItems()
         {
             var killers = GetKillers();
-            Plugin.Logger.LogInfo($"Boss {name} dropping items to {killers.Count} killers");
+            Plugin.BLogger.Info(LogCategory.Boss, $"Boss {name} dropping items to {killers.Count} killers");
             
             if (killers.Count == 0)
             {
-                Plugin.Logger.LogWarning($"Boss {name} has no killers registered, no items will drop");
+                Plugin.BLogger.Warning(LogCategory.Boss, $"Boss {name} has no killers registered, no items will drop");
                 return false;
             }
 
@@ -284,7 +284,7 @@ namespace BloodyBoss.DB.Models
             {
                 if (probabilityGeneratingReward(item.Chance))
                 {
-                    Plugin.Logger.LogInfo($"Boss {name} dropping item {item.ItemID} x{item.Stack}");
+                    Plugin.BLogger.Info(LogCategory.Boss, $"Boss {name} dropping item {item.ItemID} x{item.Stack}");
 
                     foreach (var user in killers)
                     {
@@ -293,7 +293,7 @@ namespace BloodyBoss.DB.Models
                             UserModel player = GameData.Users.GetUserByCharacterName(user);
                             if (player == null)
                             {
-                                Plugin.Logger.LogWarning($"Player {user} not found for item drop");
+                                Plugin.BLogger.Warning(LogCategory.Boss, $"Player {user} not found for item drop");
                                 continue;
                             }
 
@@ -302,18 +302,18 @@ namespace BloodyBoss.DB.Models
 
                             if(!player.TryGiveItem(itemGuid, stacks, out Entity itemEntity)){
                                 player.DropItemNearby(itemGuid, stacks);
-                                Plugin.Logger.LogInfo($"Item dropped near player {user}");
+                                Plugin.BLogger.Info(LogCategory.Boss, $"Item dropped near player {user}");
                             } else {
-                                Plugin.Logger.LogInfo($"Item given to player {user}");
+                                Plugin.BLogger.Info(LogCategory.Boss, $"Item given to player {user}");
                             }
                         }
                         catch (Exception ex)
                         {
-                            Plugin.Logger.LogError($"Error dropping item to player {user}: {ex.Message}");
+                            Plugin.BLogger.Error(LogCategory.Boss, $"Error dropping item to player {user}: {ex.Message}");
                         }
                     }
                 } else {
-                    Plugin.Logger.LogInfo($"Boss {name} item {item.ItemID} failed probability check ({item.Chance}%)");
+                    Plugin.BLogger.Info(LogCategory.Boss, $"Boss {name} item {item.ItemID} failed probability check ({item.Chance}%)");
                 }
             }
 
@@ -354,18 +354,18 @@ namespace BloodyBoss.DB.Models
             {
                 // Use new dynamic scaling system
                 healthMultiplier = DynamicScalingSystem.CalculateHealthMultiplier(this);
-                Plugin.Logger.LogInfo($"Boss {name} using dynamic scaling: x{healthMultiplier:F2}");
+                Plugin.BLogger.Info(LogCategory.Boss, $"Boss {name} using dynamic scaling: x{healthMultiplier:F2}");
             }
             else if (PluginConfig.PlayersMultiplier.Value)
             {
                 // Use legacy player multiplier system
                 healthMultiplier = players * multiplier;
-                Plugin.Logger.LogInfo($"Boss {name} using legacy scaling: {players} players x {multiplier} = x{healthMultiplier:F2}");
+                Plugin.BLogger.Info(LogCategory.Boss, $"Boss {name} using legacy scaling: {players} players x {multiplier} = x{healthMultiplier:F2}");
             }
             else
             {
                 // Use base multiplier only
-                Plugin.Logger.LogInfo($"Boss {name} using base multiplier: x{healthMultiplier:F2}");
+                Plugin.BLogger.Debug(LogCategory.Boss, $"Boss {name} using base multiplier: x{healthMultiplier:F2}");
             }
             
             health.MaxHealth._Value = health.MaxHealth * healthMultiplier;
@@ -396,7 +396,7 @@ namespace BloodyBoss.DB.Models
                 if (PluginConfig.EnableProgressiveDifficulty.Value)
                 {
                     ConsecutiveSpawns++;
-                    Plugin.Logger.LogInfo($"Boss {name} consecutive spawns: {ConsecutiveSpawns}");
+                    Plugin.BLogger.Info(LogCategory.Boss, $"Boss {name} consecutive spawns: {ConsecutiveSpawns}");
                 }
             }
             else
@@ -416,28 +416,28 @@ namespace BloodyBoss.DB.Models
             // Aplicar intercambio de habilidades si está configurado
             if (AbilitySwapPrefabGUID.HasValue)
             {
-                Plugin.Logger.LogInfo($"Boss {name}: Applying ability swap to {AbilitySwapPrefabGUID.Value} while maintaining visual appearance");
+                Plugin.BLogger.Info(LogCategory.Boss, $"Boss {name}: Applying ability swap to {AbilitySwapPrefabGUID.Value} while maintaining visual appearance");
                 ApplyAbilitySwapPostSpawn(boss, new PrefabGUID(AbilitySwapPrefabGUID.Value));
             }
             
             // Aplicar sistema modular de habilidades personalizadas
             if (CustomAbilities.Count > 0)
             {
-                Plugin.Logger.LogInfo($"Boss {name}: Applying modular ability system with {CustomAbilities.Count} custom slots");
+                Plugin.BLogger.Info(LogCategory.Boss, $"Boss {name}: Applying modular ability system with {CustomAbilities.Count} custom slots");
                 ApplyModularAbilitiesPostSpawn(boss);
             }
             
             // Aplicar intercambio de habilidades individuales (nuevo sistema)
             if (AbilitySwaps != null && AbilitySwaps.Count > 0)
             {
-                Plugin.Logger.LogInfo($"Boss {name}: Applying individual ability swaps for {AbilitySwaps.Count} slots");
+                Plugin.BLogger.Info(LogCategory.Boss, $"Boss {name}: Applying individual ability swaps for {AbilitySwaps.Count} slots");
                 ApplyIndividualAbilitySwaps(boss);
             }
             
             // Initialize boss mechanics
             if (Mechanics.Count > 0)
             {
-                Plugin.Logger.LogInfo($"Boss {name}: Initializing {Mechanics.Count} mechanics");
+                Plugin.BLogger.Debug(LogCategory.Boss, $"Boss {name}: Initializing {Mechanics.Count} mechanics");
                 BossMechanicSystem.InitializeBossMechanics(boss, this);
             }
             
@@ -603,7 +603,7 @@ namespace BloodyBoss.DB.Models
                 ClearDropTable(bossEntity);
             } catch {
 
-                Plugin.Logger.LogWarning($"The boss {name} error cleardrop");
+                Plugin.BLogger.Warning(LogCategory.Boss, $"The boss {name} error cleardrop");
 
             }
 
@@ -614,7 +614,7 @@ namespace BloodyBoss.DB.Models
             catch
             {
 
-                Plugin.Logger.LogWarning($"The boss {name} error remove icon");
+                Plugin.BLogger.Warning(LogCategory.Boss, $"The boss {name} error remove icon");
 
             }
 
@@ -625,7 +625,7 @@ namespace BloodyBoss.DB.Models
             catch
             {
 
-                Plugin.Logger.LogWarning($"The boss {name} error kill boss");
+                Plugin.BLogger.Warning(LogCategory.Boss, $"The boss {name} error kill boss");
 
             }
 
@@ -657,7 +657,7 @@ namespace BloodyBoss.DB.Models
                     var user = userModel.Entity;
                     if (Database.BOSSES.Count > 1 && PluginConfig.RandomBoss.Value)
                     {
-                        Plugin.Logger.LogInfo("Spawn Random Boss");
+                        Plugin.BLogger.Info(LogCategory.Boss, "Spawn Random Boss");
                         bossRandom = Database.BOSSES[Random.Next(Database.BOSSES.Count)];
                         // Use the random boss position with its own Y coordinate
                         bossRandom.Spawn(user, bossRandom.x, bossRandom.y, bossRandom.z);
@@ -665,7 +665,7 @@ namespace BloodyBoss.DB.Models
                         Database.saveDatabase();
                     } else
                     {
-                        Plugin.Logger.LogInfo("Spawn Boss");
+                        Plugin.BLogger.Info(LogCategory.Boss, "Spawn Boss");
                         Spawn(user);
                         bossSpawn = true;
                         Database.saveDatabase();
@@ -673,7 +673,7 @@ namespace BloodyBoss.DB.Models
                     
                 } else
                 {
-                    Plugin.Logger.LogWarning($"The boss {name} cannot be summoned again, since it is currently active");
+                    Plugin.BLogger.Warning(LogCategory.Boss, $"The boss {name} cannot be summoned again, since it is currently active");
                 }
             }
             
@@ -724,7 +724,7 @@ namespace BloodyBoss.DB.Models
                     ConsecutiveSpawns = 0;
                     CurrentDifficultyMultiplier = 1.0f;
                     LastSuccessfulKill = DateTime.Now;
-                    Plugin.Logger.LogInfo($"Boss {name} difficulty reset after successful kill");
+                    Plugin.BLogger.Info(LogCategory.Boss, $"Boss {name} difficulty reset after successful kill");
                 }
 
                 RemoveIcon(GameData.Users.All.FirstOrDefault().Entity);
@@ -794,7 +794,7 @@ namespace BloodyBoss.DB.Models
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Error checking castle position: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.Boss, $"Error checking castle position: {ex.Message}");
                 return false; // En caso de error, asumir que es válida
             }
         }
@@ -825,17 +825,17 @@ namespace BloodyBoss.DB.Models
                     // Verificar si la nueva posición está libre de castillos
                     if (!IsPositionInCastle(testPosition))
                     {
-                        Plugin.Logger.LogInfo($"Found valid spawn position after {i + 1} attempts. Distance from original: {math.distance(originalPosition, testPosition):F2} units");
+                        Plugin.BLogger.Info(LogCategory.Boss, $"Found valid spawn position after {i + 1} attempts. Distance from original: {math.distance(originalPosition, testPosition):F2} units");
                         return testPosition;
                     }
                 }
 
-                Plugin.Logger.LogWarning($"Could not find valid spawn position after {attempts} attempts within {searchRadius} units radius");
+                Plugin.BLogger.Warning(LogCategory.Boss, $"Could not find valid spawn position after {attempts} attempts within {searchRadius} units radius");
                 return null;
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Error finding valid spawn position: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.Boss, $"Error finding valid spawn position: {ex.Message}");
                 return null;
             }
         }
@@ -851,7 +851,7 @@ namespace BloodyBoss.DB.Models
             // Si la detección de castillos está deshabilitada, usar posición original
             if (!PluginConfig.EnableCastleDetection.Value)
             {
-                Plugin.Logger.LogInfo($"Boss {name}: Castle detection disabled, using original position");
+                Plugin.BLogger.Info(LogCategory.Boss, $"Boss {name}: Castle detection disabled, using original position");
                 return (originalX, originalZ, true);
             }
             
@@ -860,11 +860,11 @@ namespace BloodyBoss.DB.Models
             // Verificar si la posición original está en un castillo
             if (!IsPositionInCastle(originalPosition))
             {
-                Plugin.Logger.LogInfo($"Boss {name}: Original position is valid for spawn");
+                Plugin.BLogger.Info(LogCategory.Boss, $"Boss {name}: Original position is valid for spawn");
                 return (originalX, originalZ, true);
             }
 
-            Plugin.Logger.LogWarning($"Boss {name}: Original position is inside a castle territory, searching for alternative...");
+            Plugin.BLogger.Warning(LogCategory.Boss, $"Boss {name}: Original position is inside a castle territory, searching for alternative...");
             
             // Buscar posición alternativa
             var validPosition = FindValidSpawnPosition(originalPosition, 100f);
@@ -872,12 +872,12 @@ namespace BloodyBoss.DB.Models
             if (validPosition.HasValue)
             {
                 var newPos = validPosition.Value;
-                Plugin.Logger.LogInfo($"Boss {name}: Found alternative spawn position ({newPos.x:F2}, {newPos.z:F2})");
+                Plugin.BLogger.Info(LogCategory.Boss, $"Boss {name}: Found alternative spawn position ({newPos.x:F2}, {newPos.z:F2})");
                 return (newPos.x, newPos.z, false);
             }
             
             // Si no se encuentra posición válida, usar la original como último recurso
-            Plugin.Logger.LogError($"Boss {name}: Could not find valid spawn position, using original despite castle conflict");
+            Plugin.BLogger.Error(LogCategory.Boss, $"Boss {name}: Could not find valid spawn position, using original despite castle conflict");
             return (originalX, originalZ, false);
         }
         
@@ -891,11 +891,11 @@ namespace BloodyBoss.DB.Models
                 // Obtener la entidad fuente del prefab
                 if (!Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(sourcePrefabGUID, out Entity sourceEntity))
                 {
-                    Plugin.Logger.LogError($"Source prefab {sourcePrefabGUID.GuidHash} not found for ability swap");
+                    Plugin.BLogger.Error(LogCategory.Boss, $"Source prefab {sourcePrefabGUID.GuidHash} not found for ability swap");
                     return;
                 }
                 
-                Plugin.Logger.LogInfo($"Applying ability swap from {sourcePrefabGUID.GuidHash} to boss while preserving visual appearance");
+                Plugin.BLogger.Info(LogCategory.Boss, $"Applying ability swap from {sourcePrefabGUID.GuidHash} to boss while preserving visual appearance");
                 
                 // Usar el sistema existente pero preservando la apariencia
                 var entityManager = Core.World.EntityManager;
@@ -909,7 +909,7 @@ namespace BloodyBoss.DB.Models
                         bossEntity.Add<AbilityBar_Shared>();
                     }
                     bossEntity.Write(sourceAbilityBar);
-                    Plugin.Logger.LogInfo("Applied AbilityBar_Shared from source");
+                    Plugin.BLogger.Info(LogCategory.Boss, "Applied AbilityBar_Shared from source");
                 }
                 
                 // 2. Copiar AbilityGroupSlotBuffer
@@ -932,17 +932,17 @@ namespace BloodyBoss.DB.Models
                     {
                         targetBuffer.Add(sourceBuffer[i]);
                     }
-                    Plugin.Logger.LogInfo($"Applied {sourceBuffer.Length} ability groups from source");
+                    Plugin.BLogger.Info(LogCategory.Boss, $"Applied {sourceBuffer.Length} ability groups from source");
                 }
                 
                 // 3. Forzar refresh de AI manteniendo la apariencia
                 ForceAIRefreshPreservingAppearance(bossEntity);
                 
-                Plugin.Logger.LogInfo("Ability swap applied successfully while preserving visual appearance");
+                Plugin.BLogger.Info(LogCategory.Boss, "Ability swap applied successfully while preserving visual appearance");
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Error applying ability swap post-spawn: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.Boss, $"Error applying ability swap post-spawn: {ex.Message}");
             }
         }
         
@@ -970,11 +970,11 @@ namespace BloodyBoss.DB.Models
                 // Asegurar que el PrefabGUID se mantiene original para la apariencia
                 entity.Write(originalPrefabGUID);
                 
-                Plugin.Logger.LogInfo("AI refreshed while preserving original appearance");
+                Plugin.BLogger.Info(LogCategory.Boss, "AI refreshed while preserving original appearance");
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Error refreshing AI while preserving appearance: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.Boss, $"Error refreshing AI while preserving appearance: {ex.Message}");
             }
         }
         
@@ -986,27 +986,27 @@ namespace BloodyBoss.DB.Models
             try
             {
                 var entityManager = Core.World.EntityManager;
-                Plugin.Logger.LogInfo($"Starting individual ability swaps for boss {name}");
+                Plugin.BLogger.Info(LogCategory.Boss, $"Starting individual ability swaps for boss {name}");
                 
                 foreach (var swap in AbilitySwaps)
                 {
                     var slotIndex = swap.Key;
                     var config = swap.Value;
                     
-                    Plugin.Logger.LogInfo($"Processing ability swap for slot {slotIndex} from {config.SourceVBloodName}");
+                    Plugin.BLogger.Info(LogCategory.Boss, $"Processing ability swap for slot {slotIndex} from {config.SourceVBloodName}");
                     
                     // Obtener la entidad fuente
                     var sourcePrefabGUID = new PrefabGUID(config.SourcePrefabGUID);
                     if (!Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(sourcePrefabGUID, out Entity sourceEntity))
                     {
-                        Plugin.Logger.LogError($"Source prefab {config.SourcePrefabGUID} not found for slot {slotIndex}");
+                        Plugin.BLogger.Error(LogCategory.Boss, $"Source prefab {config.SourcePrefabGUID} not found for slot {slotIndex}");
                         continue;
                     }
                     
                     // Obtener las habilidades de la fuente
                     if (!entityManager.HasBuffer<AbilityGroupSlotBuffer>(sourceEntity))
                     {
-                        Plugin.Logger.LogError($"Source entity does not have ability buffer");
+                        Plugin.BLogger.Error(LogCategory.Boss, $"Source entity does not have ability buffer");
                         continue;
                     }
                     
@@ -1015,7 +1015,7 @@ namespace BloodyBoss.DB.Models
                     // Verificar que el slot existe en la fuente
                     if (slotIndex >= sourceBuffer.Length)
                     {
-                        Plugin.Logger.LogError($"Slot index {slotIndex} out of range for source (max: {sourceBuffer.Length - 1})");
+                        Plugin.BLogger.Error(LogCategory.Boss, $"Slot index {slotIndex} out of range for source (max: {sourceBuffer.Length - 1})");
                         continue;
                     }
                     
@@ -1052,17 +1052,17 @@ namespace BloodyBoss.DB.Models
                     // Reemplazar la habilidad en el slot específico
                     bossBuffer[slotIndex] = sourceBuffer[slotIndex];
                     
-                    Plugin.Logger.LogInfo($"Successfully swapped ability at slot {slotIndex} with {config.Description}");
+                    Plugin.BLogger.Info(LogCategory.Boss, $"Successfully swapped ability at slot {slotIndex} with {config.Description}");
                 }
                 
                 // Refrescar AI para activar las nuevas habilidades
                 ForceAIRefreshPreservingAppearance(bossEntity);
                 
-                Plugin.Logger.LogInfo($"Individual ability swaps completed successfully");
+                Plugin.BLogger.Info(LogCategory.Boss, $"Individual ability swaps completed successfully");
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Error applying individual ability swaps: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.Boss, $"Error applying individual ability swaps: {ex.Message}");
             }
         }
         
@@ -1074,7 +1074,7 @@ namespace BloodyBoss.DB.Models
             try
             {
                 var entityManager = Core.World.EntityManager;
-                Plugin.Logger.LogInfo($"Starting modular ability application for boss {name}");
+                Plugin.BLogger.Info(LogCategory.Boss, $"Starting modular ability application for boss {name}");
                 
                 // Crear o obtener el buffer de habilidades
                 DynamicBuffer<AbilityGroupSlotBuffer> abilityBuffer;
@@ -1093,24 +1093,24 @@ namespace BloodyBoss.DB.Models
                 {
                     if (!slot.Value.Enabled)
                     {
-                        Plugin.Logger.LogInfo($"Skipping disabled slot: {slot.Key}");
+                        Plugin.BLogger.Info(LogCategory.Boss, $"Skipping disabled slot: {slot.Key}");
                         continue;
                     }
                     
-                    Plugin.Logger.LogInfo($"Processing slot {slot.Key}: PrefabGUID={slot.Value.SourcePrefabGUID}, Index={slot.Value.AbilityIndex}");
+                    Plugin.BLogger.Info(LogCategory.Boss, $"Processing slot {slot.Key}: PrefabGUID={slot.Value.SourcePrefabGUID}, Index={slot.Value.AbilityIndex}");
                     
                     // Obtener la entidad fuente
                     var sourcePrefabGUID = new PrefabGUID(slot.Value.SourcePrefabGUID);
                     if (!Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(sourcePrefabGUID, out Entity sourceEntity))
                     {
-                        Plugin.Logger.LogError($"Source prefab {slot.Value.SourcePrefabGUID} not found for slot {slot.Key}");
+                        Plugin.BLogger.Error(LogCategory.Boss, $"Source prefab {slot.Value.SourcePrefabGUID} not found for slot {slot.Key}");
                         continue;
                     }
                     
                     // Obtener las habilidades de la fuente
                     if (!entityManager.HasBuffer<AbilityGroupSlotBuffer>(sourceEntity))
                     {
-                        Plugin.Logger.LogError($"Source entity does not have ability buffer for slot {slot.Key}");
+                        Plugin.BLogger.Error(LogCategory.Boss, $"Source entity does not have ability buffer for slot {slot.Key}");
                         continue;
                     }
                     
@@ -1119,7 +1119,7 @@ namespace BloodyBoss.DB.Models
                     // Verificar que el índice sea válido
                     if (slot.Value.AbilityIndex >= sourceBuffer.Length)
                     {
-                        Plugin.Logger.LogError($"Ability index {slot.Value.AbilityIndex} out of range for slot {slot.Key} (max: {sourceBuffer.Length - 1})");
+                        Plugin.BLogger.Error(LogCategory.Boss, $"Ability index {slot.Value.AbilityIndex} out of range for slot {slot.Key} (max: {sourceBuffer.Length - 1})");
                         continue;
                     }
                     
@@ -1127,7 +1127,7 @@ namespace BloodyBoss.DB.Models
                     var abilitySlot = sourceBuffer[slot.Value.AbilityIndex];
                     abilityBuffer.Add(abilitySlot);
                     
-                    Plugin.Logger.LogInfo($"Successfully copied ability {slot.Value.AbilityIndex} from {slot.Value.SourcePrefabGUID} to slot {slot.Key}");
+                    Plugin.BLogger.Info(LogCategory.Boss, $"Successfully copied ability {slot.Value.AbilityIndex} from {slot.Value.SourcePrefabGUID} to slot {slot.Key}");
                 }
                 
                 // Actualizar AbilityBar_Shared si hay habilidades configuradas
@@ -1148,7 +1148,7 @@ namespace BloodyBoss.DB.Models
                                     bossEntity.Add<AbilityBar_Shared>();
                                 }
                                 bossEntity.Write(sourceAbilityBar);
-                                Plugin.Logger.LogInfo("Applied AbilityBar_Shared from modular system");
+                                Plugin.BLogger.Info(LogCategory.Boss, "Applied AbilityBar_Shared from modular system");
                             }
                         }
                     }
@@ -1157,11 +1157,11 @@ namespace BloodyBoss.DB.Models
                 // Refrescar AI para activar las nuevas habilidades
                 ForceAIRefreshPreservingAppearance(bossEntity);
                 
-                Plugin.Logger.LogInfo($"Modular ability system applied successfully: {abilityBuffer.Length} abilities configured");
+                Plugin.BLogger.Info(LogCategory.Boss, $"Modular ability system applied successfully: {abilityBuffer.Length} abilities configured");
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Error applying modular abilities: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.Boss, $"Error applying modular abilities: {ex.Message}");
             }
         }
         

@@ -30,7 +30,7 @@ namespace BloodyBoss.Hooks
             var _entityManager = __instance.EntityManager;
             var _prefabCollectionSystem = Plugin.SystemsCore.PrefabCollectionSystem;
             
-            Plugin.Logger.LogDebug($"[ATTACKER-TRACKING] Execute");
+            Plugin.BLogger.Debug(LogCategory.Hook, $"[ATTACKER-TRACKING] Execute");
 
             // Usar _DamageTakenEventQuery para acceder a DamageTakenEvent
             var entities = __instance._DamageTakenEventQuery.ToEntityArray(Allocator.Temp);
@@ -38,7 +38,7 @@ namespace BloodyBoss.Hooks
             
             if (damageTakenEvents.Length > 0)
             {
-                Plugin.Logger.LogDebug($"[ATTACKER-TRACKING] Found {damageTakenEvents.Length} damage taken events");
+                Plugin.BLogger.Debug(LogCategory.Hook, $"[ATTACKER-TRACKING] Found {damageTakenEvents.Length} damage taken events");
             }
             
             for (int i = 0; i < entities.Length; i++)
@@ -49,7 +49,7 @@ namespace BloodyBoss.Hooks
                 var target = damageTakenEvent.Entity;
                 var source = damageTakenEvent.Source;
                 
-                Plugin.Logger.LogDebug($"[ATTACKER-TRACKING] DamageTakenEvent - Target: {target.Index}, Source: {source.Index}");
+                Plugin.BLogger.Debug(LogCategory.Hook, $"[ATTACKER-TRACKING] DamageTakenEvent - Target: {target.Index}, Source: {source.Index}");
                 
                 // Extract actual attacker and record for correlation
                 Entity attacker = Entity.Null;

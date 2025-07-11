@@ -68,10 +68,10 @@ namespace BloodyBoss.Systems.Mechanics
             if (duration > 0)
             {
                 // TODO: Schedule mechanic removal after duration
-                Plugin.Logger.LogInfo($"Enrage will last for {duration} seconds");
+                Plugin.BLogger.Info(LogCategory.Mechanic, $"Enrage will last for {duration} seconds");
             }
             
-            Plugin.Logger.LogInfo($"Enrage mechanic applied to boss: Damage x{damageMultiplier}");
+            Plugin.BLogger.Info(LogCategory.Mechanic, $"Enrage mechanic applied to boss: Damage x{damageMultiplier}");
         }
 
         public bool Validate(Dictionary<string, object> parameters)
