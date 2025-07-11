@@ -6,15 +6,14 @@ using VampireCommandFramework;
 using BloodyBoss.Exceptions;
 using System;
 
-namespace BloodyBoss.Commands
+namespace BloodyBoss.Command
 {
-
-    [CommandGroup("bb items")]
-    internal class ItemsBoosCommand
+    [CommandGroup("bb item", "Boss item drop management commands")]
+    public static class BossItemCommand
     {
 
         [Command("list", usage: "<NameOfBoss>", description: "List items of Boss drop", adminOnly: true)]
-        public void ListBossItems(ChatCommandContext ctx, string BossName)
+        public static void ListBossItems(ChatCommandContext ctx, string BossName)
         {
 
             try
@@ -55,7 +54,7 @@ namespace BloodyBoss.Commands
 
         // .encounter product add Test1 736318803 20
         [Command("add", usage: "<NameOfBoss> <ItemName> <ItemPrefabID> <Stack> <Chance>", description: "Add a item to a Boss drop. Chance is number between 0 to 1, Example 0.5 for 50% of drop", adminOnly: true)]
-        public void CreateItem(ChatCommandContext ctx, string BossName, string ItemName, int ItemPrefabID, int Stack, int Chance)
+        public static void CreateItem(ChatCommandContext ctx, string BossName, string ItemName, int ItemPrefabID, int Stack, float Chance)
         {
             try
             {
@@ -87,7 +86,7 @@ namespace BloodyBoss.Commands
 
         // .encounter product remove Test1 736318803
         [Command("remove", usage: "<NameOfBoss> <ItemName>", description: "Remove a item to a Boss", adminOnly: true)]
-        public void RemoveProduct(ChatCommandContext ctx, string BossName, string ItemName)
+        public static void RemoveProduct(ChatCommandContext ctx, string BossName, string ItemName)
         {
             try
             {

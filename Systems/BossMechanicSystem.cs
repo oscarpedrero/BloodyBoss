@@ -7,6 +7,7 @@ using Bloody.Core;
 using BloodyBoss.DB;
 using BloodyBoss.DB.Models;
 using BloodyBoss.Systems.Mechanics;
+using BloodyBoss.Cache;
 using Unity.Collections;
 using Stunlock.Core;
 using Bloody.Core.Helper.v1;
@@ -95,10 +96,11 @@ namespace BloodyBoss.Systems
         public static void CheckPlayerCountMechanics(Entity bossEntity, BossEncounterModel boss)
         {
             // Get boss position
-            if (!bossEntity.Has<LocalToWorld>())
+            var entityManager = Plugin.SystemsCore.EntityManager;
+            if (!entityManager.Exists(bossEntity) || !entityManager.HasComponent<LocalToWorld>(bossEntity))
                 return;
                 
-            var bossPos = bossEntity.Read<LocalToWorld>().Position;
+            var bossPos = entityManager.GetComponentData<LocalToWorld>(bossEntity).Position;
             var playerCount = CountNearbyPlayers(bossPos, 100f); // 100 unit radius
             
             var triggeredMechanics = boss.Mechanics

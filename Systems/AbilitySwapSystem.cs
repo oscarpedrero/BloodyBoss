@@ -428,7 +428,7 @@ namespace BloodyBoss.Systems
         }
         
         /// <summary>
-        /// Returns known VBlood prefabs from the complete VBloodDatabase.
+        /// Returns known VBlood prefabs with friendly names.
         /// </summary>
         public static Dictionary<string, int> GetKnownVBloodPrefabs()
         {
@@ -436,33 +436,36 @@ namespace BloodyBoss.Systems
             
             try
             {
-                // Obtener todos los VBloods de la base de datos completa
+                // Primero, obtener todos los nombres amigables del mapeo
+                var friendlyNames = BloodyBoss.Data.VBloodNameMapping.GetAllFriendlyNames();
+                foreach (var kvp in friendlyNames)
+                {
+                    vbloods[kvp.Key] = kvp.Value;
+                }
+                
+                // Luego, agregar cualquier VBlood de la base de datos que no esté en el mapeo
                 var allVBloods = BloodyBoss.Data.VBloodDatabase.GetAllVBloods();
                 
                 foreach (var vblood in allVBloods)
                 {
-                    if (!string.IsNullOrEmpty(vblood.Value.Name))
+                    // Si este VBlood no tiene un nombre amigable, usar el nombre interno
+                    var friendlyName = BloodyBoss.Data.VBloodNameMapping.GetFriendlyName(vblood.Key);
+                    if (friendlyName == null && !string.IsNullOrEmpty(vblood.Value.Name))
                     {
-                        // Agregar con el nombre completo
-                        vbloods[vblood.Value.Name] = vblood.Key;
-                        
-                        // También agregar versiones sin "the" para búsquedas más flexibles
-                        if (vblood.Value.Name.Contains(" the "))
+                        // Agregar con el nombre interno si no hay mapeo
+                        if (!vbloods.ContainsKey(vblood.Value.Name))
                         {
-                            var simplifiedName = vblood.Value.Name.Replace(" the ", " ");
-                            if (!vbloods.ContainsKey(simplifiedName))
-                            {
-                                vbloods[simplifiedName] = vblood.Key;
-                            }
+                            vbloods[vblood.Value.Name] = vblood.Key;
+                            Plugin.Logger.LogDebug($"No friendly name for {vblood.Key}, using internal name: {vblood.Value.Name}");
                         }
                     }
                 }
                 
-                Plugin.Logger.LogInfo($"Loaded {vbloods.Count} VBloods from database");
+                Plugin.Logger.LogInfo($"Loaded {vbloods.Count} VBloods (with friendly names)");
             }
             catch (Exception ex)
             {
-                Plugin.Logger.LogError($"Error loading VBloods from database: {ex.Message}");
+                Plugin.Logger.LogError($"Error loading VBloods: {ex.Message}");
                 
                 // Fallback al diccionario estático si falla
                 return new Dictionary<string, int>

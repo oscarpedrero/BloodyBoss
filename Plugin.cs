@@ -40,9 +40,15 @@ public class Plugin : BasePlugin
         // Harmony patching
         _harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
 
-        _harmony.PatchAll(typeof(DealDamageHook));
-        //_harmony.PatchAll(typeof(StatChangeHook));
-        //_harmony.PatchAll(typeof(VBloodSystemHook));
+        _harmony.PatchAll(typeof(DamageDetectionHook));
+        _harmony.PatchAll(typeof(AttackerTrackingHook));
+        
+        // Verificar que el parche se aplicó
+        var patches = _harmony.GetPatchedMethods();
+        foreach (var method in patches)
+        {
+            Log.LogWarning($"[HARMONY] Patched method: {method.DeclaringType}.{method.Name}");
+        }
 
         EventsHandlerSystem.OnInitialize += GameDataOnInitialize;
 
@@ -57,6 +63,7 @@ public class Plugin : BasePlugin
     {
         EventsHandlerSystem.OnInitialize -= GameDataOnInitialize;
         BossSystem.StopTimer(); // Detener el timer independiente
+        Cache.ComponentCache.Dispose(); // Limpiar cache de componentes
         CommandRegistry.UnregisterAssembly();
         _harmony?.UnpatchSelf();
         return true;
@@ -73,47 +80,9 @@ public class Plugin : BasePlugin
         Logger.LogInfo("Binding configuration");
         PluginConfig.Initialize();
         
-        // Inicializar escáner de VBloods para compatibilidad
-        Logger.LogInfo("Initializing VBlood Scanner for ability compatibility");
-        try
-        {
-            // Ejecutar escaneo después de un breve retraso
-            bool scanExecuted = false;
-            CoroutineHandler.StartRepeatingCoroutine(() => 
-            {
-                if (!scanExecuted)
-                {
-                    // COMENTADO: Scanner y debugger ya no son necesarios con la base de datos estática
-                    // El comando vblood-export ya genera toda la información necesaria
-                    
-                    // // Primero ejecutar el scanner normal con LogInfo
-                    // Logger.LogInfo("=== Starting VBlood Prefab Scanner (Info Level) ===");
-                    // VBloodPrefabScanner.ScanVBloodPrefabs();
-                    // var vbloods = VBloodPrefabScanner.GetAllVBloods();
-                    // Logger.LogInfo($"VBlood Scanner completed: Found {vbloods.Count} VBloods");
-                    
-                    // // Luego ejecutar el debugger con LogWarning para análisis detallado
-                    // Logger.LogWarning("=== Starting VBlood Component Debugger (Warning Level) ===");
-                    // VBloodComponentDebugger.DebugVBloodComponents();
-                    // Logger.LogWarning("=== VBlood Component Debugger Completed ===");
-                    
-                    // Ejecutar análisis de buffs
-                    Logger.LogWarning("=== Starting Buff Analysis ===");
-                    BuffAnalyzer.AnalyzeAllBuffs();
-                    Logger.LogWarning("=== Buff Analysis Completed ===");
-                    
-                    scanExecuted = true;
-                }
-            }, 5f);
-        }
-        catch (System.Exception ex)
-        {
-            Logger.LogError($"Failed to initialize VBlood Scanner: {ex.Message}");
-        }
 
-        EventsHandlerSystem.OnDeathVBlood += VBloodSystemHook.OnDeathVblood;
-        //EventsHandlerSystem.OnDamage += NpcSystem.OnDamageNpc;
-        EventsHandlerSystem.OnDeath += DeathNpcHook.OnDeathNpc;
+        EventsHandlerSystem.OnDeathVBlood += BossGameplayEventSystem.OnVBloodConsumed;
+        EventsHandlerSystem.OnDeath += BossGameplayEventSystem.OnDeathNpc;
         BossSystem.GenerateStats();
         BossSystem.CheckBoss();
         BossSystem.StartTimer(); // Iniciar el timer independiente

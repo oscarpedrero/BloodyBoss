@@ -20,13 +20,12 @@ using Bloody.Core.GameData.v1;
 using Bloody.Core.Patch.Server;
 using Bloody.Core.Methods;
 using Bloody.Core.Models.v1;
-using BloodyBoss.Utils;
 
 namespace BloodyBoss.DB.Models
 {
     internal class BossEncounterModel
     {
-        private Entity icontEntity;
+        private Entity iconEntity;
 
         public string name { get; set; } = string.Empty;
         public string nameHash { get; set; } = string.Empty;
@@ -103,7 +102,7 @@ namespace BloodyBoss.DB.Models
             return true;
         }
 
-        public bool AddItem(string ItemName, int ItemPrefabID, int Stack, int Chance = 1)
+        public bool AddItem(string ItemName, int ItemPrefabID, int Stack, float Chance = 1)
         {
             if (!GetItem(ItemPrefabID, out ItemEncounterModel item))
             {
@@ -111,7 +110,7 @@ namespace BloodyBoss.DB.Models
                 item.name = ItemName;
                 item.ItemID = ItemPrefabID;
                 item.Stack = Stack;
-                item.Chance = Chance;
+                item.Chance = (int)(Chance * 100);
                 items.Add(item);
                 Database.saveDatabase();
                 return true;
@@ -146,10 +145,16 @@ namespace BloodyBoss.DB.Models
             // Mantener siempre el PrefabGUID original para la apariencia
             var spawnPrefabGUID = new PrefabGUID(PrefabGUID);
             
-            SpawnSystem.SpawnUnitWithCallback(sender, spawnPrefabGUID, new float3(validX, y, validZ), Lifetime + 30, (Entity e) => {
+            SpawnSystem.SpawnUnitWithCallback(sender, spawnPrefabGUID, new float3(validX, y, validZ), Lifetime, (Entity e) => {
                 
                 bossEntity = e;
                 ModifyBoss(sender, e);
+                
+                // Log spawn position once after boss is created
+                Plugin.Logger.LogInfo($"Boss {name}: Spawned at position ({validX:F2}, {y:F2}, {validZ:F2})");
+                
+                // Registration happens inside ModifyBoss now
+                
                 if (PluginConfig.ClearDropTable.Value)
                 {
                     var action = () =>
@@ -181,7 +186,7 @@ namespace BloodyBoss.DB.Models
             _message = _message.Replace("#worldbossname#", FontColorChatSystem.Yellow($"{name}"));
             HourDespawn = DateTime.Parse(Hour).AddSeconds(Lifetime).ToString("HH:mm:ss");
             var _ref_message = (FixedString512Bytes) FontColorChatSystem.Green($"{_message}");
-            ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager,ref _ref_message);
+            ServerChatUtils.SendSystemMessageToAllClients(Plugin.SystemsCore.EntityManager,ref _ref_message);
 
             return true;
         }
@@ -208,7 +213,7 @@ namespace BloodyBoss.DB.Models
             var originalY = y;
             y = locationY;
             
-            SpawnSystem.SpawnUnitWithCallback(sender, spawnPrefabGUID, new float3(validX, locationY, validZ), Lifetime + 30, (Entity e) => {
+            SpawnSystem.SpawnUnitWithCallback(sender, spawnPrefabGUID, new float3(validX, locationY, validZ), Lifetime, (Entity e) => {
 
                 bossEntity = e;
                 ModifyBoss(sender, e);
@@ -218,6 +223,8 @@ namespace BloodyBoss.DB.Models
                 
                 // Initialize boss mechanics system
                 BossMechanicSystem.InitializeBossMechanics(e, this);
+                
+                // Registration happens inside ModifyBoss now
                 
                 if (PluginConfig.ClearDropTable.Value)
                 {
@@ -251,7 +258,7 @@ namespace BloodyBoss.DB.Models
             _message = _message.Replace("#worldbossname#", FontColorChatSystem.Yellow($"{name}"));
             var _ref_message = (FixedString512Bytes)FontColorChatSystem.Green($"{_message}");
             HourDespawn = DateTime.Parse(Hour).AddSeconds(Lifetime).ToString("HH:mm:ss");
-            ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, ref _ref_message);
+            ServerChatUtils.SendSystemMessageToAllClients(Plugin.SystemsCore.EntityManager, ref _ref_message);
 
             return true;
         }
@@ -333,15 +340,6 @@ namespace BloodyBoss.DB.Models
         public void ModifyBoss(Entity user, Entity boss)
         {
             AssetName = Plugin.SystemsCore.PrefabCollectionSystem._PrefabDataLookup[new PrefabGUID(PrefabGUID)].AssetName.ToString();
-            
-            // Log spawn position after a small delay to ensure position is updated
-            CoroutineHandler.StartFrameCoroutine(() => {
-                if (boss.Has<LocalToWorld>())
-                {
-                    var ltw = boss.Read<LocalToWorld>();
-                    Plugin.Logger.LogInfo($"Boss {name}: Spawned at position ({ltw.Position.x:F2}, {ltw.Position.y:F2}, {ltw.Position.z:F2})");
-                }
-            }, 5, 1); // Solo ejecutar 1 vez
             
             var players = GameData.Users.Online.ToList().Count;
             var unit = boss.Read<UnitLevel>();
@@ -442,6 +440,12 @@ namespace BloodyBoss.DB.Models
                 Plugin.Logger.LogInfo($"Boss {name}: Initializing {Mechanics.Count} mechanics");
                 BossMechanicSystem.InitializeBossMechanics(boss, this);
             }
+            
+            // Register boss for damage tracking
+            BossGameplayEventSystem.RegisterBoss(boss, this);
+            
+            // Register boss for optimized tracking
+            BossTrackingSystem.RegisterSpawnedBoss(boss, this);
 
         }
 
@@ -449,7 +453,7 @@ namespace BloodyBoss.DB.Models
         {
 
             SpawnSystem.SpawnUnitWithCallback(boss, Prefabs.MapIcon_POI_VBloodSource, new float2(x, z), Lifetime + 5, (Entity e) => {
-                icontEntity = e;
+                iconEntity = e;
                 e.Add<MapIconData>();
                 e.Add<MapIconTargetEntity>();
                 var mapIconTargetEntity = e.Read<MapIconTargetEntity>();
@@ -468,7 +472,7 @@ namespace BloodyBoss.DB.Models
         {
 
             SpawnSystem.SpawnUnitWithCallback(boss, Prefabs.MapIcon_POI_VBloodSource, new float2(locationX, locationZ), Lifetime + 5, (Entity e) => {
-                icontEntity = e;
+                iconEntity = e;
                 e.Add<MapIconData>();
                 e.Add<MapIconTargetEntity>();
                 var mapIconTargetEntity = e.Read<MapIconTargetEntity>();
@@ -499,7 +503,7 @@ namespace BloodyBoss.DB.Models
                 NameableInteractable _nameableInteractable = entity.Read<NameableInteractable>();
                 if (_nameableInteractable.Name.Value == nameHash + "ibb")
                 {
-                    icontEntity = entity;
+                    iconEntity = entity;
                     entities.Dispose();
                     return true;
                 }
@@ -542,7 +546,7 @@ namespace BloodyBoss.DB.Models
         {
             if (GetIcon())
             {
-                StatChangeUtility.KillOrDestroyEntity(Plugin.SystemsCore.EntityManager, icontEntity, user, user, 0, StatChangeReason.Any, true);
+                StatChangeUtility.KillOrDestroyEntity(Plugin.SystemsCore.EntityManager, iconEntity, user, user, 0, StatChangeReason.Any, true);
             }
         }
         internal void SetLocation(float3 position)
@@ -577,11 +581,6 @@ namespace BloodyBoss.DB.Models
             Database.saveDatabase();
         }
 
-        internal void SetHourDespawn()
-        {
-            HourDespawn = DateTime.Now.AddSeconds(Lifetime - 5).ToString("HH:mm:ss");
-            Database.saveDatabase();
-        }
 
         internal void KillBoss(Entity user)
         {
@@ -630,7 +629,11 @@ namespace BloodyBoss.DB.Models
 
             }
 
-            
+            // Unregister boss from damage tracking
+            if (GetBossEntity())
+            {
+                BossGameplayEventSystem.UnregisterBoss(bossEntity);
+            }
             
             bossSpawn = false;
         }
@@ -641,6 +644,13 @@ namespace BloodyBoss.DB.Models
             var date = DateTime.Now;
             if (date.ToString("HH:mm") == Hour)
             {
+                // Check if we already spawned in this minute
+                if (LastSpawn != DateTime.MinValue && LastSpawn.ToString("HH:mm") == date.ToString("HH:mm"))
+                {
+                    // Already spawned this minute, skip
+                    return;
+                }
+                
                 if (!bossSpawn)
                 {
                     var userModel = GameData.Users.All.FirstOrDefault();
@@ -667,44 +677,7 @@ namespace BloodyBoss.DB.Models
                 }
             }
             
-            //Plugin.Logger.LogInfo($"Check {date.ToString("HH:mm:ss")} vs {HourDespawn}");
-            if (date.ToString("HH:mm:ss") == HourDespawn)
-            {
-                var userModel = GameData.Users.All.FirstOrDefault();
-                var user = userModel.Entity;
-                if (Database.BOSSES.Count > 1 && PluginConfig.RandomBoss.Value)
-                {
-                    if (bossRandom.bossSpawn)
-                    {
-
-                        Plugin.Logger.LogInfo("Despawn Random Boss");
-                        var _message = PluginConfig.DespawnMessageBossTemplate.Value;
-                        _message = _message.Replace("#worldbossname#", FontColorChatSystem.Yellow($"{name}"));
-                        var _ref_message = (FixedString512Bytes)FontColorChatSystem.Green($"{_message}");
-                        ServerChatUtils.SendSystemMessageToAllClients(Plugin.SystemsCore.EntityManager, ref _ref_message);
-                        bossRandom.DespawnBoss(user);
-                        bossRandom.bossSpawn = false;
-                        bossRandom = null;
-                        Database.saveDatabase();
-
-                    }
-                }
-                else
-                {
-                    if (bossSpawn)
-                    {
-                        Plugin.Logger.LogInfo("Despawn Boss");
-                        var _message = PluginConfig.DespawnMessageBossTemplate.Value;
-                        _message = _message.Replace("#worldbossname#", FontColorChatSystem.Yellow($"{name}"));
-                        var _ref_message = (FixedString512Bytes)FontColorChatSystem.Green($"{_message}");
-                        ServerChatUtils.SendSystemMessageToAllClients(Plugin.SystemsCore.EntityManager, ref _ref_message );
-                        DespawnBoss(user);
-                        bossSpawn = false;
-                        Database.saveDatabase();
-
-                    }
-                }
-            }
+            // Manual despawn by HourDespawn is now disabled - relying on LifeTime system
         }
 
         public void AddKiller(string killerCharacterName)
@@ -734,12 +707,12 @@ namespace BloodyBoss.DB.Models
                 var killers = GetKillers();
                 DropItems();
                 var _ref_message = (FixedString512Bytes) message;
-                ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, ref _ref_message);
+                ServerChatUtils.SendSystemMessageToAllClients(Plugin.SystemsCore.EntityManager, ref _ref_message);
 
                 foreach (var killer in killers)
                 {
                     _ref_message = (FixedString512Bytes)$"{FontColorChatSystem.Yellow($"- {killer}")}";
-                    ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, ref _ref_message);
+                    ServerChatUtils.SendSystemMessageToAllClients(Plugin.SystemsCore.EntityManager, ref _ref_message);
                 }
 
                 RemoveKillers();

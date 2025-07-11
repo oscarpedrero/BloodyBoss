@@ -8,24 +8,101 @@ using BloodyBoss.DB.Models;
 using BloodyBoss.Systems;
 using VampireCommandFramework;
 using Bloody.Core.API.v1;
+using ProjectM;
+using Unity.Entities;
+using Stunlock.Core;
+using BloodyBoss.Exceptions;
+using Bloody.Core;
 
 namespace BloodyBoss.Command
 {
-    public static partial class BossCommand
+    [CommandGroup("bb")]
+    public static class AbilityCommands
     {
+        private static KeyValuePair<string, int>? FindVBlood(string searchTerm, ChatCommandContext ctx = null)
+        {
+            var knownVBloods = AbilitySwapSystem.GetKnownVBloodPrefabs();
+            
+            // First try exact match
+            var vblood = knownVBloods.FirstOrDefault(x => x.Key.ToLower() == searchTerm.ToLower());
+            
+            // If not found, try contains
+            if (vblood.Key == null)
+            {
+                vblood = knownVBloods.FirstOrDefault(x => x.Key.ToLower().Contains(searchTerm.ToLower()));
+            }
+            
+            // If still not found, try matching individual words
+            if (vblood.Key == null)
+            {
+                var searchWords = searchTerm.ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                var matches = knownVBloods.Where(x => 
+                    searchWords.All(word => x.Key.ToLower().Contains(word))
+                ).ToList();
+                
+                if (matches.Count == 1)
+                {
+                    vblood = matches.First();
+                }
+                else if (matches.Count > 1 && ctx != null)
+                {
+                    ctx.Reply($"Multiple VBloods found matching '{searchTerm}':");
+                    foreach (var match in matches.Take(5))
+                    {
+                        ctx.Reply($"  - {match.Key}");
+                    }
+                    if (matches.Count > 5)
+                    {
+                        ctx.Reply($"  ... and {matches.Count - 5} more");
+                    }
+                    return null;
+                }
+            }
+            
+            return vblood.Key != null ? vblood : (KeyValuePair<string, int>?)null;
+        }
+        [Command("ability-debug", usage: "<SearchTerm>", description: "Debug VBlood search", adminOnly: true)]
+        public static void DebugVBloodSearch(ChatCommandContext ctx, string searchTerm)
+        {
+            var knownVBloods = AbilitySwapSystem.GetKnownVBloodPrefabs();
+            ctx.Reply($"🔍 Debugging search for: '{searchTerm}'");
+            ctx.Reply($"Total VBloods loaded: {knownVBloods.Count}");
+            
+            // Show first 10 VBloods for reference
+            ctx.Reply($"Sample VBloods:");
+            foreach (var vb in knownVBloods.Take(10))
+            {
+                ctx.Reply($"  - '{vb.Key}'");
+            }
+            
+            // Test exact match
+            var exactMatch = knownVBloods.FirstOrDefault(x => x.Key.ToLower() == searchTerm.ToLower());
+            ctx.Reply($"Exact match: {(exactMatch.Key != null ? exactMatch.Key : "None")}");
+            
+            // Test contains
+            var containsMatches = knownVBloods.Where(x => x.Key.ToLower().Contains(searchTerm.ToLower())).ToList();
+            ctx.Reply($"Contains matches: {containsMatches.Count}");
+            if (containsMatches.Any())
+            {
+                foreach (var match in containsMatches.Take(5))
+                {
+                    ctx.Reply($"  - '{match.Key}'");
+                }
+            }
+        }
+        
         [Command("ability-info", usage: "<VBloodName> [SlotIndex]", description: "Show detailed ability information from a VBlood", adminOnly: true)]
         public static void ShowAbilityInfo(ChatCommandContext ctx, string vbloodName, int slotIndex = -1)
         {
-            var knownVBloods = AbilitySwapSystem.GetKnownVBloodPrefabs();
-            var vblood = knownVBloods.FirstOrDefault(x => x.Key.ToLower().Contains(vbloodName.ToLower()));
-            
-            if (vblood.Key == null)
+            var result = FindVBlood(vbloodName, ctx);
+            if (!result.HasValue)
             {
                 ctx.Reply(FontColorChatSystem.Red($"VBlood '{vbloodName}' not found"));
                 ctx.Reply("Use .bb ability-list to see available VBloods");
-                Plugin.Logger.LogDebug($"VBlood '{vbloodName}' not found in database");
                 return;
             }
+            
+            var vblood = result.Value;
 
             var vbloodInfo = VBloodDatabase.GetVBlood(vblood.Value);
             if (vbloodInfo == null)
@@ -199,14 +276,14 @@ namespace BloodyBoss.Command
                 return;
             }
 
-            var knownVBloods = AbilitySwapSystem.GetKnownVBloodPrefabs();
-            var source = knownVBloods.FirstOrDefault(x => x.Key.ToLower().Contains(sourceVBlood.ToLower()));
-            
-            if (source.Key == null)
+            var result = FindVBlood(sourceVBlood, ctx);
+            if (!result.HasValue)
             {
                 ctx.Reply($"❌ VBlood '{sourceVBlood}' not found");
                 return;
             }
+            
+            var source = result.Value;
 
             var compatibility = AbilityCompatibilitySystem.CheckAbilityCompatibility(
                 boss.PrefabGUID, source.Value, slotIndex);
@@ -266,27 +343,27 @@ namespace BloodyBoss.Command
                     return;
                 }
 
-                var knownVBloods = AbilitySwapSystem.GetKnownVBloodPrefabs();
-                var source = knownVBloods.FirstOrDefault(x => x.Key.ToLower().Contains(sourceVBlood.ToLower()));
-                
-                if (source.Key == null)
+                var result = FindVBlood(sourceVBlood, ctx);
+                if (!result.HasValue)
                 {
                     ctx.Reply($"❌ VBlood '{sourceVBlood}' not found");
                     ctx.Reply("Use .bb ability-info to see available VBloods");
                     return;
                 }
+                
+                var source = result.Value;
 
                 // Check compatibility first
-                var result = AbilityCompatibilitySystem.CheckAbilityCompatibility(
+                var compatResult = AbilityCompatibilitySystem.CheckAbilityCompatibility(
                     boss.PrefabGUID, 
                     source.Value, 
                     slotIndex
                 );
 
-                if (!result.IsCompatible)
+                if (!compatResult.IsCompatible)
                 {
                     ctx.Reply($"❌ Ability is incompatible!");
-                    foreach (var error in result.Errors)
+                    foreach (var error in compatResult.Errors)
                     {
                         ctx.Reply($"  • {error}");
                     }
@@ -311,13 +388,13 @@ namespace BloodyBoss.Command
                     
                     Database.saveDatabase();
                     
-                    var icon = GetCompatibilityIcon(result.Level);
+                    var icon = GetCompatibilityIcon(compatResult.Level);
                     ctx.Reply($"{icon} Configured slot {slotIndex} with ability from {source.Key}");
                     
-                    if (result.Warnings.Any())
+                    if (compatResult.Warnings.Any())
                     {
                         ctx.Reply(FontColorChatSystem.Yellow("Warnings:"));
-                        foreach (var warning in result.Warnings)
+                        foreach (var warning in compatResult.Warnings)
                         {
                             ctx.Reply($"  - {FontColorChatSystem.Yellow(warning)}");
                             Plugin.Logger.LogDebug($"Ability compatibility warning: {warning}");
@@ -345,142 +422,582 @@ namespace BloodyBoss.Command
             }
         }
 
-        [Command("vblood-docs", usage: "", description: "Export VBlood documentation to markdown file", adminOnly: true)]
-        public static void ExportVBloodDocumentation(ChatCommandContext ctx)
+        private static string GetCompatibilityIcon(AbilityCompatibilitySystem.CompatibilityLevel level)
+        {
+            return level switch
+            {
+                AbilityCompatibilitySystem.CompatibilityLevel.Perfect => FontColorChatSystem.Green("[PERFECT]"),
+                AbilityCompatibilitySystem.CompatibilityLevel.Good => FontColorChatSystem.Yellow("[GOOD]"),
+                AbilityCompatibilitySystem.CompatibilityLevel.Warning => FontColorChatSystem.Yellow("[WARNING]"),
+                AbilityCompatibilitySystem.CompatibilityLevel.Incompatible => FontColorChatSystem.Red("[INCOMPATIBLE]"),
+                _ => FontColorChatSystem.White("[UNKNOWN]")
+            };
+        }
+
+        // ===== MODULAR ABILITY SYSTEM COMMANDS =====
+
+        [Command("ability-list", usage: "[filter]", description: "List known VBlood PrefabGUIDs for ability swapping", adminOnly: true)]
+        public static void ListVBloodPrefabs(ChatCommandContext ctx, string filter = "")
+        {
+            var knownVBloods = AbilitySwapSystem.GetKnownVBloodPrefabs();
+            
+            // Apply filter if provided
+            var filteredVBloods = string.IsNullOrEmpty(filter) 
+                ? knownVBloods 
+                : knownVBloods.Where(kvp => kvp.Key.ToLower().Contains(filter.ToLower())).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            
+            ctx.Reply($"🩸 Known VBloods ({filteredVBloods.Count} of {knownVBloods.Count}):");
+            ctx.Reply($"────────────────────────────────────────────────");
+            
+            int count = 0;
+            foreach (var vblood in filteredVBloods.OrderBy(kvp => kvp.Key))
+            {
+                if (count < 20) // Limit output to avoid spam
+                {
+                    ctx.Reply($"├─ {vblood.Key}: {vblood.Value}");
+                }
+                count++;
+            }
+            
+            if (count > 20)
+            {
+                ctx.Reply($"└─ ... and {count - 20} more");
+            }
+            else if (count > 0)
+            {
+                ctx.Reply($"└─ Total: {count} VBloods");
+            }
+            
+            if (count == 0)
+            {
+                ctx.Reply($"No VBloods found matching '{filter}'");
+            }
+            
+            // Debug info
+            ctx.Reply($"");
+            ctx.Reply($"📝 Examples:");
+            ctx.Reply($"   .bb ability-info \"alpha\"");
+            ctx.Reply($"   .bb ability-list wolf");
+        }
+
+        [Command("ability-slot-set", usage: "<BossName> <SlotName> <SourcePrefabGUID> <AbilityIndex> [enabled] [description]", description: "Configure a specific ability slot", adminOnly: true)]
+        public static void SetAbilitySlot(ChatCommandContext ctx, string bossName, string slotName, int sourcePrefabGUID, int abilityIndex, bool enabled = true, string description = "")
         {
             try
             {
-                var outputPath = System.IO.Path.Combine(Database.ConfigPath, "VBlood_Abilities_Documentation.md");
-                var docLines = new List<string>();
-                
-                // Header
-                docLines.Add("# V Rising VBlood Abilities Documentation");
-                docLines.Add($"Generated on: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
-                docLines.Add("");
-                docLines.Add("This document lists all available VBlood bosses and their abilities that can be used with the BloodyBoss mod.");
-                docLines.Add("");
-                docLines.Add("## Command Usage");
-                docLines.Add("```");
-                docLines.Add(".bb ability-slot <BossName> <VBloodName> <SlotIndex> true <Description>");
-                docLines.Add("```");
-                docLines.Add("");
-                docLines.Add("## Available VBloods and Their Abilities");
-                docLines.Add("");
-                
-                var allVBloods = VBloodDatabase.GetAllVBloods().OrderBy(v => v.Value.Level).ThenBy(v => v.Value.Name);
-                
-                foreach (var vblood in allVBloods)
+                if (Database.GetBoss(bossName, out BossEncounterModel boss))
                 {
-                    var info = vblood.Value;
-                    docLines.Add($"### {info.Name} (Level {info.Level})");
-                    docLines.Add($"- **GUID**: {vblood.Key}");
-                    docLines.Add($"- **Can Fly**: {(info.CanFly ? "Yes" : "No")}");
-                    docLines.Add($"- **Features**: {string.Join(", ", info.Features)}");
-                    docLines.Add($"- **Total Abilities**: {info.Abilities.Count}");
-                    docLines.Add("");
-                    
-                    if (info.Abilities.Count > 0)
+                    // Validar que el PrefabGUID existe
+                    var sourcePrefab = new PrefabGUID(sourcePrefabGUID);
+                    if (!Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap.ContainsKey(sourcePrefab))
                     {
-                        docLines.Add("#### Available Ability Slots:");
-                        docLines.Add("| Slot | Category | Cast Time | Description |");
-                        docLines.Add("|------|----------|-----------|-------------|");
-                        
-                        foreach (var ability in info.Abilities.OrderBy(a => a.Key))
+                        throw ctx.Error($"Source PrefabGUID {sourcePrefabGUID} not found in game data");
+                    }
+                    
+                    // Validar nombre del slot
+                    if (string.IsNullOrWhiteSpace(slotName))
+                    {
+                        throw ctx.Error("Slot name cannot be empty");
+                    }
+                    
+                    // Validar compatibilidad de la habilidad usando el nuevo sistema
+                    var compatibilityResult = AbilityCompatibilitySystem.CheckAbilityCompatibility(
+                        boss.PrefabGUID, sourcePrefabGUID, abilityIndex);
+                    
+                    var bossInfo = VBloodDatabase.GetVBlood(boss.PrefabGUID);
+                    var sourceInfo = VBloodDatabase.GetVBlood(sourcePrefabGUID);
+                    
+                    if (!compatibilityResult.IsCompatible)
+                    {
+                        ctx.Reply($"❌ ERROR: This ability is incompatible with {bossInfo?.Name ?? "this boss"}");
+                        foreach (var error in compatibilityResult.Errors)
                         {
-                            var slot = ability.Key;
-                            var abilityInfo = ability.Value;
-                            
-                            var description = GetAbilityDescription(abilityInfo);
-                            var castTime = abilityInfo.CastTime > 0 ? $"{abilityInfo.CastTime}s" : "Instant";
-                            
-                            docLines.Add($"| {slot} | {abilityInfo.Category} | {castTime} | {description} |");
+                            ctx.Reply($"├─ ⛔ {error}");
+                        }
+                        ctx.Reply($"└─ This ability cannot be used on this boss");
+                        return;
+                    }
+                    else if (compatibilityResult.Level != AbilityCompatibilitySystem.CompatibilityLevel.Perfect)
+                    {
+                        ctx.Reply($"⚠️ WARNING: Compatibility level: {compatibilityResult.Level}");
+                        foreach (var warning in compatibilityResult.Warnings)
+                        {
+                            ctx.Reply($"├─ ⚡ {warning}");
+                        }
+                        
+                        if (sourceInfo != null && sourceInfo.Abilities.TryGetValue(abilityIndex, out var abilityInfo))
+                        {
+                            ctx.Reply($"├─ Category: {abilityInfo.Category}");
+                            if (abilityInfo.CastTime > 0)
+                            {
+                                ctx.Reply($"├─ Cast Time: {abilityInfo.CastTime}s");
+                            }
+                            if (abilityInfo.SpawnedPrefabs.Count > 0)
+                            {
+                                ctx.Reply($"├─ Spawns: {abilityInfo.SpawnedPrefabs.Count} projectile(s)");
+                            }
+                        }
+                        ctx.Reply($"└─ The ability will work but may have visual or gameplay issues");
+                    }
+                    
+                    // Crear o actualizar el slot
+                    boss.CustomAbilities[slotName] = new CustomAbilitySlot(sourcePrefabGUID, abilityIndex, enabled, description);
+                    Database.saveDatabase();
+                    
+                    ctx.Reply($"🎯 Configured ability slot '{slotName}' for boss '{bossName}':");
+                    ctx.Reply($"├─ Source PrefabGUID: {sourcePrefabGUID}");
+                    ctx.Reply($"├─ Ability Index: {abilityIndex}");
+                    ctx.Reply($"├─ Enabled: {(enabled ? "✅ Yes" : "❌ No")}");
+                    ctx.Reply($"├─ Description: {(string.IsNullOrEmpty(description) ? "None" : description)}");
+                    ctx.Reply($"└─ Compatibility: {GetCompatibilityIcon(compatibilityResult.Level)} {compatibilityResult.Level}");
+                    
+                    var knownVBloods = AbilitySwapSystem.GetKnownVBloodPrefabs();
+                    var vbloodName = knownVBloods.FirstOrDefault(x => x.Value == sourcePrefabGUID).Key ?? "Unknown VBlood";
+                    ctx.Reply($"🩸 Source VBlood: {vbloodName}");
+                }
+                else
+                {
+                    throw new BossDontExistException();
+                }
+            }
+            catch (BossDontExistException)
+            {
+                throw ctx.Error($"Boss '{bossName}' does not exist");
+            }
+        }
+
+        [Command("ability-slot-remove", usage: "<BossName> <SlotName>", description: "Remove a specific ability slot", adminOnly: true)]
+        public static void RemoveAbilitySlot(ChatCommandContext ctx, string bossName, string slotName)
+        {
+            try
+            {
+                if (Database.GetBoss(bossName, out BossEncounterModel boss))
+                {
+                    if (!boss.CustomAbilities.ContainsKey(slotName))
+                    {
+                        throw ctx.Error($"Ability slot '{slotName}' does not exist for boss '{bossName}'");
+                    }
+                    
+                    boss.CustomAbilities.Remove(slotName);
+                    Database.saveDatabase();
+                    
+                    ctx.Reply($"🗑️ Removed ability slot '{slotName}' from boss '{bossName}'");
+                    ctx.Reply($"└─ Remaining slots: {boss.CustomAbilities.Count}");
+                }
+                else
+                {
+                    throw new BossDontExistException();
+                }
+            }
+            catch (BossDontExistException)
+            {
+                throw ctx.Error($"Boss '{bossName}' does not exist");
+            }
+        }
+
+        [Command("ability-slot-toggle", usage: "<BossName> <SlotName>", description: "Enable/disable a specific ability slot", adminOnly: true)]
+        public static void ToggleAbilitySlot(ChatCommandContext ctx, string bossName, string slotName)
+        {
+            try
+            {
+                if (Database.GetBoss(bossName, out BossEncounterModel boss))
+                {
+                    if (!boss.CustomAbilities.ContainsKey(slotName))
+                    {
+                        throw ctx.Error($"Ability slot '{slotName}' does not exist for boss '{bossName}'");
+                    }
+                    
+                    var slot = boss.CustomAbilities[slotName];
+                    slot.Enabled = !slot.Enabled;
+                    Database.saveDatabase();
+                    
+                    ctx.Reply($"🔄 Toggled ability slot '{slotName}' for boss '{bossName}':");
+                    ctx.Reply($"└─ Status: {(slot.Enabled ? "✅ Enabled" : "❌ Disabled")}");
+                }
+                else
+                {
+                    throw new BossDontExistException();
+                }
+            }
+            catch (BossDontExistException)
+            {
+                throw ctx.Error($"Boss '{bossName}' does not exist");
+            }
+        }
+
+        [Command("ability-slot-list", usage: "<BossName>", description: "List all configured ability slots for a boss", adminOnly: true)]
+        public static void ListAbilitySlots(ChatCommandContext ctx, string bossName)
+        {
+            try
+            {
+                if (Database.GetBoss(bossName, out BossEncounterModel boss))
+                {
+                    if (boss.CustomAbilities.Count == 0)
+                    {
+                        ctx.Reply($"📋 Boss '{bossName}' has no custom ability slots configured");
+                        ctx.Reply($"└─ Use .bb ability-slot-set to configure abilities");
+                        return;
+                    }
+                    
+                    ctx.Reply($"📋 Custom ability slots for boss '{bossName}':");
+                    ctx.Reply($"────────────────────────────────────────────────");
+                    
+                    var knownVBloods = AbilitySwapSystem.GetKnownVBloodPrefabs();
+                    
+                    foreach (var slot in boss.CustomAbilities)
+                    {
+                        var vbloodName = knownVBloods.FirstOrDefault(x => x.Value == slot.Value.SourcePrefabGUID).Key ?? "Unknown";
+                        var status = slot.Value.Enabled ? "✅" : "❌";
+                        
+                        ctx.Reply($"├─ Slot '{slot.Key}': {status}");
+                        ctx.Reply($"│  ├─ Source: {vbloodName} ({slot.Value.SourcePrefabGUID})");
+                        ctx.Reply($"│  ├─ Ability Index: {slot.Value.AbilityIndex}");
+                        ctx.Reply($"│  └─ Description: {(string.IsNullOrEmpty(slot.Value.Description) ? "None" : slot.Value.Description)}");
+                    }
+                    
+                    var enabledCount = boss.CustomAbilities.Values.Count(s => s.Enabled);
+                    ctx.Reply($"└─ Total: {boss.CustomAbilities.Count} slots ({enabledCount} enabled)");
+                }
+                else
+                {
+                    throw new BossDontExistException();
+                }
+            }
+            catch (BossDontExistException)
+            {
+                throw ctx.Error($"Boss '{bossName}' does not exist");
+            }
+        }
+
+        [Command("ability-slot-clear", usage: "<BossName>", description: "Remove all custom ability slots from a boss", adminOnly: true)]
+        public static void ClearAbilitySlots(ChatCommandContext ctx, string bossName)
+        {
+            try
+            {
+                if (Database.GetBoss(bossName, out BossEncounterModel boss))
+                {
+                    var removedCount = boss.CustomAbilities.Count;
+                    boss.CustomAbilities.Clear();
+                    Database.saveDatabase();
+                    
+                    ctx.Reply($"🧹 Cleared all custom ability slots from boss '{bossName}'");
+                    ctx.Reply($"└─ Removed {removedCount} slots");
+                }
+                else
+                {
+                    throw new BossDontExistException();
+                }
+            }
+            catch (BossDontExistException)
+            {
+                throw ctx.Error($"Boss '{bossName}' does not exist");
+            }
+        }
+
+        [Command("ability-inspect", usage: "<SourcePrefabGUID>", description: "Inspect available abilities of a VBlood", adminOnly: true)]
+        public static void InspectAbilities(ChatCommandContext ctx, int sourcePrefabGUID)
+        {
+            try
+            {
+                var sourcePrefab = new PrefabGUID(sourcePrefabGUID);
+                if (!Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(sourcePrefab, out Entity sourceEntity))
+                {
+                    throw ctx.Error($"PrefabGUID {sourcePrefabGUID} not found");
+                }
+                
+                var entityManager = Core.World.EntityManager;
+                var knownVBloods = AbilitySwapSystem.GetKnownVBloodPrefabs();
+                var vbloodName = knownVBloods.FirstOrDefault(x => x.Value == sourcePrefabGUID).Key ?? "Unknown VBlood";
+                
+                ctx.Reply($"🔍 Detailed abilities for {vbloodName} (PrefabGUID: {sourcePrefabGUID}):");
+                ctx.Reply($"────────────────────────────────────────────────");
+                
+                // Check AbilityBar_Shared
+                if (sourceEntity.Has<AbilityBar_Shared>())
+                {
+                    ctx.Reply($"✅ Has AbilityBar_Shared component");
+                }
+                else
+                {
+                    ctx.Reply($"❌ No AbilityBar_Shared component");
+                    return;
+                }
+                
+                // Check AbilityGroupSlotBuffer with detailed analysis
+                if (entityManager.HasBuffer<AbilityGroupSlotBuffer>(sourceEntity))
+                {
+                    var buffer = entityManager.GetBuffer<AbilityGroupSlotBuffer>(sourceEntity);
+                    ctx.Reply($"✅ Found {buffer.Length} ability groups:");
+                    ctx.Reply($"");
+                    
+                    for (int i = 0; i < buffer.Length && i < 20; i++)
+                    {
+                        try
+                        {
+                            var abilityGroup = buffer[i];
+                            string abilityInfo = AnalyzeAbilityGroup(abilityGroup, i);
+                            ctx.Reply($"├─ Index {i}: {abilityInfo}");
+                        }
+                        catch (Exception ex)
+                        {
+                            ctx.Reply($"├─ Index {i}: Error analyzing - {ex.Message}");
                         }
                     }
                     
-                    docLines.Add("");
-                    docLines.Add("**Example Commands:**");
-                    
-                    // Provide example commands for the first 3 abilities
-                    var examples = info.Abilities.Take(3);
-                    foreach (var example in examples)
+                    if (buffer.Length > 20)
                     {
-                        var simpleName = info.Name.Replace(" the ", " ").Replace(" ", "_");
-                        docLines.Add($"```");
-                        docLines.Add($".bb ability-slot \"YourBoss\" \"{info.Name}\" {example.Key} true \"{GetAbilityDescription(example.Value)}\"");
-                        docLines.Add($"```");
+                        ctx.Reply($"└─ ... and {buffer.Length - 20} more abilities (use .bb ability-export-all for complete list)");
                     }
                     
-                    docLines.Add("");
-                    docLines.Add("---");
-                    docLines.Add("");
+                    ctx.Reply($"");
+                    ctx.Reply($"💡 Usage examples:");
+                    for (int i = 0; i < Math.Min(buffer.Length, 3); i++)
+                    {
+                        ctx.Reply($"   .bb ability-slot-set \"YourBoss\" \"slot{i + 1}\" {sourcePrefabGUID} {i} true \"{vbloodName} ability {i + 1}\"");
+                    }
                 }
-                
-                // Footer with additional information
-                docLines.Add("## Compatibility Notes");
-                docLines.Add("");
-                docLines.Add("- **Beast** abilities work best on beast-type bosses");
-                docLines.Add("- **Humanoid** abilities work best on humanoid/vampire bosses");
-                docLines.Add("- **Flight** abilities require bosses that can fly");
-                docLines.Add("- **Transformation** abilities may have visual issues on incompatible models");
-                docLines.Add("");
-                docLines.Add("## Tips");
-                docLines.Add("");
-                docLines.Add("1. Use `.bb ability-suggest <BossName>` to get compatible ability suggestions");
-                docLines.Add("2. Use `.bb ability-test <BossName> <VBloodName> <Slot>` to test compatibility before applying");
-                docLines.Add("3. Some abilities may have warnings but still work with minor visual issues");
-                docLines.Add("4. Avoid mixing abilities from very different creature types (e.g., spider abilities on humanoids)");
-                
-                // Write to file
-                System.IO.File.WriteAllLines(outputPath, docLines);
-                
-                ctx.Reply(FontColorChatSystem.Green($"VBlood documentation exported successfully!"));
-                ctx.Reply($"File location: {outputPath}");
-                ctx.Reply($"Total VBloods documented: {allVBloods.Count()}");
-                
-                Plugin.Logger.LogInfo($"VBlood documentation exported to {outputPath}");
+                else
+                {
+                    ctx.Reply($"❌ No AbilityGroupSlotBuffer - VBlood may not be compatible with modular system");
+                }
             }
             catch (Exception ex)
             {
-                ctx.Reply(FontColorChatSystem.Red($"Error exporting documentation: {ex.Message}"));
-                Plugin.Logger.LogError($"Error exporting VBlood documentation: {ex}");
+                throw ctx.Error($"Error inspecting abilities: {ex.Message}");
             }
         }
         
-        private static string GetAbilityDescription(AbilityStaticInfo ability)
+        private static string AnalyzeAbilityGroup(AbilityGroupSlotBuffer abilityGroup, int index)
         {
-            var parts = new List<string>();
-            
-            if (ability.IsCombo)
-                parts.Add($"{ability.ComboLength}-hit combo");
-            
-            if (ability.IsChanneled)
-                parts.Add("Channeled");
-                
-            if (ability.RequiresFlight)
-                parts.Add("Requires flight");
-                
-            if (ability.SpawnedPrefabs.Count > 0)
+            try
             {
-                var spawnTypes = ability.SpawnedPrefabs.Select(s => 
+                // Try to extract meaningful information from the ability group
+                var info = new List<string>();
+                
+                // Attempt to get ability properties using reflection (careful with Il2Cpp)
+                var type = abilityGroup.GetType();
+                var fields = type.GetFields();
+                
+                foreach (var field in fields)
                 {
-                    if (s.SpawnName.Contains("Projectile")) return "projectile";
-                    if (s.SpawnName.Contains("Buff")) return "buff";
-                    if (s.SpawnName.Contains("Area")) return "AoE";
-                    if (s.SpawnName.Contains("Travel")) return "movement";
-                    return "effect";
-                }).Distinct();
+                    try
+                    {
+                        var value = field.GetValue(abilityGroup);
+                        if (value != null)
+                        {
+                            if (value is PrefabGUID prefabGuid && prefabGuid.GuidHash != 0)
+                            {
+                                // Try to get the name of this ability from the prefab system
+                                if (Plugin.SystemsCore.PrefabCollectionSystem._PrefabDataLookup.TryGetValue(prefabGuid, out var prefabData))
+                                {
+                                    var assetName = prefabData.AssetName.ToString();
+                                    if (assetName.Contains("Ability") || assetName.Contains("Spell") || assetName.Contains("Attack"))
+                                    {
+                                        // Clean up the asset name to be more readable
+                                        var cleanName = CleanAbilityName(assetName);
+                                        info.Add($"'{cleanName}'");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Skip fields that can't be accessed
+                    }
+                }
                 
-                parts.Add(string.Join("/", spawnTypes));
+                // Classify ability type based on index (rough heuristic)
+                string type_guess = index switch
+                {
+                    0 => "Primary Attack",
+                    1 => "Secondary Attack", 
+                    2 => "Special/Spell",
+                    3 => "Ultimate/Spell",
+                    _ when index < 6 => "Combat Ability",
+                    _ when index < 10 => "Advanced Ability",
+                    _ => "System Ability"
+                };
+                
+                if (info.Count > 0)
+                {
+                    return $"{type_guess} - {string.Join(", ", info)}";
+                }
+                else
+                {
+                    return $"{type_guess} - Available";
+                }
             }
-            
-            if (ability.ExtraData.ContainsKey("BehaviorType"))
+            catch (Exception ex)
             {
-                var behavior = ability.ExtraData["BehaviorType"].ToString();
-                if (behavior != "None" && !parts.Any(p => p.ToLower().Contains(behavior.ToLower())))
-                    parts.Add(behavior);
+                return $"Available (analysis failed: {ex.Message})";
             }
-            
-            return parts.Count > 0 ? string.Join(", ", parts) : ability.Category.ToString();
+        }
+        
+        private static string CleanAbilityName(string assetName)
+        {
+            // Clean up asset names to be more readable
+            return assetName
+                .Replace("AB_", "")
+                .Replace("CHAR_", "")
+                .Replace("VBlood_", "")
+                .Replace("_", " ")
+                .Replace("Projectile", "Proj")
+                .Replace("Attack", "Atk")
+                .Replace("Ability", "")
+                .Trim();
+        }
+        
+        private static string AnalyzeAbilityGroupForDocs(AbilityGroupSlotBuffer abilityGroup, int index)
+        {
+            try
+            {
+                // Try to extract meaningful information from the ability group
+                var abilityNames = new List<string>();
+                
+                // Attempt to get ability properties using reflection (careful with Il2Cpp)
+                var type = abilityGroup.GetType();
+                var fields = type.GetFields();
+                
+                foreach (var field in fields)
+                {
+                    try
+                    {
+                        var value = field.GetValue(abilityGroup);
+                        if (value != null)
+                        {
+                            if (value is PrefabGUID prefabGuid && prefabGuid.GuidHash != 0)
+                            {
+                                // Try to get the name of this ability from the prefab system
+                                if (Plugin.SystemsCore.PrefabCollectionSystem._PrefabDataLookup.TryGetValue(prefabGuid, out var prefabData))
+                                {
+                                    var assetName = prefabData.AssetName.ToString();
+                                    if (assetName.Contains("Ability") || assetName.Contains("Spell") || assetName.Contains("Attack") || assetName.Contains("Cast"))
+                                    {
+                                        // Clean up the asset name to be more readable
+                                        var cleanName = CleanAbilityName(assetName);
+                                        if (!string.IsNullOrWhiteSpace(cleanName) && cleanName.Length > 2)
+                                        {
+                                            abilityNames.Add($"`{cleanName}`");
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Skip fields that can't be accessed
+                    }
+                }
+                
+                // Classify ability type based on index (heuristic based on common VBlood patterns)
+                string type_classification = index switch
+                {
+                    0 => "**Primary Attack**",
+                    1 => "**Secondary Attack**", 
+                    2 => "**Special/Spell**",
+                    3 => "**Ultimate/Spell**",
+                    _ when index < 6 => "**Combat Ability**",
+                    _ when index < 10 => "**Advanced Ability**",
+                    _ => "**System Ability**"
+                };
+                
+                // Build the description
+                if (abilityNames.Count > 0)
+                {
+                    var uniqueNames = abilityNames.Distinct().Take(3); // Limit to avoid clutter
+                    return $"{type_classification} - {string.Join(", ", uniqueNames)}";
+                }
+                else
+                {
+                    return $"{type_classification} - Available for use";
+                }
+            }
+            catch (Exception)
+            {
+                // Fallback for any errors
+                string type_fallback = index switch
+                {
+                    0 => "**Primary Attack**",
+                    1 => "**Secondary Attack**", 
+                    2 => "**Special/Spell**",
+                    3 => "**Ultimate/Spell**",
+                    _ => "**Combat Ability**"
+                };
+                return $"{type_fallback} - Available for use";
+            }
+        }
+
+        [Command("ability-preset", usage: "<BossName> <PresetName>", description: "Apply a predefined ability preset", adminOnly: true)]
+        public static void ApplyAbilityPreset(ChatCommandContext ctx, string bossName, string presetName)
+        {
+            try
+            {
+                if (Database.GetBoss(bossName, out BossEncounterModel boss))
+                {
+                    var preset = GetAbilityPreset(presetName.ToLower());
+                    if (preset == null)
+                    {
+                        ctx.Reply($"❌ Unknown preset '{presetName}'. Available presets:");
+                        foreach (var availablePreset in GetAvailablePresets())
+                        {
+                            ctx.Reply($"├─ {availablePreset}");
+                        }
+                        return;
+                    }
+                    
+                    boss.CustomAbilities.Clear();
+                    foreach (var slot in preset)
+                    {
+                        boss.CustomAbilities[slot.Key] = slot.Value;
+                    }
+                    Database.saveDatabase();
+                    
+                    ctx.Reply($"📦 Applied preset '{presetName}' to boss '{bossName}':");
+                    ctx.Reply($"└─ Configured {preset.Count} ability slots");
+                }
+                else
+                {
+                    throw new BossDontExistException();
+                }
+            }
+            catch (BossDontExistException)
+            {
+                throw ctx.Error($"Boss '{bossName}' does not exist");
+            }
+        }
+        
+        // Presets helper methods
+        private static Dictionary<string, CustomAbilitySlot> GetAbilityPreset(string presetName)
+        {
+            return presetName switch
+            {
+                "dracula-mix" => new Dictionary<string, CustomAbilitySlot>
+                {
+                    ["melee1"] = new CustomAbilitySlot(-327335305, 0, true, "Dracula melee attack"),
+                    ["spell1"] = new CustomAbilitySlot(-327335305, 2, true, "Dracula spell"),
+                    ["special"] = new CustomAbilitySlot(939467639, 1, true, "Vincent frost ability")
+                },
+                "frost-warrior" => new Dictionary<string, CustomAbilitySlot>
+                {
+                    ["melee1"] = new CustomAbilitySlot(1112948824, 0, true, "Tristan melee"),
+                    ["melee2"] = new CustomAbilitySlot(1112948824, 1, true, "Tristan charge"),
+                    ["frost"] = new CustomAbilitySlot(939467639, 2, true, "Vincent frost blast")
+                },
+                "spell-caster" => new Dictionary<string, CustomAbilitySlot>
+                {
+                    ["spell1"] = new CustomAbilitySlot(-99012450, 1, true, "Christina heal"),
+                    ["spell2"] = new CustomAbilitySlot(-99012450, 2, true, "Christina light"),
+                    ["spell3"] = new CustomAbilitySlot(-327335305, 3, true, "Dracula dark spell")
+                },
+                _ => null
+            };
+        }
+        
+        private static string[] GetAvailablePresets()
+        {
+            return new[] { "dracula-mix", "frost-warrior", "spell-caster" };
         }
     }
 }

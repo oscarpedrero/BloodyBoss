@@ -31,13 +31,13 @@ New administrative and player commands for enhanced control:
 - **Teleportation system** - configurable player/admin access to boss locations
 - **Force mechanics** - manually trigger drops, reset kill counters
 
-### 🧪 **Modular Ability System**
-Revolutionary new system for mixing and matching VBlood abilities:
-- **Slot-based configuration** - Configure up to 6 individual ability slots per boss
-- **Cross-VBlood mixing** - Combine abilities from different VBloods
-- **Visual preservation** - Bosses maintain their original appearance while using new abilities
-- **Predefined presets** - Quick-apply popular ability combinations
-- **Real-time discovery** - Automatically discover all available VBlood abilities
+### 🎯 **Boss Mechanics System**
+Add special combat mechanics to create challenging encounters:
+- **Stun Mechanic** - Stun players with visual warnings
+- **AoE Attacks** - Create damaging areas with different elements
+- **Slow Mechanic** - Drain energy and slow players
+- **Absorb Mechanic** - Boss drains health or shields
+- **Phase-based triggers** - Mechanics activate at health thresholds
 
 ### ⚙️ **Enhanced Configuration**
 - **Modular settings** for all new systems
@@ -65,7 +65,7 @@ Revolutionary new system for mixing and matching VBlood abilities:
 
 ## ✨ Key Features
 
-- 🧪 **Modular Ability System** - Mix and match abilities from different VBloods while preserving appearance
+- 🎯 **Boss Mechanics** - Add stun, AoE, slow and absorb mechanics to encounters
 - 🎯 **Smart Boss Scaling** - Automatically adjusts difficulty based on server population
 - 📊 **Progressive Challenges** - Bosses become stronger over multiple spawns
 - 🎪 **Epic Encounters** - Special phases with dramatic announcements
@@ -92,22 +92,22 @@ Ensure the following mods are installed for seamless integration:
 2. **Launch** your server to generate config files
 3. **Configure** your settings in `BepInEx/Config/BloodyBoss.cfg`
 4. **Create** your first boss with `.bb create "My Boss" -1905691330 90 2 1800`
-5. **Set location** with `.bb set location "My Boss"`
-6. **Set spawn time** with `.bb set hour "My Boss" 20:00`
-7. **Add rewards** with `.bb items add "My Boss" "Blood Essence" 1055853475 50 100`
+5. **Set location** with `.bb location set "My Boss"`
+6. **Set spawn time** with `.bb schedule set "My Boss" 20:00`
+7. **Add rewards** with `.bb item add "My Boss" "Blood Essence" 862477668 50 1.0`
 8. **Start** the encounter with `.bb start "My Boss"`
 
 ## 📚 Documentation
 
 | Topic | Description |
 |-------|-------------|
-| [📦 Installation](docs/INSTALLATION.md) | Complete installation guide and troubleshooting |
-| [⚙️ Configuration](docs/CONFIGURATION.md) | Detailed configuration options and examples |
-| [🎮 Commands](docs/COMMANDS.md) | Complete command reference with examples |
-| [🧪 Modular Abilities](docs/MODULAR-ABILITIES.md) | **NEW!** Complete guide to mixing VBlood abilities |
-| [🚀 Advanced Features](docs/ADVANCED-FEATURES.md) | Dynamic scaling, progressive difficulty, and phase systems |
-| [🛠️ Troubleshooting](docs/TROUBLESHOOTING.md) | Common issues and solutions |
-| [📝 Examples](docs/EXAMPLES.md) | Step-by-step setup guides and use cases |
+| [📦 Installation](doc/INSTALLATION.md) | Complete installation guide and troubleshooting |
+| [⚙️ Configuration](doc/CONFIGURATION.md) | Detailed configuration options and examples |
+| [🎮 Commands](doc/commands/index.md) | Complete command reference with examples |
+| [🧪 Boss Mechanics](doc/BOSS-MECHANICS.md) | Available combat mechanics (stun, aoe, slow, absorb) |
+| [🚀 Advanced Features](doc/ADVANCED-FEATURES.md) | Dynamic scaling, progressive difficulty, and phase systems |
+| [🛠️ Troubleshooting](doc/TROUBLESHOOTING.md) | Common issues and solutions |
+| [📝 Examples](doc/EXAMPLES.md) | Step-by-step setup guides and use cases |
 
 ## 🎯 Example Boss Encounter
 
@@ -116,15 +116,15 @@ Ensure the following mods are installed for seamless integration:
 .bb create "Ancient Dracula" -1905691330 100 2 2400
 
 # Set location (stand where you want the boss to spawn)
-.bb set location "Ancient Dracula"
+.bb location set "Ancient Dracula"
 
 # Schedule for 8 PM server time
-.bb set hour "Ancient Dracula" 20:00
+.bb schedule set "Ancient Dracula" 20:00
 
 # Add epic rewards
-.bb items add "Ancient Dracula" "Greater Blood Essence" 1055853475 100 75
-.bb items add "Ancient Dracula" "Legendary Weapon Box" -257494203 1 25
-.bb items add "Ancient Dracula" "Ancient Relic" 429052660 5 50
+.bb item add "Ancient Dracula" "Greater Blood Essence" 862477668 100 0.75
+.bb item add "Ancient Dracula" "Legendary Weapon Box" -257494203 1 0.25
+.bb item add "Ancient Dracula" "Ancient Relic" 429052660 5 0.50
 
 # Enable dynamic scaling for this encounter
 # Configure in BloodyBoss.cfg:
@@ -165,126 +165,83 @@ LegendaryPrefix = 💀 LEGENDARY THREAT!
 **Basic Commands:**
 ```bash
 .bb create "Shadow Lord" -1905691330 95 3 3000
-.bb set location "Shadow Lord"
-.bb set hour "Shadow Lord" 21:30
+.bb location set "Shadow Lord"
+.bb schedule set "Shadow Lord" 21:30
 .bb start "Shadow Lord"
 ```
 
 **Advanced Commands (v2.1.0):**
 ```bash
 .bb status "Shadow Lord"           # Detailed boss information
-.bb pause "Shadow Lord"            # Pause boss timer
-.bb resume "Shadow Lord"           # Resume boss timer
-.bb despawn "Shadow Lord"          # Force despawn boss
-.bb teleport "Shadow Lord"         # Teleport to boss (if enabled)
-.bb debug "Shadow Lord"            # Technical debug information
+.bb schedule pause "Shadow Lord"   # Pause boss timer
+.bb schedule resume "Shadow Lord"  # Resume boss timer
+.bb despawn "Shadow Lord"          # Force despawn boss (deprecated)
+.bb location teleport "Shadow Lord" # Teleport to boss location
+.bb debug info "Shadow Lord"       # Technical debug information
 ```
 
-**Modular Ability Commands:**
+**Boss Mechanics Commands:**
 ```bash
-# Configure individual ability slots
-.bb ability-slot-set "Boss" "melee1" -327335305 0 true "Dracula melee"
-.bb ability-slot-set "Boss" "spell1" 939467639 2 true "Vincent frost"
+# Add mechanics with quotes around options!
+.bb mechanic-add "Boss" stun "--hp 90 --target random --duration 3"
+.bb mechanic-add "Boss" aoe "--hp 75 --aoe_type fire --radius 10"
+.bb mechanic-add "Boss" slow "--hp 50 --radius 15 --min_players 3"
+.bb mechanic-add "Boss" absorb "--hp 25 --type health --amount 100"
 
-# Apply predefined presets
-.bb ability-preset "Boss" "dracula-mix"    # Dracula + Vincent combo
-.bb ability-preset "Boss" "frost-warrior"  # Tristan + Vincent combo
-.bb ability-preset "Boss" "spell-caster"   # Christina + Dracula combo
+# Manage mechanics
+.bb mechanic-list "Boss"              # List all configured mechanics
+.bb mechanic-toggle "Boss" 0          # Enable/disable specific mechanic
+.bb mechanic-remove "Boss" 0          # Remove specific mechanic
+.bb mechanic-clear "Boss"             # Clear all mechanics
 
-# Manage ability slots
-.bb ability-slot-list "Boss"              # List all configured slots
-.bb ability-slot-toggle "Boss" "melee1"   # Enable/disable specific slot
-.bb ability-slot-remove "Boss" "spell1"   # Remove specific slot
-.bb ability-slot-clear "Boss"             # Clear all slots
-
-# Discovery and documentation
-.bb ability-discover                       # Discover all VBloods in game
-.bb ability-export-all                    # Generate complete documentation
-.bb ability-inspect -327335305            # Inspect specific VBlood abilities
+# Test and debug
+.bb mechanic-test "Boss" 0            # Manually trigger a mechanic
+.bb mechanic-help                     # Show mechanic examples
 ```
 
-## 🧪 Modular Ability System Examples
+## 🎯 Boss Mechanics Examples
 
-Create bosses with unique ability combinations:
+Create challenging encounters with combat mechanics:
 
 ```bash
-# Create a Vincent that looks like Vincent but fights like Dracula + others
+# Create a boss with multiple mechanics
 .bb create "VincentMix" 939467639 350 6 3000
-.bb set location "VincentMix"
+.bb location set "VincentMix"
 
-# Configure mixed abilities from different VBloods
-.bb ability-slot-set "VincentMix" "melee1" -327335305 0 true "Dracula dark melee"
-.bb ability-slot-set "VincentMix" "melee2" 1112948824 1 true "Tristan knight charge"
-.bb ability-slot-set "VincentMix" "spell1" -99012450 1 true "Christina holy light"
-.bb ability-slot-set "VincentMix" "spell2" -99012450 2 true "Christina divine blast"
-.bb ability-slot-set "VincentMix" "special1" 1666186131 0 true "Ungora web attack"
-.bb ability-slot-set "VincentMix" "special2" -1347412392 1 true "Octavian militia strike"
+# Add combat mechanics (remember quotes!)
+.bb mechanic-add "VincentMix" stun "--hp 90 --target random --duration 3"
+.bb mechanic-add "VincentMix" aoe "--hp 75 --aoe_type frost --radius 10 --damage 500"
+.bb mechanic-add "VincentMix" slow "--hp 50 --radius 15 --min_players 3"
+.bb mechanic-add "VincentMix" absorb "--hp 25 --type health --amount 100"
 
 # Start the encounter
 .bb start "VincentMix"
 ```
 
-**Result:** A boss that appears as Vincent visually but uses a deadly combination of melee attacks from Dracula and Tristan, holy magic from Christina, web attacks from Ungora, and militia strikes from Octavian!
+**Result:** A boss with escalating difficulty phases that stuns players, creates frost damage zones, slows the raid, and absorbs health to heal itself!
 
-### 📋 Available VBlood Abilities
+### 🎯 Available Mechanics
 
-Based on game discovery, here are the confirmed VBloods with their available ability slots:
+| Mechanic | Description | Key Parameters |
+|----------|-------------|----------------|
+| **stun** | Stuns players with warning indicator | target, duration, mark_duration |
+| **aoe** | Creates damaging areas | aoe_type, radius, damage, pattern |
+| **slow** | Slows and drains energy | radius, min_players, global_radius |
+| **absorb** | Drains health or shields | type (health/shield/all), amount |
 
-| VBlood Name | PrefabGUID | Ability Slots | Compatible |
-|-------------|------------|---------------|------------|
-| **Dracula** | -327335305 | 37 slots | ✅ Excellent |
-| **The Winged Horror** | 1233988687 | 21 slots | ✅ Excellent |
-| **Cyril the Cursed Smith** | -1347412392 | 16 slots | ✅ Very Good |
-| **Frostmaw the Mountain Terror** | 24378719 | 12 slots | ✅ Very Good |
-| **Meredith the Bright Archer** | -1065970933 | 12 slots | ✅ Very Good |
-| **Beatrice the Tailor** | -1942352521 | 11 slots | ✅ Good |
-| **Alpha Wolf** | -1905691330 | 10 slots | ✅ Good |
-| **Christina the Sun Priestess** | -99012450 | 10 slots | ✅ Good |
-| **Tristan the Vampire Knight** | 1112948824 | 10 slots | ✅ Good |
-| **Errol the Stonebreaker** | 1106149033 | 9 slots | ✅ Good |
-| **Putrid Rat** | -1391546313 | 9 slots | ✅ Good |
-| **Quincy the Bandit King** | -1659822956 | 9 slots | ✅ Good |
-| **Cursed Wanderer** | 577478542 | 8 slots | ✅ Good |
-| **Jade the Vampire Hunter** | -2025101517 | 8 slots | ✅ Good |
-| **Manticore** | 1945956671 | 8 slots | ✅ Good |
-| **Raziel the Shepherd** | -680831417 | 8 slots | ✅ Good |
-| **Terah the Geomancer** | -203043163 | 8 slots | ✅ Good |
-| **Terrorclaw the Ogre** | 577478542 | 8 slots | ✅ Good |
-| **Vincent the Frostbringer** | 939467639 | 6 slots | ✅ Good |
-| **Polora the Feywalker** | -1208888966 | 6 slots | ✅ Good |
-| **Rufus the Foreman** | -2039908510 | 5 slots | ✅ Moderate |
-| **Bane the Shadowblade** | 1896428751 | 3 slots | ✅ Limited |
-| **Clive the Firestarter** | -700632469 | 3 slots | ✅ Limited |
-| **Nicholaus the Fallen** | 1896428751 | 3 slots | ✅ Limited |
+### 📋 **Mechanic Patterns**
 
-### 🎯 Predefined Presets
-
-Quick-apply popular combinations:
-
-| Preset Name | Description | Abilities |
-|-------------|-------------|-----------|
-| **dracula-mix** | Dark melee + frost magic | Dracula melee + spell, Vincent frost |
-| **frost-warrior** | Knight combat + ice powers | Tristan melee + charge, Vincent frost blast |
-| **spell-caster** | Pure magic combination | Christina heal + light, Dracula dark spell |
+Create classic boss encounters:
 
 ```bash
-# Apply any preset instantly
-.bb ability-preset "YourBoss" "dracula-mix"
+# Raid-style boss with phases
+.bb mechanic-add "RaidBoss" stun "--hp 80 --target closest --duration 5"  # Tank swap
+.bb mechanic-add "RaidBoss" aoe "--hp 60 --pattern players --count 5"     # Raid damage
+.bb mechanic-add "RaidBoss" absorb "--hp 40 --type shield"                # Shield phase
+.bb mechanic-add "RaidBoss" slow "--hp 20 --radius 15 --min_players 4"   # Burn phase
 ```
 
-### 📋 **Modular Ability System Overview**
-
-Mix and match abilities from different VBloods while preserving original appearance:
-
-```bash
-# Quick example: Vincent with Dracula's powers
-.bb create "HybridBoss" 939467639 400 8 2400
-.bb ability-slot-set "HybridBoss" "primary" -327335305 0 true "Dracula shockwave"
-.bb ability-slot-set "HybridBoss" "spell" -99012450 2 true "Christina AoE"
-.bb start "HybridBoss"
-```
-
-**🔗 For complete abilities reference:** See [docs/MODULAR-ABILITIES.md](docs/MODULAR-ABILITIES.md)
+**🔗 For complete mechanics reference:** See [doc/BOSS-MECHANICS.md](doc/BOSS-MECHANICS.md)
 
 ## 🎭 Phase System Examples
 
@@ -342,26 +299,21 @@ If you enjoy BloodyBoss and want to support continued development:
 <details>
 <summary>Version History</summary>
 
-### `2.1.0` - Dynamic Scaling & Modular Abilities
-- ✨ **NEW**: **Modular Ability System** - Mix and match abilities from different VBloods
-- ✨ **NEW**: **Slot-based configuration** - Configure up to 6 individual ability slots per boss
-- ✨ **NEW**: **Cross-VBlood mixing** - Combine abilities while preserving original appearance
-- ✨ **NEW**: **Predefined presets** - Quick-apply popular ability combinations (dracula-mix, frost-warrior, spell-caster)
-- ✨ **NEW**: **Real-time VBlood discovery** - Automatically discover all VBloods and their abilities
-- ✨ **NEW**: **Comprehensive ability documentation** - Auto-generate complete ability guides
-- ✨ **NEW**: Dynamic scaling system based on online players
-- ✨ **NEW**: Progressive difficulty with consecutive spawn tracking  
-- ✨ **NEW**: Phase announcement system with customizable messages
-- ✨ **NEW**: Advanced admin commands (despawn, pause, resume, debug, etc.)
-- ✨ **NEW**: Teleportation system with configurable permissions
-- ✨ **NEW**: Multi-language support for all messages
-- ✨ **NEW**: Castle territory detection - prevents boss spawns inside player castles
-- ✨ **NEW**: Automatic spawn position relocation - finds valid positions within 100 units if original is in castle
-- ✨ **NEW**: Independent timer system - bosses spawn on schedule regardless of player connection status
-- 🔧 **IMPROVED**: Timer system performance with numeric comparisons
-- 🔧 **IMPROVED**: Error handling and logging throughout
-- 🔧 **IMPROVED**: Silent despawn command - no more spam messages when admins manually despawn bosses
-- 🔧 **UPDATED**: Dependencies to latest versions (BepInEx 1.733.2, VCF 0.10.4)
+### `2.1.0` - Performance & Stability Update
+- ✨ **NEW**: **Boss Mechanics System** - Add stun, AoE, slow and absorb mechanics to create challenging encounters
+- ✨ **NEW**: **Event-driven damage system** - Replaced polling with efficient event-based damage detection
+- ✨ **NEW**: **Optimized boss tracking** - O(1) performance instead of O(n²) for better server performance
+- ✨ **NEW**: **Automatic lifetime system** - Bosses despawn automatically using Unity's LifeTime component
+- 🔧 **IMPROVED**: **Memory safety** - Fixed memory leaks with proper cache management and entity cleanup
+- 🔧 **IMPROVED**: **Thread safety** - All ECS operations now run on main thread preventing crashes
+- 🔧 **IMPROVED**: **Damage correlation** - Better tracking of who damaged bosses for accurate rewards
+- 🔧 **IMPROVED**: **Error handling** - Comprehensive null checks and graceful error recovery
+- 🗑️ **REMOVED**: **Manual despawn system** - No longer needed with automatic LifeTime
+- 🗑️ **REMOVED**: **HourDespawn configuration** - Simplified to just spawn time + lifetime
+- 🐛 **FIXED**: Boss spawning multiple times per minute
+- 🐛 **FIXED**: Server crashes when accessing ECS from timer threads
+- 🐛 **FIXED**: Memory leaks from uncleaned boss data
+- 🐛 **FIXED**: Damage tracking correlation issues
 
 ### `2.0.0` - Oakveil Compatibility Update
 - 🔧 **UPDATED**: To Oakveil compatibility

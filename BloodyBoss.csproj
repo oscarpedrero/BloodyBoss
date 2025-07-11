@@ -11,12 +11,9 @@
 
 	<ItemGroup>
 		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.733" IncludeAssets="compile" />
-		<PackageReference Include="VRising.Unhollowed.Client" Version="1.1.8.9179701" />
+		<PackageReference Include="VRising.Unhollowed.Client" Version="1.1.9.9219901" />
 		<PackageReference Include="VRising.VampireCommandFramework" Version="0.9.*" />
-		<!-- <PackageReference Include="Bloody.Core" Version="2.*" /> -->
-		<Reference Include="Bloody.Core">
-			<HintPath>libs\Bloody.Core.dll</HintPath>
-		</Reference>
+		<PackageReference Include="Bloody.Core" Version="2.0.1" />
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
 		<PackageReference Include="BepInEx.Unity.Common" Version="6.0.0-be.733" />
 		<PackageReference Include="HarmonyX" Version="2.10.*" />
