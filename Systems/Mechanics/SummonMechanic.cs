@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -10,6 +11,7 @@ using Bloody.Core.API.v1;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Collections;
+using ProjectM.Shared;
 
 namespace BloodyBoss.Systems.Mechanics
 {
@@ -124,6 +126,14 @@ namespace BloodyBoss.Systems.Mechanics
                 addEntity.Write(bossFaction);
             }
             
+            // Apply aggro settings
+            if (addEntity.Has<AggroConsumer>())
+            {
+                var aggro = addEntity.Read<AggroConsumer>();
+                aggro.Active._Value = true;
+                addEntity.Write(aggro);
+            }
+            
             // Mark as summoned by boss (for despawn on boss death)
             if (despawnOnBossDeath && addEntity.Has<EntityOwner>())
             {
@@ -132,9 +142,62 @@ namespace BloodyBoss.Systems.Mechanics
                 addEntity.Write(owner);
             }
             
+            // Disable VBlood consumption if this is a VBlood unit
+            if (addEntity.Has<VBloodUnit>())
+            {
+                Plugin.BLogger.Info(LogCategory.Mechanic, "Summoned add is VBlood, disabling consumption");
+                
+                // Remove BloodConsumeSource to prevent feeding
+                if (addEntity.Has<BloodConsumeSource>())
+                {
+                    addEntity.Remove<BloodConsumeSource>();
+                    Plugin.BLogger.Info(LogCategory.Mechanic, "Removed BloodConsumeSource from summoned VBlood");
+                }
+                
+                // Add VBloodConsumed component if not present
+                if (!addEntity.Has<VBloodConsumed>())
+                {
+                    addEntity.Add<VBloodConsumed>();
+                    Plugin.BLogger.Info(LogCategory.Mechanic, "Added VBloodConsumed to prevent V unlock");
+                }
+                
+                // Try removing the Interactable component to prevent feeding
+                try
+                {
+                    if (addEntity.Has<Interactable>())
+                    {
+                        addEntity.Remove<Interactable>();
+                        Plugin.BLogger.Info(LogCategory.Mechanic, "Removed Interactable component from VBlood summon");
+                    }
+                    
+                    // Also remove the NameableInteractable if present
+                    if (addEntity.Has<NameableInteractable>())
+                    {
+                        addEntity.Remove<NameableInteractable>();
+                        Plugin.BLogger.Info(LogCategory.Mechanic, "Removed NameableInteractable component from VBlood summon");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Plugin.BLogger.Warning(LogCategory.Mechanic, $"Failed to modify VBlood interactions: {ex.Message}");
+                }
+                
+                // Clear drop table so VBlood summon doesn't drop anything
+                ClearSummonDropTable(addEntity);
+                
+                // Set a lifetime for the summon (they will despawn after this time)
+                if (addEntity.Has<LifeTime>())
+                {
+                    var lifetime = addEntity.Read<LifeTime>();
+                    lifetime.Duration = 300f; // 5 minutes
+                    lifetime.EndAction = LifeTimeEndAction.Destroy;
+                    addEntity.Write(lifetime);
+                    Plugin.BLogger.Info(LogCategory.Mechanic, "Set VBlood summon lifetime to 5 minutes");
+                }
+            }
+            
             // Apply any summon buffs/modifiers
-            var summonBuff = new PrefabGUID(1055766895); // Generic summon enhancement
-            BuffNPC(addEntity, summonBuff);
+            // Removed invalid buff that was causing errors
         }
 
         private void BuffNPC(Entity entity, PrefabGUID buffGuid)
@@ -193,6 +256,20 @@ namespace BloodyBoss.Systems.Mechanics
                 }
             }
             return defaultValue;
+        }
+        
+        private void ClearSummonDropTable(Entity entity)
+        {
+            try
+            {
+                var dropTableBuffer = entity.ReadBuffer<DropTableBuffer>();
+                dropTableBuffer.Clear();
+                Plugin.BLogger.Info(LogCategory.Mechanic, "Cleared drop table from VBlood summon");
+            }
+            catch (Exception ex)
+            {
+                Plugin.BLogger.Debug(LogCategory.Mechanic, $"Could not clear drop table from summon: {ex.Message}");
+            }
         }
     }
 }

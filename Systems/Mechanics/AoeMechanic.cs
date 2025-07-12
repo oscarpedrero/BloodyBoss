@@ -13,6 +13,7 @@ using Stunlock.Core;
 using Unity.Collections;
 using ProjectM.Shared;
 using Bloody.Core.Helper.v1;
+using BloodyBoss.Data;
 using ProjectM.Gameplay.Systems;
 
 namespace BloodyBoss.Systems.Mechanics
@@ -611,7 +612,7 @@ namespace BloodyBoss.Systems.Mechanics
                     var pos = from + direction * (distance * t);
                     
                     // Spawn a temporary effect at this position
-                    SpawnSystem.SpawnUnitWithCallback(source, new PrefabGUID(1520432556), // Floating eye
+                    SpawnSystem.SpawnUnitWithCallback(source, PrefabConstants.FloatingEyeMark,
                         new float2(pos.x, pos.z), 0.3f + (i * 0.1f), (Entity effect) =>
                     {
                         Plugin.BLogger.Debug(LogCategory.Mechanic, $"Created {aoeType} trail effect");

@@ -14,7 +14,7 @@ namespace BloodyBoss.Data
         {
             [-2013903325] = new VBloodStaticInfo // ArchMage
             {
-                Name = "ArchMage",
+                Name = "Mairwyn the Elementalist",
                 Level = 70,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid" },
@@ -399,7 +399,7 @@ namespace BloodyBoss.Data
             },
             [1896428751] = new VBloodStaticInfo // Bandit Bomber
             {
-                Name = "Bandit Bomber",
+                Name = "Clive the Firestarter",
                 Level = 30,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Bandit" },
@@ -509,7 +509,7 @@ namespace BloodyBoss.Data
             },
             [763273073] = new VBloodStaticInfo // Bandit Chaosarrow
             {
-                Name = "Bandit Chaosarrow",
+                Name = "Lidia the Chaos Archer",
                 Level = 30,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Bandit" },
@@ -1025,7 +1025,7 @@ namespace BloodyBoss.Data
             },
             [-2122682556] = new VBloodStaticInfo // Bandit Fisherman
             {
-                Name = "Bandit Fisherman",
+                Name = "Finn the Fisherman",
                 Level = 32,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Bandit" },
@@ -1524,7 +1524,7 @@ namespace BloodyBoss.Data
             },
             [2122229952] = new VBloodStaticInfo // Bandit Foreman
             {
-                Name = "Bandit Foreman",
+                Name = "Rufus the Foreman",
                 Level = 20,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Bandit" },
@@ -2500,7 +2500,7 @@ namespace BloodyBoss.Data
             },
             [1124739990] = new VBloodStaticInfo // Bandit Frostarrow
             {
-                Name = "Bandit Frostarrow",
+                Name = "Keely the Frost Archer",
                 Level = 20,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Bandit" },
@@ -2972,7 +2972,7 @@ namespace BloodyBoss.Data
             },
             [1106149033] = new VBloodStaticInfo // Bandit Stalker
             {
-                Name = "Bandit Stalker",
+                Name = "Grayson the Armourer",
                 Level = 27,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Bandit" },
@@ -3293,7 +3293,7 @@ namespace BloodyBoss.Data
             },
             [-2025101517] = new VBloodStaticInfo // Bandit StoneBreaker
             {
-                Name = "Bandit StoneBreaker",
+                Name = "Errol the Stonebreaker",
                 Level = 20,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Bandit" },
@@ -3937,7 +3937,7 @@ namespace BloodyBoss.Data
             },
             [-1659822956] = new VBloodStaticInfo // Bandit Tourok
             {
-                Name = "Bandit Tourok",
+                Name = "Quincey the Bandit King",
                 Level = 37,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Bandit" },
@@ -4639,7 +4639,7 @@ namespace BloodyBoss.Data
             },
             [1112948824] = new VBloodStaticInfo // BatVampire
             {
-                Name = "BatVampire",
+                Name = "Lord Styx the Night Champion",
                 Level = 84,
                 CanFly = false,
                 Features = new HashSet<string> { "Vampire" },
@@ -8387,7 +8387,7 @@ namespace BloodyBoss.Data
             },
             [114912615] = new VBloodStaticInfo // ChurchOfLight Cardinal
             {
-                Name = "ChurchOfLight Cardinal",
+                Name = "Azariel the Sunbringer",
                 Level = 79,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Church" },
@@ -8664,7 +8664,7 @@ namespace BloodyBoss.Data
             },
             [-26105228] = new VBloodStaticInfo // ChurchOfLight Overseer
             {
-                Name = "ChurchOfLight Overseer",
+                Name = "Sir Magnus the Overseer",
                 Level = 66,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Church" },
@@ -8991,7 +8991,7 @@ namespace BloodyBoss.Data
             },
             [-740796338] = new VBloodStaticInfo // ChurchOfLight Paladin
             {
-                Name = "ChurchOfLight Paladin",
+                Name = "Solarus the Immaculate",
                 Level = 86,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Church" },
@@ -9522,7 +9522,7 @@ namespace BloodyBoss.Data
             },
             [192051202] = new VBloodStaticInfo // ChurchOfLight Sommelier
             {
-                Name = "ChurchOfLight Sommelier",
+                Name = "Baron du Bouchon the Sommelier",
                 Level = 70,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Church" },
@@ -9889,7 +9889,7 @@ namespace BloodyBoss.Data
             },
             [-1936575244] = new VBloodStaticInfo // Cursed MountainBeast
             {
-                Name = "Cursed MountainBeast",
+                Name = "Gorecrusher the Behemoth",
                 Level = 84,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Beast", "Beast", "Cursed" },
@@ -10354,7 +10354,7 @@ namespace BloodyBoss.Data
             },
             [-203043163] = new VBloodStaticInfo // Cursed ToadKing
             {
-                Name = "Cursed ToadKing",
+                Name = "Albert the Duke of Balaton",
                 Level = 64,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Beast", "Beast", "Cursed" },
@@ -10657,7 +10657,7 @@ namespace BloodyBoss.Data
             },
             [-910296704] = new VBloodStaticInfo // Cursed Witch
             {
-                Name = "Cursed Witch",
+                Name = "Matka the Curse Weaver",
                 Level = 76,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Cursed" },
@@ -10915,7 +10915,7 @@ namespace BloodyBoss.Data
             },
             [-1391546313] = new VBloodStaticInfo // Forest Bear Dire
             {
-                Name = "Forest Bear Dire",
+                Name = "Kodia the Ferocious Bear",
                 Level = 35,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Beast", "Beast" },
@@ -11255,7 +11255,7 @@ namespace BloodyBoss.Data
             },
             [-1905691330] = new VBloodStaticInfo // Forest Wolf
             {
-                Name = "Forest Wolf",
+                Name = "Alpha the White Wolf",
                 Level = 16,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Beast", "Beast" },
@@ -11888,7 +11888,7 @@ namespace BloodyBoss.Data
             },
             [-1065970933] = new VBloodStaticInfo // Geomancer Human
             {
-                Name = "Geomancer Human",
+                Name = "Terah the Geomancer",
                 Level = 53,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid" },
@@ -12355,7 +12355,7 @@ namespace BloodyBoss.Data
             },
             [172235178] = new VBloodStaticInfo // Gloomrot Iva
             {
-                Name = "Gloomrot Iva",
+                Name = "Ziva the Engineer",
                 Level = 60,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Gloomrot" },
@@ -13171,7 +13171,7 @@ namespace BloodyBoss.Data
             },
             [1233988687] = new VBloodStaticInfo // Gloomrot Monster
             {
-                Name = "Gloomrot Monster",
+                Name = "Adam the Firstborn",
                 Level = 88,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Gloomrot" },
@@ -14008,7 +14008,7 @@ namespace BloodyBoss.Data
             },
             [106480588] = new VBloodStaticInfo // Gloomrot Purifier
             {
-                Name = "Gloomrot Purifier",
+                Name = "Angram the Purifier",
                 Level = 61,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Gloomrot" },
@@ -15260,7 +15260,7 @@ namespace BloodyBoss.Data
             },
             [2054432370] = new VBloodStaticInfo // Gloomrot RailgunSergeant
             {
-                Name = "Gloomrot RailgunSergeant",
+                Name = "Voltatia the Power Master",
                 Level = 79,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Gloomrot" },
@@ -15643,7 +15643,7 @@ namespace BloodyBoss.Data
             },
             [814083983] = new VBloodStaticInfo // Gloomrot TheProfessor
             {
-                Name = "Gloomrot TheProfessor",
+                Name = "Henry Blackbrew the Doctor",
                 Level = 74,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Gloomrot" },
@@ -16116,7 +16116,7 @@ namespace BloodyBoss.Data
             },
             [-1101874342] = new VBloodStaticInfo // Gloomrot Voltage
             {
-                Name = "Gloomrot Voltage",
+                Name = "Domina the Blade Dancer",
                 Level = 60,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Gloomrot" },
@@ -16938,7 +16938,7 @@ namespace BloodyBoss.Data
             },
             [685266977] = new VBloodStaticInfo // Harpy Matriarch
             {
-                Name = "Harpy Matriarch",
+                Name = "Morian the Stormwing Matriarch",
                 Level = 70,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Beast", "Beast" },
@@ -17260,7 +17260,7 @@ namespace BloodyBoss.Data
             },
             [-393555055] = new VBloodStaticInfo // Manticore
             {
-                Name = "Manticore",
+                Name = "Talzur the Winged Horror",
                 Level = 86,
                 CanFly = true,
                 Features = new HashSet<string> { "UnitCategory:Beast", "Beast", "CanFly" },
@@ -17999,7 +17999,7 @@ namespace BloodyBoss.Data
             },
             [-680831417] = new VBloodStaticInfo // Militia BishopOfDunley
             {
-                Name = "Militia BishopOfDunley",
+                Name = "Raziel the Shepherd",
                 Level = 57,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Militia" },
@@ -18497,7 +18497,7 @@ namespace BloodyBoss.Data
             },
             [910988233] = new VBloodStaticInfo // Militia Glassblower
             {
-                Name = "Militia Glassblower",
+                Name = "Grethel the Glassblower",
                 Level = 50,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Militia" },
@@ -18818,7 +18818,7 @@ namespace BloodyBoss.Data
             },
             [-29797003] = new VBloodStaticInfo // Militia Guard
             {
-                Name = "Militia Guard",
+                Name = "Vincent the Frostbringer",
                 Level = 44,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Militia" },
@@ -19807,7 +19807,7 @@ namespace BloodyBoss.Data
             },
             [1688478381] = new VBloodStaticInfo // Militia Leader
             {
-                Name = "Militia Leader",
+                Name = "Octavian the Militia Captain",
                 Level = 58,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Militia" },
@@ -20889,7 +20889,7 @@ namespace BloodyBoss.Data
             },
             [850622034] = new VBloodStaticInfo // Militia Longbowman LightArrow
             {
-                Name = "Militia Longbowman LightArrow",
+                Name = "Meredith the Bright Archer",
                 Level = 50,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Militia" },
@@ -21221,7 +21221,7 @@ namespace BloodyBoss.Data
             },
             [-99012450] = new VBloodStaticInfo // Militia Nun
             {
-                Name = "Militia Nun",
+                Name = "Christina the Sun Priestess",
                 Level = 44,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Militia" },
@@ -21601,7 +21601,7 @@ namespace BloodyBoss.Data
             },
             [1945956671] = new VBloodStaticInfo // Militia Scribe
             {
-                Name = "Militia Scribe",
+                Name = "Maja the Dark Savant",
                 Level = 47,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Militia" },
@@ -21931,7 +21931,7 @@ namespace BloodyBoss.Data
             },
             [-484556888] = new VBloodStaticInfo // Poloma
             {
-                Name = "Poloma",
+                Name = "Polora the Feywalker",
                 Level = 35,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid" },
@@ -22425,7 +22425,7 @@ namespace BloodyBoss.Data
             },
             [-548489519] = new VBloodStaticInfo // Spider Queen
             {
-                Name = "Spider Queen",
+                Name = "Ungora the Spider Queen",
                 Level = 63,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Beast", "Beast" },
@@ -23677,7 +23677,7 @@ namespace BloodyBoss.Data
             },
             [577478542] = new VBloodStaticInfo // Undead BishopOfDeath
             {
-                Name = "Undead BishopOfDeath",
+                Name = "Goreswine the Ravager",
                 Level = 27,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid" },
@@ -24289,7 +24289,7 @@ namespace BloodyBoss.Data
             },
             [939467639] = new VBloodStaticInfo // Undead BishopOfShadows
             {
-                Name = "Undead BishopOfShadows",
+                Name = "Leandra the Shadow Priestess",
                 Level = 47,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid" },
@@ -24785,7 +24785,7 @@ namespace BloodyBoss.Data
             },
             [326378955] = new VBloodStaticInfo // Undead CursedSmith
             {
-                Name = "Undead CursedSmith",
+                Name = "Cyril the Cursed Smith",
                 Level = 65,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Cursed" },
@@ -25247,7 +25247,7 @@ namespace BloodyBoss.Data
             },
             [613251918] = new VBloodStaticInfo // Undead Infiltrator
             {
-                Name = "Undead Infiltrator",
+                Name = "Bane the Shadowblade",
                 Level = 50,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid" },
@@ -25907,7 +25907,7 @@ namespace BloodyBoss.Data
             },
             [-1365931036] = new VBloodStaticInfo // Undead Leader
             {
-                Name = "Undead Leader",
+                Name = "Kriig the Undead General",
                 Level = 47,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid" },
@@ -26275,7 +26275,7 @@ namespace BloodyBoss.Data
             },
             [153390636] = new VBloodStaticInfo // Undead Priest
             {
-                Name = "Undead Priest",
+                Name = "Nicholaus the Fallen",
                 Level = 35,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid" },
@@ -26618,7 +26618,7 @@ namespace BloodyBoss.Data
             },
             [-1208888966] = new VBloodStaticInfo // Undead ZealousCultist
             {
-                Name = "Undead ZealousCultist",
+                Name = "Foulrot the Soultaker",
                 Level = 63,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid" },
@@ -27082,7 +27082,7 @@ namespace BloodyBoss.Data
             },
             [495971434] = new VBloodStaticInfo // Vampire BloodKnight
             {
-                Name = "Vampire BloodKnight",
+                Name = "General Valencia the Depraved",
                 Level = 84,
                 CanFly = false,
                 Features = new HashSet<string> { "Vampire" },
@@ -27520,7 +27520,7 @@ namespace BloodyBoss.Data
             },
             [-327335305] = new VBloodStaticInfo // Vampire Dracula
             {
-                Name = "Vampire Dracula",
+                Name = "Dracula the Immortal King",
                 Level = 91,
                 CanFly = false,
                 Features = new HashSet<string> { "Vampire" },
@@ -29027,7 +29027,7 @@ namespace BloodyBoss.Data
             },
             [-496360395] = new VBloodStaticInfo // Vampire HighLord
             {
-                Name = "Vampire HighLord",
+                Name = "General Cassius the Betrayer",
                 Level = 57,
                 CanFly = false,
                 Features = new HashSet<string> { "Vampire" },
@@ -29940,7 +29940,7 @@ namespace BloodyBoss.Data
             },
             [-2039908510] = new VBloodStaticInfo // Vermin DireRat
             {
-                Name = "Vermin DireRat",
+                Name = "Putrid Rat",
                 Level = 30,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Beast", "Beast" },
@@ -30124,7 +30124,7 @@ namespace BloodyBoss.Data
             },
             [336560131] = new VBloodStaticInfo // VHunter CastleMan
             {
-                Name = "VHunter CastleMan",
+                Name = "Simon Belmont the Vampire Hunter",
                 Level = 80,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid" },
@@ -31133,7 +31133,7 @@ namespace BloodyBoss.Data
             },
             [-1968372384] = new VBloodStaticInfo // VHunter Jade
             {
-                Name = "VHunter Jade",
+                Name = "Jade the Vampire Hunter",
                 Level = 57,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid" },
@@ -32013,7 +32013,7 @@ namespace BloodyBoss.Data
             },
             [-1449631170] = new VBloodStaticInfo // VHunter Leader
             {
-                Name = "VHunter Leader",
+                Name = "Tristan the Vampire Hunter",
                 Level = 44,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid" },
@@ -32841,7 +32841,7 @@ namespace BloodyBoss.Data
             },
             [109969450] = new VBloodStaticInfo // Villager CursedWanderer
             {
-                Name = "Villager CursedWanderer",
+                Name = "Ben the Old Wanderer",
                 Level = 63,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid", "Cursed" },
@@ -33039,7 +33039,7 @@ namespace BloodyBoss.Data
             },
             [-1942352521] = new VBloodStaticInfo // Villager Tailor
             {
-                Name = "Villager Tailor",
+                Name = "Beatrice the Tailor",
                 Level = 40,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Human", "Human", "Humanoid" },
@@ -33453,7 +33453,7 @@ namespace BloodyBoss.Data
             },
             [24378719] = new VBloodStaticInfo // Wendigo
             {
-                Name = "Wendigo",
+                Name = "Frostmaw the Mountain Terror",
                 Level = 53,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Beast", "Beast" },
@@ -35189,7 +35189,7 @@ namespace BloodyBoss.Data
             },
             [-1347412392] = new VBloodStaticInfo // Winter Yeti
             {
-                Name = "Winter Yeti",
+                Name = "Terrorclaw the Ogre",
                 Level = 76,
                 CanFly = false,
                 Features = new HashSet<string> { "UnitCategory:Beast", "Beast" },

@@ -46,7 +46,7 @@ public class Plugin : BasePlugin
 
         _harmony.PatchAll(typeof(DamageDetectionHook));
         _harmony.PatchAll(typeof(AttackerTrackingHook));
-        
+
         // Verificar que el parche se aplicó
         var patches = _harmony.GetPatchedMethods();
         foreach (var method in patches)
@@ -58,7 +58,7 @@ public class Plugin : BasePlugin
 
         Logger = new(Log);
         BLogger = new BloodyLogger(Log);
-        
+
 
         // Register all commands in the assembly with VCF
         CommandRegistry.RegisterAll();
@@ -84,7 +84,7 @@ public class Plugin : BasePlugin
         Database.Initialize();
         Logger.LogInfo("Binding configuration");
         PluginConfig.Initialize();
-        
+
         // Configure BloodyLogger with settings from config
         ConfigureLogger();
 
@@ -93,8 +93,9 @@ public class Plugin : BasePlugin
         BossSystem.GenerateStats();
         BossSystem.CheckBoss();
         BossSystem.StartTimer(); // Iniciar el timer independiente
+
     }
-    
+
     private static void ConfigureLogger()
     {
         try
@@ -104,7 +105,7 @@ public class Plugin : BasePlugin
             {
                 globalLevel = BloodyBoss.Systems.LogLevel.Info;
             }
-            
+
             // Parse category levels
             var categoryLevels = new Dictionary<string, BloodyBoss.Systems.LogLevel>();
             if (!string.IsNullOrEmpty(PluginConfig.CategoryLogLevels.Value))
@@ -119,7 +120,7 @@ public class Plugin : BasePlugin
                     }
                 }
             }
-            
+
             // Parse disabled categories
             var disabledCategories = new HashSet<string>();
             if (!string.IsNullOrEmpty(PluginConfig.DisabledLogCategories.Value))
@@ -130,10 +131,10 @@ public class Plugin : BasePlugin
                     disabledCategories.Add(category.Trim());
                 }
             }
-            
+
             // Configure the logger
             BLogger.Configure(globalLevel, categoryLevels, disabledCategories);
-            
+
             Logger.LogInfo($"BloodyLogger configured - Level: {globalLevel}, Categories: {categoryLevels.Count}, Disabled: {disabledCategories.Count}");
         }
         catch (Exception ex)

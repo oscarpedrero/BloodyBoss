@@ -116,6 +116,9 @@ namespace BloodyBoss.Factory
             model.bossSpawn = true;
             model.LastSpawn = DateTime.Now;
             
+            // Save database to persist spawn state
+            Database.saveDatabase();
+            
             Plugin.BLogger.Info(LogCategory.Boss, $"Boss {model.name}: Entity configured successfully");
         }
         
@@ -174,9 +177,19 @@ namespace BloodyBoss.Factory
                 // Apply custom stats from model
                 unitStats = model.unitStats.FillStats(unitStats);
                 
+                // Log original regen values
+                Plugin.BLogger.Debug(LogCategory.Boss, $"Boss {model.name} original PassiveHealthRegen: {unitStats.PassiveHealthRegen._Value}, HealthRecovery: {unitStats.HealthRecovery._Value}");
+                
                 // Apply damage multiplier
                 unitStats.PhysicalPower._Value *= damageMultiplier;
                 unitStats.SpellPower._Value *= damageMultiplier;
+                
+                // IMPORTANT: Force disable passive health regeneration AFTER FillStats
+                // to prevent boss auto-healing to 100%
+                unitStats.PassiveHealthRegen._Value = 0f;
+                
+                // Also ensure multiplicadores don't affect regen
+                unitStats.HealthRecovery._Value = 0f;
                 
                 bossEntity.Write(unitStats);
             }

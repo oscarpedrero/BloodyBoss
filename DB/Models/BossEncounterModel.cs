@@ -63,11 +63,6 @@ namespace BloodyBoss.DB.Models
         // Phase Announcement Properties
         public int LastAnnouncedPhase { get; set; } = 0;
         
-        // Ability Swap Properties
-        public int? AbilitySwapPrefabGUID { get; set; } = null;
-        
-        // Modular Ability System Properties
-        public Dictionary<string, CustomAbilitySlot> CustomAbilities { get; set; } = new Dictionary<string, CustomAbilitySlot>();
         public List<BossMechanicModel> Mechanics { get; set; } = new List<BossMechanicModel>();
         
         // Ability Swap Configuration
@@ -413,24 +408,13 @@ namespace BloodyBoss.DB.Models
             bossSpawn = true;
             LastSpawn = DateTime.Now;
             
-            // Aplicar intercambio de habilidades si está configurado
-            if (AbilitySwapPrefabGUID.HasValue)
-            {
-                Plugin.BLogger.Info(LogCategory.Boss, $"Boss {name}: Applying ability swap to {AbilitySwapPrefabGUID.Value} while maintaining visual appearance");
-                ApplyAbilitySwapPostSpawn(boss, new PrefabGUID(AbilitySwapPrefabGUID.Value));
-            }
+            // Save database to persist spawn state
+            Database.saveDatabase();
             
-            // Aplicar sistema modular de habilidades personalizadas
-            if (CustomAbilities.Count > 0)
-            {
-                Plugin.BLogger.Info(LogCategory.Boss, $"Boss {name}: Applying modular ability system with {CustomAbilities.Count} custom slots");
-                ApplyModularAbilitiesPostSpawn(boss);
-            }
-            
-            // Aplicar intercambio de habilidades individuales (nuevo sistema)
+            // Aplicar intercambio de habilidades individuales (sistema híbrido)
             if (AbilitySwaps != null && AbilitySwaps.Count > 0)
             {
-                Plugin.BLogger.Info(LogCategory.Boss, $"Boss {name}: Applying individual ability swaps for {AbilitySwaps.Count} slots");
+                Plugin.BLogger.Info(LogCategory.Boss, $"Boss {name}: Applying hybrid ability swaps for {AbilitySwaps.Count} slots");
                 ApplyIndividualAbilitySwaps(boss);
             }
             
@@ -636,6 +620,7 @@ namespace BloodyBoss.DB.Models
             }
             
             bossSpawn = false;
+            Database.saveDatabase();
         }
 
         internal void CheckSpawnDespawn()
@@ -717,6 +702,7 @@ namespace BloodyBoss.DB.Models
 
                 RemoveKillers();
                 bossSpawn = false;
+                Database.saveDatabase();
 
                 // Reset progressive difficulty on successful kill
                 if (PluginConfig.EnableProgressiveDifficulty.Value && PluginConfig.ResetDifficultyOnKill.Value)
@@ -735,6 +721,9 @@ namespace BloodyBoss.DB.Models
 
         public void BuffKillers()
         {
+            // First, filter out players who are too far away
+            FilterKillersByDistance();
+            
             if (PluginConfig.BuffAfterKillingEnabled.Value)
             {
                 foreach (var killer in GetKillers())
@@ -743,7 +732,61 @@ namespace BloodyBoss.DB.Models
                     BuffSystem.BuffPlayer(playerModel.Character.Entity, playerModel.Entity, new PrefabGUID(PluginConfig.BuffAfterKillingPrefabGUID.Value), 3, false);
                 }
             }
+        }
+        
+        /// <summary>
+        /// Removes players from the killers list if they are too far from the boss
+        /// </summary>
+        private void FilterKillersByDistance()
+        {
+            // Get boss position for distance check
+            float3 bossPosition = float3.zero;
+            bool hasBossPosition = false;
             
+            if (GetBossEntity() && bossEntity.Has<LocalToWorld>())
+            {
+                bossPosition = bossEntity.Read<LocalToWorld>().Position;
+                hasBossPosition = true;
+            }
+            
+            if (!hasBossPosition)
+            {
+                Plugin.BLogger.Warning(LogCategory.Reward, "Could not get boss position for distance filtering");
+                return;
+            }
+            
+            // Create a filtered list
+            var validKillers = new List<string>();
+            
+            foreach (var killer in GetKillers())
+            {
+                var playerModel = GameData.Users.GetUserByCharacterName(killer);
+                
+                if (playerModel.Character.Entity != Entity.Null && playerModel.Character.Entity.Has<LocalToWorld>())
+                {
+                    var playerPosition = playerModel.Character.Entity.Read<LocalToWorld>().Position;
+                    var distance = math.distance(playerPosition, bossPosition);
+                    
+                    if (distance <= 100f) // Only keep players within 100 units
+                    {
+                        validKillers.Add(killer);
+                        Plugin.BLogger.Debug(LogCategory.Reward, $"Player {killer} validated (distance: {distance:F1} units)");
+                    }
+                    else
+                    {
+                        Plugin.BLogger.Info(LogCategory.Reward, $"Player {killer} removed from killers list (too far: {distance:F1} units)");
+                    }
+                }
+                else
+                {
+                    // If we can't check distance (player offline?), don't include them
+                    Plugin.BLogger.Debug(LogCategory.Reward, $"Player {killer} removed from killers list (entity not found)");
+                }
+            }
+            
+            // Replace the killers list with only valid killers
+            vbloodKills = validKillers;
+            Plugin.BLogger.Info(LogCategory.Reward, $"Filtered killers list: {vbloodKills.Count} valid players out of {GetKillers().Count} total");
         }
 
         public string GetAnnouncementMessage()
@@ -882,71 +925,6 @@ namespace BloodyBoss.DB.Models
         }
         
         /// <summary>
-        /// Aplica intercambio de habilidades manteniendo la apariencia visual original
-        /// </summary>
-        private void ApplyAbilitySwapPostSpawn(Entity bossEntity, PrefabGUID sourcePrefabGUID)
-        {
-            try
-            {
-                // Obtener la entidad fuente del prefab
-                if (!Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(sourcePrefabGUID, out Entity sourceEntity))
-                {
-                    Plugin.BLogger.Error(LogCategory.Boss, $"Source prefab {sourcePrefabGUID.GuidHash} not found for ability swap");
-                    return;
-                }
-                
-                Plugin.BLogger.Info(LogCategory.Boss, $"Applying ability swap from {sourcePrefabGUID.GuidHash} to boss while preserving visual appearance");
-                
-                // Usar el sistema existente pero preservando la apariencia
-                var entityManager = Core.World.EntityManager;
-                
-                // 1. Copiar AbilityBar_Shared
-                if (sourceEntity.Has<AbilityBar_Shared>())
-                {
-                    var sourceAbilityBar = sourceEntity.Read<AbilityBar_Shared>();
-                    if (!bossEntity.Has<AbilityBar_Shared>())
-                    {
-                        bossEntity.Add<AbilityBar_Shared>();
-                    }
-                    bossEntity.Write(sourceAbilityBar);
-                    Plugin.BLogger.Info(LogCategory.Boss, "Applied AbilityBar_Shared from source");
-                }
-                
-                // 2. Copiar AbilityGroupSlotBuffer
-                if (entityManager.HasBuffer<AbilityGroupSlotBuffer>(sourceEntity))
-                {
-                    var sourceBuffer = entityManager.GetBuffer<AbilityGroupSlotBuffer>(sourceEntity);
-                    DynamicBuffer<AbilityGroupSlotBuffer> targetBuffer;
-                    
-                    if (!entityManager.HasBuffer<AbilityGroupSlotBuffer>(bossEntity))
-                    {
-                        targetBuffer = entityManager.AddBuffer<AbilityGroupSlotBuffer>(bossEntity);
-                    }
-                    else
-                    {
-                        targetBuffer = entityManager.GetBuffer<AbilityGroupSlotBuffer>(bossEntity);
-                        targetBuffer.Clear();
-                    }
-                    
-                    for (int i = 0; i < sourceBuffer.Length; i++)
-                    {
-                        targetBuffer.Add(sourceBuffer[i]);
-                    }
-                    Plugin.BLogger.Info(LogCategory.Boss, $"Applied {sourceBuffer.Length} ability groups from source");
-                }
-                
-                // 3. Forzar refresh de AI manteniendo la apariencia
-                ForceAIRefreshPreservingAppearance(bossEntity);
-                
-                Plugin.BLogger.Info(LogCategory.Boss, "Ability swap applied successfully while preserving visual appearance");
-            }
-            catch (Exception ex)
-            {
-                Plugin.BLogger.Error(LogCategory.Boss, $"Error applying ability swap post-spawn: {ex.Message}");
-            }
-        }
-        
-        /// <summary>
         /// Refresca la AI sin cambiar la apariencia visual
         /// </summary>
         private void ForceAIRefreshPreservingAppearance(Entity entity)
@@ -1043,10 +1021,18 @@ namespace BloodyBoss.DB.Models
                         bossBuffer = entityManager.GetBuffer<AbilityGroupSlotBuffer>(bossEntity);
                     }
                     
-                    // Asegurar que el buffer tiene suficiente tamaño
-                    while (bossBuffer.Length <= slotIndex)
+                    // Verificar que el boss tiene suficientes slots
+                    if (slotIndex >= bossBuffer.Length)
                     {
-                        bossBuffer.Add(new AbilityGroupSlotBuffer());
+                        Plugin.BLogger.Error(LogCategory.Boss, $"Cannot swap slot {slotIndex} - boss only has {bossBuffer.Length} ability slots");
+                        continue;
+                    }
+                    
+                    // Verificar que la fuente tiene esa habilidad en ese slot
+                    if (slotIndex >= sourceBuffer.Length)
+                    {
+                        Plugin.BLogger.Error(LogCategory.Boss, $"Source {config.SourceVBloodName} doesn't have ability at slot {slotIndex} (only has {sourceBuffer.Length} slots)");
+                        continue;
                     }
                     
                     // Reemplazar la habilidad en el slot específico
@@ -1066,126 +1052,6 @@ namespace BloodyBoss.DB.Models
             }
         }
         
-        /// <summary>
-        /// Aplica el sistema modular de habilidades personalizadas
-        /// </summary>
-        private void ApplyModularAbilitiesPostSpawn(Entity bossEntity)
-        {
-            try
-            {
-                var entityManager = Core.World.EntityManager;
-                Plugin.BLogger.Info(LogCategory.Boss, $"Starting modular ability application for boss {name}");
-                
-                // Crear o obtener el buffer de habilidades
-                DynamicBuffer<AbilityGroupSlotBuffer> abilityBuffer;
-                if (!entityManager.HasBuffer<AbilityGroupSlotBuffer>(bossEntity))
-                {
-                    abilityBuffer = entityManager.AddBuffer<AbilityGroupSlotBuffer>(bossEntity);
-                }
-                else
-                {
-                    abilityBuffer = entityManager.GetBuffer<AbilityGroupSlotBuffer>(bossEntity);
-                    abilityBuffer.Clear();
-                }
-                
-                // Aplicar habilidades personalizadas por slot
-                foreach (var slot in CustomAbilities)
-                {
-                    if (!slot.Value.Enabled)
-                    {
-                        Plugin.BLogger.Info(LogCategory.Boss, $"Skipping disabled slot: {slot.Key}");
-                        continue;
-                    }
-                    
-                    Plugin.BLogger.Info(LogCategory.Boss, $"Processing slot {slot.Key}: PrefabGUID={slot.Value.SourcePrefabGUID}, Index={slot.Value.AbilityIndex}");
-                    
-                    // Obtener la entidad fuente
-                    var sourcePrefabGUID = new PrefabGUID(slot.Value.SourcePrefabGUID);
-                    if (!Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(sourcePrefabGUID, out Entity sourceEntity))
-                    {
-                        Plugin.BLogger.Error(LogCategory.Boss, $"Source prefab {slot.Value.SourcePrefabGUID} not found for slot {slot.Key}");
-                        continue;
-                    }
-                    
-                    // Obtener las habilidades de la fuente
-                    if (!entityManager.HasBuffer<AbilityGroupSlotBuffer>(sourceEntity))
-                    {
-                        Plugin.BLogger.Error(LogCategory.Boss, $"Source entity does not have ability buffer for slot {slot.Key}");
-                        continue;
-                    }
-                    
-                    var sourceBuffer = entityManager.GetBuffer<AbilityGroupSlotBuffer>(sourceEntity);
-                    
-                    // Verificar que el índice sea válido
-                    if (slot.Value.AbilityIndex >= sourceBuffer.Length)
-                    {
-                        Plugin.BLogger.Error(LogCategory.Boss, $"Ability index {slot.Value.AbilityIndex} out of range for slot {slot.Key} (max: {sourceBuffer.Length - 1})");
-                        continue;
-                    }
-                    
-                    // Copiar la habilidad específica
-                    var abilitySlot = sourceBuffer[slot.Value.AbilityIndex];
-                    abilityBuffer.Add(abilitySlot);
-                    
-                    Plugin.BLogger.Info(LogCategory.Boss, $"Successfully copied ability {slot.Value.AbilityIndex} from {slot.Value.SourcePrefabGUID} to slot {slot.Key}");
-                }
-                
-                // Actualizar AbilityBar_Shared si hay habilidades configuradas
-                if (abilityBuffer.Length > 0)
-                {
-                    // Intentar obtener AbilityBar_Shared de la primera fuente como base
-                    var firstSlot = CustomAbilities.Values.FirstOrDefault(s => s.Enabled);
-                    if (firstSlot != null)
-                    {
-                        var firstSourcePrefab = new PrefabGUID(firstSlot.SourcePrefabGUID);
-                        if (Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap.TryGetValue(firstSourcePrefab, out Entity firstSourceEntity))
-                        {
-                            if (firstSourceEntity.Has<AbilityBar_Shared>())
-                            {
-                                var sourceAbilityBar = firstSourceEntity.Read<AbilityBar_Shared>();
-                                if (!bossEntity.Has<AbilityBar_Shared>())
-                                {
-                                    bossEntity.Add<AbilityBar_Shared>();
-                                }
-                                bossEntity.Write(sourceAbilityBar);
-                                Plugin.BLogger.Info(LogCategory.Boss, "Applied AbilityBar_Shared from modular system");
-                            }
-                        }
-                    }
-                }
-                
-                // Refrescar AI para activar las nuevas habilidades
-                ForceAIRefreshPreservingAppearance(bossEntity);
-                
-                Plugin.BLogger.Info(LogCategory.Boss, $"Modular ability system applied successfully: {abilityBuffer.Length} abilities configured");
-            }
-            catch (Exception ex)
-            {
-                Plugin.BLogger.Error(LogCategory.Boss, $"Error applying modular abilities: {ex.Message}");
-            }
-        }
-        
-    }
-    
-    /// <summary>
-    /// Represents a custom ability slot configuration
-    /// </summary>
-    public class CustomAbilitySlot
-    {
-        public int SourcePrefabGUID { get; set; } = 0;
-        public int AbilityIndex { get; set; } = 0;
-        public bool Enabled { get; set; } = true;
-        public string Description { get; set; } = "";
-        
-        public CustomAbilitySlot() { }
-        
-        public CustomAbilitySlot(int sourcePrefabGUID, int abilityIndex, bool enabled = true, string description = "")
-        {
-            SourcePrefabGUID = sourcePrefabGUID;
-            AbilityIndex = abilityIndex;
-            Enabled = enabled;
-            Description = description;
-        }
     }
     
     /// <summary>

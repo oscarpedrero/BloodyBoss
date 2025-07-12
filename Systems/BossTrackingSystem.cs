@@ -189,12 +189,8 @@ namespace BloodyBoss.Systems
                 BossMechanicSystem.CheckTimeMechanics(entity, tracked.Model);
                 BossMechanicSystem.CheckPlayerCountMechanics(entity, tracked.Model);
                 
-                // Modify boss stats if needed
-                var userModel = Bloody.Core.GameData.v1.GameData.Users.All.FirstOrDefault();
-                if (userModel != null)
-                {
-                    tracked.Model.ModifyBoss(userModel.Entity, entity);
-                }
+                // REMOVED: ModifyBoss should only be called once during spawn, not repeatedly
+                // This was causing the boss to reset its health to 100% constantly
             }
             catch (Exception ex)
             {

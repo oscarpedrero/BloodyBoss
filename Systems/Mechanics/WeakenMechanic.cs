@@ -9,6 +9,7 @@ using Bloody.Core.GameData.v1;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Collections;
+using BloodyBoss.Data;
 
 namespace BloodyBoss.Systems.Mechanics
 {
@@ -70,40 +71,35 @@ namespace BloodyBoss.Systems.Mechanics
             {
                 case "physical":
                     // Reduce physical power
-                    var physicalWeakenBuff = new PrefabGUID(-1055766866); // Physical weakness
-                    BuffCharacter(target, physicalWeakenBuff);
+                    BuffCharacter(target, PrefabConstants.PhysicalWeakness);
                     break;
                     
                 case "spell":
                     // Reduce spell power
-                    var spellWeakenBuff = new PrefabGUID(801183323); // Spell weakness
-                    BuffCharacter(target, spellWeakenBuff);
+                    BuffCharacter(target, PrefabConstants.SpellWeakness);
                     break;
                     
                 case "defense":
                     // Reduce armor/resistances
-                    var defenseWeakenBuff = new PrefabGUID(-1894153850); // Armor reduction
-                    BuffCharacter(target, defenseWeakenBuff);
+                    BuffCharacter(target, PrefabConstants.ArmorReduction);
                     break;
                     
                 case "healing":
                     // Reduce healing received
-                    var healWeakenBuff = new PrefabGUID(1723455773); // Healing reduction
-                    BuffCharacter(target, healWeakenBuff);
+                    BuffCharacter(target, PrefabConstants.HealingReduction);
                     break;
                     
                 case "all":
                 default:
                     // Apply all weakening effects
-                    BuffCharacter(target, new PrefabGUID(-1055766866)); // Physical weakness
-                    BuffCharacter(target, new PrefabGUID(801183323)); // Spell weakness
-                    BuffCharacter(target, new PrefabGUID(-1894153850)); // Armor reduction
+                    BuffCharacter(target, PrefabConstants.PhysicalWeakness);
+                    BuffCharacter(target, PrefabConstants.SpellWeakness);
+                    BuffCharacter(target, PrefabConstants.ArmorReduction);
                     break;
             }
             
             // Visual effect for weakening
-            var visualBuff = new PrefabGUID(-1464851863); // Weakness visual
-            BuffCharacter(target, visualBuff);
+            BuffCharacter(target, PrefabConstants.IllusionVisual);
             
             Plugin.BLogger.Debug(LogCategory.Mechanic, $"Applied {weakenType} weaken effect reducing by {amount}%");
         }

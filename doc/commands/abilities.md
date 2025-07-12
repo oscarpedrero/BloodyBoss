@@ -235,19 +235,14 @@ Found 156 compatible abilities:
 
 ### Set Specific Slot
 ```
-.bb ability-slot-set <BossName> <SlotName> <SourcePrefabGUID> <AbilityIndex> [enabled] [description]
+.bb ability-slot-set <BossName> <SlotIndex> <Enabled> [Description]
 ```
 
-More technical approach using GUIDs directly.
+Modify an existing ability swap configuration.
 
 ### Remove Slot
 ```
-.bb ability-slot-remove <BossName> <SlotName>
-```
-
-### Toggle Slot
-```
-.bb ability-slot-toggle <BossName> <SlotName>
+.bb ability-slot-remove <BossName> <SlotIndex>
 ```
 
 ### List All Slots

@@ -17,6 +17,7 @@ using ProjectM.Shared;
 using ProjectM.Gameplay.Scripting;
 using Stunlock.Network;
 using Bloody.Core.Helper.v1;
+using BloodyBoss.Data;
 
 namespace BloodyBoss.Systems.Mechanics
 {
@@ -25,9 +26,9 @@ namespace BloodyBoss.Systems.Mechanics
         public string Type => "stun";
         
         // Visual effect PrefabGUIDs
-        private readonly PrefabGUID HOLY_BEAM_TARGET = new PrefabGUID(-1848432780);  // AB_Militia_BishopOfDunley_HolyBeam_TargetBuff_Buff - visible mark
-        private readonly PrefabGUID STUN_IMPACT = new PrefabGUID(-1369764436);  // Buff_General_Stun_ImpactFX
-        private readonly PrefabGUID STUN_DEBUFF = new PrefabGUID(355774169);  // Buff_General_Stun
+        private readonly PrefabGUID HOLY_BEAM_TARGET = PrefabConstants.HolyBeamTarget;
+        private readonly PrefabGUID STUN_IMPACT = PrefabConstants.StunImpact;
+        private readonly PrefabGUID STUN_DEBUFF = PrefabConstants.Stun;
         
         // Track active marks
         private readonly Dictionary<Entity, Entity> _activeMarks = new Dictionary<Entity, Entity>();
@@ -71,7 +72,7 @@ namespace BloodyBoss.Systems.Mechanics
             try
             {
                 // Use floating eye as default mark effect
-                var markBuff = new PrefabGUID(1520432556); // AB_Militia_HoundMaster_QuickShot_Buff - Floating Eye
+                var markBuff = PrefabConstants.FloatingEyeMark;
                 
                 // If specific effect requested, use that instead
                 if (markEffect != "auto" && int.TryParse(markEffect, out int specificGuid))

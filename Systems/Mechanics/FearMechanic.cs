@@ -11,6 +11,7 @@ using Bloody.Core.Models.v1;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Collections;
+using BloodyBoss.Data;
 
 namespace BloodyBoss.Systems.Mechanics
 {
@@ -80,8 +81,7 @@ namespace BloodyBoss.Systems.Mechanics
 
         private void ApplyFear(Entity target, float duration)
         {
-            var fearBuff = new PrefabGUID(753231464); // Fear buff
-            BuffCharacter(target, fearBuff);
+            BuffCharacter(target, PrefabConstants.Fear);
             
             Plugin.BLogger.Debug(LogCategory.Mechanic, $"Applied fear to entity for {duration}s");
         }

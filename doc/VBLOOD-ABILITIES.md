@@ -10,7 +10,7 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 ## Available VBloods and Their Abilities
 
-### Forest Wolf (Level 16)
+### Alpha the White Wolf (Level 16)
 - **GUID**: -1905691330
 - **Can Fly**: No
 - **Features**: UnitCategory:Beast, Beast
@@ -32,18 +32,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Forest Wolf" 0 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Alpha the White Wolf" 0 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Forest Wolf" 1 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Alpha the White Wolf" 1 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Forest Wolf" 2 true "Channeled, effect, Dash"
+.bb ability-slot "YourBoss" "Alpha the White Wolf" 2 true "Channeled, effect, Dash"
 ```
 
 ---
 
-### Bandit Foreman (Level 20)
+### Rufus the Foreman (Level 20)
 - **GUID**: 2122229952
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Bandit
@@ -68,18 +68,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Bandit Foreman" 0 true "Channeled, projectile"
+.bb ability-slot "YourBoss" "Rufus the Foreman" 0 true "Channeled, projectile"
 ```
 ```
-.bb ability-slot "YourBoss" "Bandit Foreman" 1 true "Channeled, effect, TargetAOE"
+.bb ability-slot "YourBoss" "Rufus the Foreman" 1 true "Channeled, effect, TargetAOE"
 ```
 ```
-.bb ability-slot "YourBoss" "Bandit Foreman" 2 true "Channeled"
+.bb ability-slot "YourBoss" "Rufus the Foreman" 2 true "Channeled"
 ```
 
 ---
 
-### Bandit Frostarrow (Level 20)
+### Keely the Frost Archer (Level 20)
 - **GUID**: 1124739990
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Bandit
@@ -98,18 +98,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Bandit Frostarrow" 0 true "Channeled"
+.bb ability-slot "YourBoss" "Keely the Frost Archer" 0 true "Channeled"
 ```
 ```
-.bb ability-slot "YourBoss" "Bandit Frostarrow" 1 true "Channeled, buff"
+.bb ability-slot "YourBoss" "Keely the Frost Archer" 1 true "Channeled, buff"
 ```
 ```
-.bb ability-slot "YourBoss" "Bandit Frostarrow" 2 true "Channeled"
+.bb ability-slot "YourBoss" "Keely the Frost Archer" 2 true "Channeled"
 ```
 
 ---
 
-### Bandit StoneBreaker (Level 20)
+### Errol the Stonebreaker (Level 20)
 - **GUID**: -2025101517
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Bandit
@@ -129,18 +129,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Bandit StoneBreaker" 0 true "Channeled, Requires flight, effect"
+.bb ability-slot "YourBoss" "Errol the Stonebreaker" 0 true "Channeled, Requires flight, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Bandit StoneBreaker" 1 true "Channeled, Requires flight, effect"
+.bb ability-slot "YourBoss" "Errol the Stonebreaker" 1 true "Channeled, Requires flight, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Bandit StoneBreaker" 2 true "Channeled, projectile/effect"
+.bb ability-slot "YourBoss" "Errol the Stonebreaker" 2 true "Channeled, projectile/effect"
 ```
 
 ---
 
-### Bandit Stalker (Level 27)
+### Grayson the Armourer (Level 27)
 - **GUID**: 1106149033
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Bandit
@@ -161,18 +161,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Bandit Stalker" 0 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Grayson the Armourer" 0 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Bandit Stalker" 1 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Grayson the Armourer" 1 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Bandit Stalker" 2 true "Channeled"
+.bb ability-slot "YourBoss" "Grayson the Armourer" 2 true "Channeled"
 ```
 
 ---
 
-### Undead BishopOfDeath (Level 27)
+### Goreswine the Ravager (Level 27)
 - **GUID**: 577478542
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid
@@ -192,18 +192,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Undead BishopOfDeath" 0 true "Channeled, projectile"
+.bb ability-slot "YourBoss" "Goreswine the Ravager" 0 true "Channeled, projectile"
 ```
 ```
-.bb ability-slot "YourBoss" "Undead BishopOfDeath" 1 true "Channeled, projectile"
+.bb ability-slot "YourBoss" "Goreswine the Ravager" 1 true "Channeled, projectile"
 ```
 ```
-.bb ability-slot "YourBoss" "Undead BishopOfDeath" 2 true "Channeled, effect, TargetAOE"
+.bb ability-slot "YourBoss" "Goreswine the Ravager" 2 true "Channeled, effect, TargetAOE"
 ```
 
 ---
 
-### Bandit Bomber (Level 30)
+### Clive the Firestarter (Level 30)
 - **GUID**: 1896428751
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Bandit
@@ -218,18 +218,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Bandit Bomber" 0 true "Channeled, effect, TargetAOE"
+.bb ability-slot "YourBoss" "Clive the Firestarter" 0 true "Channeled, effect, TargetAOE"
 ```
 ```
-.bb ability-slot "YourBoss" "Bandit Bomber" 1 true "Channeled"
+.bb ability-slot "YourBoss" "Clive the Firestarter" 1 true "Channeled"
 ```
 ```
-.bb ability-slot "YourBoss" "Bandit Bomber" 2 true "Channeled, projectile"
+.bb ability-slot "YourBoss" "Clive the Firestarter" 2 true "Channeled, projectile"
 ```
 
 ---
 
-### Bandit Chaosarrow (Level 30)
+### Lidia the Chaos Archer (Level 30)
 - **GUID**: 763273073
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Bandit
@@ -248,13 +248,13 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Bandit Chaosarrow" 0 true "Channeled, buff"
+.bb ability-slot "YourBoss" "Lidia the Chaos Archer" 0 true "Channeled, buff"
 ```
 ```
-.bb ability-slot "YourBoss" "Bandit Chaosarrow" 1 true "Channeled, buff"
+.bb ability-slot "YourBoss" "Lidia the Chaos Archer" 1 true "Channeled, buff"
 ```
 ```
-.bb ability-slot "YourBoss" "Bandit Chaosarrow" 2 true "Channeled"
+.bb ability-slot "YourBoss" "Lidia the Chaos Archer" 2 true "Channeled"
 ```
 
 ---
@@ -289,7 +289,7 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 ---
 
-### Vermin DireRat (Level 30)
+### Putrid Rat (Level 30)
 - **GUID**: -2039908510
 - **Can Fly**: No
 - **Features**: UnitCategory:Beast, Beast
@@ -306,18 +306,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Vermin DireRat" 0 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Putrid Rat" 0 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Vermin DireRat" 1 true "Channeled"
+.bb ability-slot "YourBoss" "Putrid Rat" 1 true "Channeled"
 ```
 ```
-.bb ability-slot "YourBoss" "Vermin DireRat" 2 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Putrid Rat" 2 true "Channeled, effect"
 ```
 
 ---
 
-### Bandit Fisherman (Level 32)
+### Finn the Fisherman (Level 32)
 - **GUID**: -2122682556
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Bandit
@@ -342,18 +342,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Bandit Fisherman" 0 true "2-hit combo, Channeled, Requires flight, effect"
+.bb ability-slot "YourBoss" "Finn the Fisherman" 0 true "2-hit combo, Channeled, Requires flight, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Bandit Fisherman" 1 true "Channeled, effect/buff, TargetAOE"
+.bb ability-slot "YourBoss" "Finn the Fisherman" 1 true "Channeled, effect/buff, TargetAOE"
 ```
 ```
-.bb ability-slot "YourBoss" "Bandit Fisherman" 2 true "Channeled, effect, Channeling"
+.bb ability-slot "YourBoss" "Finn the Fisherman" 2 true "Channeled, effect, Channeling"
 ```
 
 ---
 
-### Forest Bear Dire (Level 35)
+### Kodia the Ferocious Bear (Level 35)
 - **GUID**: -1391546313
 - **Can Fly**: No
 - **Features**: UnitCategory:Beast, Beast
@@ -374,18 +374,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Forest Bear Dire" 0 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Kodia the Ferocious Bear" 0 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Forest Bear Dire" 1 true "Channeled, AoE/buff"
+.bb ability-slot "YourBoss" "Kodia the Ferocious Bear" 1 true "Channeled, AoE/buff"
 ```
 ```
-.bb ability-slot "YourBoss" "Forest Bear Dire" 2 true "Channeled, effect, Dash"
+.bb ability-slot "YourBoss" "Kodia the Ferocious Bear" 2 true "Channeled, effect, Dash"
 ```
 
 ---
 
-### Poloma (Level 35)
+### Polora the Feywalker (Level 35)
 - **GUID**: -484556888
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid
@@ -404,18 +404,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Poloma" 0 true "Channeled"
+.bb ability-slot "YourBoss" "Polora the Feywalker" 0 true "Channeled"
 ```
 ```
-.bb ability-slot "YourBoss" "Poloma" 1 true "Channeled, projectile"
+.bb ability-slot "YourBoss" "Polora the Feywalker" 1 true "Channeled, projectile"
 ```
 ```
-.bb ability-slot "YourBoss" "Poloma" 2 true "Channeled, buff"
+.bb ability-slot "YourBoss" "Polora the Feywalker" 2 true "Channeled, buff"
 ```
 
 ---
 
-### Undead Priest (Level 35)
+### Nicholaus the Fallen (Level 35)
 - **GUID**: 153390636
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid
@@ -436,18 +436,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Undead Priest" 0 true "Channeled, projectile"
+.bb ability-slot "YourBoss" "Nicholaus the Fallen" 0 true "Channeled, projectile"
 ```
 ```
-.bb ability-slot "YourBoss" "Undead Priest" 1 true "Channeled, movement, Travel"
+.bb ability-slot "YourBoss" "Nicholaus the Fallen" 1 true "Channeled, movement, Travel"
 ```
 ```
-.bb ability-slot "YourBoss" "Undead Priest" 2 true "Channeled, projectile, Channeling"
+.bb ability-slot "YourBoss" "Nicholaus the Fallen" 2 true "Channeled, projectile, Channeling"
 ```
 
 ---
 
-### Bandit Tourok (Level 37)
+### Quincey the Bandit King (Level 37)
 - **GUID**: -1659822956
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Bandit
@@ -468,18 +468,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Bandit Tourok" 0 true "Channeled, Requires flight, effect"
+.bb ability-slot "YourBoss" "Quincey the Bandit King" 0 true "Channeled, Requires flight, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Bandit Tourok" 1 true "Channeled, Requires flight, effect"
+.bb ability-slot "YourBoss" "Quincey the Bandit King" 1 true "Channeled, Requires flight, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Bandit Tourok" 2 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Quincey the Bandit King" 2 true "Channeled, effect"
 ```
 
 ---
 
-### Villager Tailor (Level 40)
+### Beatrice the Tailor (Level 40)
 - **GUID**: -1942352521
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid
@@ -502,18 +502,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Villager Tailor" 0 true "Channeled"
+.bb ability-slot "YourBoss" "Beatrice the Tailor" 0 true "Channeled"
 ```
 ```
-.bb ability-slot "YourBoss" "Villager Tailor" 1 true "2-hit combo, Channeled, effect"
+.bb ability-slot "YourBoss" "Beatrice the Tailor" 1 true "2-hit combo, Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Villager Tailor" 2 true "Channeled, projectile"
+.bb ability-slot "YourBoss" "Beatrice the Tailor" 2 true "Channeled, projectile"
 ```
 
 ---
 
-### Militia Guard (Level 44)
+### Vincent the Frostbringer (Level 44)
 - **GUID**: -29797003
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Militia
@@ -532,18 +532,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Militia Guard" 0 true "2-hit combo, Channeled, effect"
+.bb ability-slot "YourBoss" "Vincent the Frostbringer" 0 true "2-hit combo, Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Militia Guard" 1 true "Channeled"
+.bb ability-slot "YourBoss" "Vincent the Frostbringer" 1 true "Channeled"
 ```
 ```
-.bb ability-slot "YourBoss" "Militia Guard" 2 true "Channeled, buff"
+.bb ability-slot "YourBoss" "Vincent the Frostbringer" 2 true "Channeled, buff"
 ```
 
 ---
 
-### Militia Nun (Level 44)
+### Christina the Sun Priestess (Level 44)
 - **GUID**: -99012450
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Militia
@@ -565,18 +565,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Militia Nun" 0 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Christina the Sun Priestess" 0 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Militia Nun" 1 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Christina the Sun Priestess" 1 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Militia Nun" 2 true "Channeled, effect, TargetAOE"
+.bb ability-slot "YourBoss" "Christina the Sun Priestess" 2 true "Channeled, effect, TargetAOE"
 ```
 
 ---
 
-### VHunter Leader (Level 44)
+### Tristan the Vampire Hunter (Level 44)
 - **GUID**: -1449631170
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid
@@ -599,13 +599,13 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "VHunter Leader" 0 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Tristan the Vampire Hunter" 0 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "VHunter Leader" 1 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Tristan the Vampire Hunter" 1 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "VHunter Leader" 2 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Tristan the Vampire Hunter" 2 true "Channeled, effect"
 ```
 
 ---
@@ -638,7 +638,7 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 ---
 
-### Militia Scribe (Level 47)
+### Maja the Dark Savant (Level 47)
 - **GUID**: 1945956671
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Militia
@@ -658,18 +658,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Militia Scribe" 0 true "Channeled, projectile"
+.bb ability-slot "YourBoss" "Maja the Dark Savant" 0 true "Channeled, projectile"
 ```
 ```
-.bb ability-slot "YourBoss" "Militia Scribe" 1 true "2-hit combo, Channeled, projectile"
+.bb ability-slot "YourBoss" "Maja the Dark Savant" 1 true "2-hit combo, Channeled, projectile"
 ```
 ```
-.bb ability-slot "YourBoss" "Militia Scribe" 2 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Maja the Dark Savant" 2 true "Channeled, effect"
 ```
 
 ---
 
-### Undead BishopOfShadows (Level 47)
+### Leandra the Shadow Priestess (Level 47)
 - **GUID**: 939467639
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid
@@ -687,18 +687,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Undead BishopOfShadows" 0 true "Channeled, projectile"
+.bb ability-slot "YourBoss" "Leandra the Shadow Priestess" 0 true "Channeled, projectile"
 ```
 ```
-.bb ability-slot "YourBoss" "Undead BishopOfShadows" 1 true "Channeled, projectile"
+.bb ability-slot "YourBoss" "Leandra the Shadow Priestess" 1 true "Channeled, projectile"
 ```
 ```
-.bb ability-slot "YourBoss" "Undead BishopOfShadows" 2 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Leandra the Shadow Priestess" 2 true "Channeled, effect"
 ```
 
 ---
 
-### Undead Leader (Level 47)
+### Kriig the Undead General (Level 47)
 - **GUID**: -1365931036
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid
@@ -715,13 +715,13 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Undead Leader" 0 true "2-hit combo, Channeled, effect"
+.bb ability-slot "YourBoss" "Kriig the Undead General" 0 true "2-hit combo, Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Undead Leader" 1 true "Channeled"
+.bb ability-slot "YourBoss" "Kriig the Undead General" 1 true "Channeled"
 ```
 ```
-.bb ability-slot "YourBoss" "Undead Leader" 2 true "Channeled, effect, Dash"
+.bb ability-slot "YourBoss" "Kriig the Undead General" 2 true "Channeled, effect, Dash"
 ```
 
 ---
@@ -785,7 +785,7 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 ---
 
-### Militia Glassblower (Level 50)
+### Grethel the Glassblower (Level 50)
 - **GUID**: 910988233
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Militia
@@ -806,18 +806,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Militia Glassblower" 0 true "Channeled"
+.bb ability-slot "YourBoss" "Grethel the Glassblower" 0 true "Channeled"
 ```
 ```
-.bb ability-slot "YourBoss" "Militia Glassblower" 1 true "Channeled"
+.bb ability-slot "YourBoss" "Grethel the Glassblower" 1 true "Channeled"
 ```
 ```
-.bb ability-slot "YourBoss" "Militia Glassblower" 2 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Grethel the Glassblower" 2 true "Channeled, effect"
 ```
 
 ---
 
-### Militia Longbowman LightArrow (Level 50)
+### Meredith the Bright Archer (Level 50)
 - **GUID**: 850622034
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Militia
@@ -838,18 +838,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Militia Longbowman LightArrow" 0 true "Channeled, projectile"
+.bb ability-slot "YourBoss" "Meredith the Bright Archer" 0 true "Channeled, projectile"
 ```
 ```
-.bb ability-slot "YourBoss" "Militia Longbowman LightArrow" 1 true "Channeled, projectile"
+.bb ability-slot "YourBoss" "Meredith the Bright Archer" 1 true "Channeled, projectile"
 ```
 ```
-.bb ability-slot "YourBoss" "Militia Longbowman LightArrow" 2 true "Channeled"
+.bb ability-slot "YourBoss" "Meredith the Bright Archer" 2 true "Channeled"
 ```
 
 ---
 
-### Undead Infiltrator (Level 50)
+### Bane the Shadowblade (Level 50)
 - **GUID**: 613251918
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid
@@ -869,18 +869,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Undead Infiltrator" 0 true "3-hit combo, Channeled, effect, Channeling"
+.bb ability-slot "YourBoss" "Bane the Shadowblade" 0 true "3-hit combo, Channeled, effect, Channeling"
 ```
 ```
-.bb ability-slot "YourBoss" "Undead Infiltrator" 1 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Bane the Shadowblade" 1 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Undead Infiltrator" 2 true "Channeled, movement/buff, Travel"
+.bb ability-slot "YourBoss" "Bane the Shadowblade" 2 true "Channeled, movement/buff, Travel"
 ```
 
 ---
 
-### Geomancer Human (Level 53)
+### Terah the Geomancer (Level 53)
 - **GUID**: -1065970933
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid
@@ -904,13 +904,13 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Geomancer Human" 0 true "Channeled, projectile"
+.bb ability-slot "YourBoss" "Terah the Geomancer" 0 true "Channeled, projectile"
 ```
 ```
-.bb ability-slot "YourBoss" "Geomancer Human" 1 true "Channeled, buff"
+.bb ability-slot "YourBoss" "Terah the Geomancer" 1 true "Channeled, buff"
 ```
 ```
-.bb ability-slot "YourBoss" "Geomancer Human" 2 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Terah the Geomancer" 2 true "Channeled, effect"
 ```
 
 ---
@@ -952,7 +952,7 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 ---
 
-### Wendigo (Level 53)
+### Frostmaw the Mountain Terror (Level 53)
 - **GUID**: 24378719
 - **Can Fly**: No
 - **Features**: UnitCategory:Beast, Beast
@@ -976,13 +976,13 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Wendigo" 0 true "3-hit combo, Channeled, effect"
+.bb ability-slot "YourBoss" "Frostmaw the Mountain Terror" 0 true "3-hit combo, Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Wendigo" 1 true "3-hit combo, Channeled, projectile/buff"
+.bb ability-slot "YourBoss" "Frostmaw the Mountain Terror" 1 true "3-hit combo, Channeled, projectile/buff"
 ```
 ```
-.bb ability-slot "YourBoss" "Wendigo" 2 true "Channeled, AoE"
+.bb ability-slot "YourBoss" "Frostmaw the Mountain Terror" 2 true "Channeled, AoE"
 ```
 
 ---
@@ -1196,7 +1196,7 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 ---
 
-### Militia BishopOfDunley (Level 57)
+### Raziel the Shepherd (Level 57)
 - **GUID**: -680831417
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Militia
@@ -1216,13 +1216,13 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Militia BishopOfDunley" 0 true "Channeled, projectile"
+.bb ability-slot "YourBoss" "Raziel the Shepherd" 0 true "Channeled, projectile"
 ```
 ```
-.bb ability-slot "YourBoss" "Militia BishopOfDunley" 1 true "Channeled"
+.bb ability-slot "YourBoss" "Raziel the Shepherd" 1 true "Channeled"
 ```
 ```
-.bb ability-slot "YourBoss" "Militia BishopOfDunley" 2 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Raziel the Shepherd" 2 true "Channeled, effect"
 ```
 
 ---
@@ -1346,7 +1346,7 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 ---
 
-### Vampire HighLord (Level 57)
+### General Cassius the Betrayer (Level 57)
 - **GUID**: -496360395
 - **Can Fly**: No
 - **Features**: Vampire
@@ -1367,18 +1367,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Vampire HighLord" 0 true "2-hit combo, Channeled, effect"
+.bb ability-slot "YourBoss" "General Cassius the Betrayer" 0 true "2-hit combo, Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Vampire HighLord" 1 true "Channeled, buff, Travel"
+.bb ability-slot "YourBoss" "General Cassius the Betrayer" 1 true "Channeled, buff, Travel"
 ```
 ```
-.bb ability-slot "YourBoss" "Vampire HighLord" 2 true "Channeled, effect"
+.bb ability-slot "YourBoss" "General Cassius the Betrayer" 2 true "Channeled, effect"
 ```
 
 ---
 
-### VHunter Jade (Level 57)
+### Jade the Vampire Hunter (Level 57)
 - **GUID**: -1968372384
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid
@@ -1402,13 +1402,13 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "VHunter Jade" 0 true "12-hit combo, Channeled, projectile"
+.bb ability-slot "YourBoss" "Jade the Vampire Hunter" 0 true "12-hit combo, Channeled, projectile"
 ```
 ```
-.bb ability-slot "YourBoss" "VHunter Jade" 1 true "2-hit combo, Channeled, projectile"
+.bb ability-slot "YourBoss" "Jade the Vampire Hunter" 1 true "2-hit combo, Channeled, projectile"
 ```
 ```
-.bb ability-slot "YourBoss" "VHunter Jade" 2 true "Channeled, projectile"
+.bb ability-slot "YourBoss" "Jade the Vampire Hunter" 2 true "Channeled, projectile"
 ```
 
 ---
@@ -1447,7 +1447,7 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 ---
 
-### Militia Leader (Level 58)
+### Octavian the Militia Captain (Level 58)
 - **GUID**: 1688478381
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Militia
@@ -1473,18 +1473,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Militia Leader" 0 true "Channeled, effect, Hover"
+.bb ability-slot "YourBoss" "Octavian the Militia Captain" 0 true "Channeled, effect, Hover"
 ```
 ```
-.bb ability-slot "YourBoss" "Militia Leader" 1 true "Channeled, projectile"
+.bb ability-slot "YourBoss" "Octavian the Militia Captain" 1 true "Channeled, projectile"
 ```
 ```
-.bb ability-slot "YourBoss" "Militia Leader" 2 true "Channeled, movement/buff, Travel"
+.bb ability-slot "YourBoss" "Octavian the Militia Captain" 2 true "Channeled, movement/buff, Travel"
 ```
 
 ---
 
-### Gloomrot Iva (Level 60)
+### Ziva the Engineer (Level 60)
 - **GUID**: 172235178
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Gloomrot
@@ -1517,18 +1517,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Gloomrot Iva" 0 true "3-hit combo, Channeled"
+.bb ability-slot "YourBoss" "Ziva the Engineer" 0 true "3-hit combo, Channeled"
 ```
 ```
-.bb ability-slot "YourBoss" "Gloomrot Iva" 1 true "Channeled, effect/buff, Channeling"
+.bb ability-slot "YourBoss" "Ziva the Engineer" 1 true "Channeled, effect/buff, Channeling"
 ```
 ```
-.bb ability-slot "YourBoss" "Gloomrot Iva" 2 true "Channeled, effect, Channeling"
+.bb ability-slot "YourBoss" "Ziva the Engineer" 2 true "Channeled, effect, Channeling"
 ```
 
 ---
 
-### Gloomrot Voltage (Level 60)
+### Domina the Blade Dancer (Level 60)
 - **GUID**: -1101874342
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Gloomrot
@@ -1551,18 +1551,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Gloomrot Voltage" 0 true "3-hit combo, Channeled, effect"
+.bb ability-slot "YourBoss" "Domina the Blade Dancer" 0 true "3-hit combo, Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Gloomrot Voltage" 1 true "Channeled, movement, Travel"
+.bb ability-slot "YourBoss" "Domina the Blade Dancer" 1 true "Channeled, movement, Travel"
 ```
 ```
-.bb ability-slot "YourBoss" "Gloomrot Voltage" 2 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Domina the Blade Dancer" 2 true "Channeled, effect"
 ```
 
 ---
 
-### Gloomrot Purifier (Level 61)
+### Angram the Purifier (Level 61)
 - **GUID**: 106480588
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Gloomrot
@@ -1589,18 +1589,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Gloomrot Purifier" 0 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Angram the Purifier" 0 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Gloomrot Purifier" 1 true "Channeled, buff, Channeling"
+.bb ability-slot "YourBoss" "Angram the Purifier" 1 true "Channeled, buff, Channeling"
 ```
 ```
-.bb ability-slot "YourBoss" "Gloomrot Purifier" 2 true "Channeled, effect/buff"
+.bb ability-slot "YourBoss" "Angram the Purifier" 2 true "Channeled, effect/buff"
 ```
 
 ---
 
-### Spider Queen (Level 63)
+### Ungora the Spider Queen (Level 63)
 - **GUID**: -548489519
 - **Can Fly**: No
 - **Features**: UnitCategory:Beast, Beast
@@ -1621,18 +1621,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Spider Queen" 0 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Ungora the Spider Queen" 0 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Spider Queen" 1 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Ungora the Spider Queen" 1 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Spider Queen" 2 true "Channeled, projectile"
+.bb ability-slot "YourBoss" "Ungora the Spider Queen" 2 true "Channeled, projectile"
 ```
 
 ---
 
-### Undead ZealousCultist (Level 63)
+### Foulrot the Soultaker (Level 63)
 - **GUID**: -1208888966
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid
@@ -1650,18 +1650,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Undead ZealousCultist" 0 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Foulrot the Soultaker" 0 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Undead ZealousCultist" 1 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Foulrot the Soultaker" 1 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Undead ZealousCultist" 2 true "Channeled, buff"
+.bb ability-slot "YourBoss" "Foulrot the Soultaker" 2 true "Channeled, buff"
 ```
 
 ---
 
-### Villager CursedWanderer (Level 63)
+### Ben the Old Wanderer (Level 63)
 - **GUID**: 109969450
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Cursed
@@ -1676,18 +1676,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Villager CursedWanderer" 0 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Ben the Old Wanderer" 0 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Villager CursedWanderer" 1 true "Channeled"
+.bb ability-slot "YourBoss" "Ben the Old Wanderer" 1 true "Channeled"
 ```
 ```
-.bb ability-slot "YourBoss" "Villager CursedWanderer" 2 true "Channeled"
+.bb ability-slot "YourBoss" "Ben the Old Wanderer" 2 true "Channeled"
 ```
 
 ---
 
-### Cursed ToadKing (Level 64)
+### Albert the Duke of Balaton (Level 64)
 - **GUID**: -203043163
 - **Can Fly**: No
 - **Features**: UnitCategory:Beast, Beast, Cursed
@@ -1707,13 +1707,13 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Cursed ToadKing" 0 true "2-hit combo, Channeled, effect"
+.bb ability-slot "YourBoss" "Albert the Duke of Balaton" 0 true "2-hit combo, Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Cursed ToadKing" 1 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Albert the Duke of Balaton" 1 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Cursed ToadKing" 2 true "Channeled, movement, Travel"
+.bb ability-slot "YourBoss" "Albert the Duke of Balaton" 2 true "Channeled, movement, Travel"
 ```
 
 ---
@@ -1770,7 +1770,7 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 ---
 
-### Undead CursedSmith (Level 65)
+### Cyril the Cursed Smith (Level 65)
 - **GUID**: 326378955
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Cursed
@@ -1794,18 +1794,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Undead CursedSmith" 0 true "4-hit combo, Channeled, effect"
+.bb ability-slot "YourBoss" "Cyril the Cursed Smith" 0 true "4-hit combo, Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Undead CursedSmith" 1 true "Channeled, effect/buff, Travel"
+.bb ability-slot "YourBoss" "Cyril the Cursed Smith" 1 true "Channeled, effect/buff, Travel"
 ```
 ```
-.bb ability-slot "YourBoss" "Undead CursedSmith" 2 true "Channeled, projectile"
+.bb ability-slot "YourBoss" "Cyril the Cursed Smith" 2 true "Channeled, projectile"
 ```
 
 ---
 
-### ChurchOfLight Overseer (Level 66)
+### Sir Magnus the Overseer (Level 66)
 - **GUID**: -26105228
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Church
@@ -1825,18 +1825,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "ChurchOfLight Overseer" 0 true "2-hit combo, Channeled, Requires flight, effect"
+.bb ability-slot "YourBoss" "Sir Magnus the Overseer" 0 true "2-hit combo, Channeled, Requires flight, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "ChurchOfLight Overseer" 1 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Sir Magnus the Overseer" 1 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "ChurchOfLight Overseer" 2 true "Channeled, effect/buff"
+.bb ability-slot "YourBoss" "Sir Magnus the Overseer" 2 true "Channeled, effect/buff"
 ```
 
 ---
 
-### ArchMage (Level 70)
+### Mairwyn the Elementalist (Level 70)
 - **GUID**: -2013903325
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid
@@ -1858,18 +1858,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "ArchMage" 0 true "3-hit combo, Channeled, projectile/buff"
+.bb ability-slot "YourBoss" "Mairwyn the Elementalist" 0 true "3-hit combo, Channeled, projectile/buff"
 ```
 ```
-.bb ability-slot "YourBoss" "ArchMage" 1 true "Channeled, projectile"
+.bb ability-slot "YourBoss" "Mairwyn the Elementalist" 1 true "Channeled, projectile"
 ```
 ```
-.bb ability-slot "YourBoss" "ArchMage" 2 true "Channeled, AoE"
+.bb ability-slot "YourBoss" "Mairwyn the Elementalist" 2 true "Channeled, AoE"
 ```
 
 ---
 
-### ChurchOfLight Sommelier (Level 70)
+### Baron du Bouchon the Sommelier (Level 70)
 - **GUID**: 192051202
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Church
@@ -1890,18 +1890,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "ChurchOfLight Sommelier" 0 true "Channeled, effect, Hover"
+.bb ability-slot "YourBoss" "Baron du Bouchon the Sommelier" 0 true "Channeled, effect, Hover"
 ```
 ```
-.bb ability-slot "YourBoss" "ChurchOfLight Sommelier" 1 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Baron du Bouchon the Sommelier" 1 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "ChurchOfLight Sommelier" 2 true "Channeled, projectile"
+.bb ability-slot "YourBoss" "Baron du Bouchon the Sommelier" 2 true "Channeled, projectile"
 ```
 
 ---
 
-### Harpy Matriarch (Level 70)
+### Morian the Stormwing Matriarch (Level 70)
 - **GUID**: 685266977
 - **Can Fly**: No
 - **Features**: UnitCategory:Beast, Beast
@@ -1921,18 +1921,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Harpy Matriarch" 0 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Morian the Stormwing Matriarch" 0 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Harpy Matriarch" 1 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Morian the Stormwing Matriarch" 1 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Harpy Matriarch" 2 true "Channeled, effect, Dash"
+.bb ability-slot "YourBoss" "Morian the Stormwing Matriarch" 2 true "Channeled, effect, Dash"
 ```
 
 ---
 
-### Gloomrot TheProfessor (Level 74)
+### Henry Blackbrew the Doctor (Level 74)
 - **GUID**: 814083983
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Gloomrot
@@ -1955,13 +1955,13 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Gloomrot TheProfessor" 0 true "Channeled, projectile, Hover"
+.bb ability-slot "YourBoss" "Henry Blackbrew the Doctor" 0 true "Channeled, projectile, Hover"
 ```
 ```
-.bb ability-slot "YourBoss" "Gloomrot TheProfessor" 1 true "Channeled, projectile"
+.bb ability-slot "YourBoss" "Henry Blackbrew the Doctor" 1 true "Channeled, projectile"
 ```
 ```
-.bb ability-slot "YourBoss" "Gloomrot TheProfessor" 2 true "Channeled, buff, Channeling"
+.bb ability-slot "YourBoss" "Henry Blackbrew the Doctor" 2 true "Channeled, buff, Channeling"
 ```
 
 ---
@@ -2075,7 +2075,7 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 ---
 
-### Cursed Witch (Level 76)
+### Matka the Curse Weaver (Level 76)
 - **GUID**: -910296704
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Cursed
@@ -2094,18 +2094,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Cursed Witch" 0 true "Channeled, projectile"
+.bb ability-slot "YourBoss" "Matka the Curse Weaver" 0 true "Channeled, projectile"
 ```
 ```
-.bb ability-slot "YourBoss" "Cursed Witch" 1 true "Channeled"
+.bb ability-slot "YourBoss" "Matka the Curse Weaver" 1 true "Channeled"
 ```
 ```
-.bb ability-slot "YourBoss" "Cursed Witch" 2 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Matka the Curse Weaver" 2 true "Channeled, effect"
 ```
 
 ---
 
-### Winter Yeti (Level 76)
+### Terrorclaw the Ogre (Level 76)
 - **GUID**: -1347412392
 - **Can Fly**: No
 - **Features**: UnitCategory:Beast, Beast
@@ -2133,18 +2133,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Winter Yeti" 0 true "2-hit combo, Channeled, effect"
+.bb ability-slot "YourBoss" "Terrorclaw the Ogre" 0 true "2-hit combo, Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Winter Yeti" 1 true "Channeled, effect, Travel"
+.bb ability-slot "YourBoss" "Terrorclaw the Ogre" 1 true "Channeled, effect, Travel"
 ```
 ```
-.bb ability-slot "YourBoss" "Winter Yeti" 2 true "Channeled"
+.bb ability-slot "YourBoss" "Terrorclaw the Ogre" 2 true "Channeled"
 ```
 
 ---
 
-### ChurchOfLight Cardinal (Level 79)
+### Azariel the Sunbringer (Level 79)
 - **GUID**: 114912615
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Church
@@ -2163,18 +2163,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "ChurchOfLight Cardinal" 0 true "Channeled, buff"
+.bb ability-slot "YourBoss" "Azariel the Sunbringer" 0 true "Channeled, buff"
 ```
 ```
-.bb ability-slot "YourBoss" "ChurchOfLight Cardinal" 1 true "Channeled, buff, Channeling"
+.bb ability-slot "YourBoss" "Azariel the Sunbringer" 1 true "Channeled, buff, Channeling"
 ```
 ```
-.bb ability-slot "YourBoss" "ChurchOfLight Cardinal" 2 true "Channeled, effect, Travel"
+.bb ability-slot "YourBoss" "Azariel the Sunbringer" 2 true "Channeled, effect, Travel"
 ```
 
 ---
 
-### Gloomrot RailgunSergeant (Level 79)
+### Voltatia the Power Master (Level 79)
 - **GUID**: 2054432370
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Gloomrot
@@ -2195,18 +2195,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Gloomrot RailgunSergeant" 0 true "Channeled, effect, Channeling"
+.bb ability-slot "YourBoss" "Voltatia the Power Master" 0 true "Channeled, effect, Channeling"
 ```
 ```
-.bb ability-slot "YourBoss" "Gloomrot RailgunSergeant" 1 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Voltatia the Power Master" 1 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Gloomrot RailgunSergeant" 2 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Voltatia the Power Master" 2 true "Channeled, effect"
 ```
 
 ---
 
-### VHunter CastleMan (Level 80)
+### Simon Belmont the Vampire Hunter (Level 80)
 - **GUID**: 336560131
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid
@@ -2243,13 +2243,13 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "VHunter CastleMan" 0 true "3-hit combo, Channeled, effect"
+.bb ability-slot "YourBoss" "Simon Belmont the Vampire Hunter" 0 true "3-hit combo, Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "VHunter CastleMan" 1 true "3-hit combo, Channeled, effect"
+.bb ability-slot "YourBoss" "Simon Belmont the Vampire Hunter" 1 true "3-hit combo, Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "VHunter CastleMan" 2 true "3-hit combo, Channeled, effect"
+.bb ability-slot "YourBoss" "Simon Belmont the Vampire Hunter" 2 true "3-hit combo, Channeled, effect"
 ```
 
 ---
@@ -2289,7 +2289,7 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 ---
 
-### BatVampire (Level 84)
+### Lord Styx the Night Champion (Level 84)
 - **GUID**: 1112948824
 - **Can Fly**: No
 - **Features**: Vampire
@@ -2311,18 +2311,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "BatVampire" 0 true "3-hit combo, Channeled, effect"
+.bb ability-slot "YourBoss" "Lord Styx the Night Champion" 0 true "3-hit combo, Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "BatVampire" 1 true "Channeled, effect, TargetAOE"
+.bb ability-slot "YourBoss" "Lord Styx the Night Champion" 1 true "Channeled, effect, TargetAOE"
 ```
 ```
-.bb ability-slot "YourBoss" "BatVampire" 2 true "Channeled, effect, TargetAOE"
+.bb ability-slot "YourBoss" "Lord Styx the Night Champion" 2 true "Channeled, effect, TargetAOE"
 ```
 
 ---
 
-### Cursed MountainBeast (Level 84)
+### Gorecrusher the Behemoth (Level 84)
 - **GUID**: -1936575244
 - **Can Fly**: No
 - **Features**: UnitCategory:Beast, Beast, Cursed
@@ -2345,18 +2345,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Cursed MountainBeast" 0 true "3-hit combo, Channeled, effect"
+.bb ability-slot "YourBoss" "Gorecrusher the Behemoth" 0 true "3-hit combo, Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Cursed MountainBeast" 1 true "Channeled, buff"
+.bb ability-slot "YourBoss" "Gorecrusher the Behemoth" 1 true "Channeled, buff"
 ```
 ```
-.bb ability-slot "YourBoss" "Cursed MountainBeast" 2 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Gorecrusher the Behemoth" 2 true "Channeled, effect"
 ```
 
 ---
 
-### Vampire BloodKnight (Level 84)
+### General Valencia the Depraved (Level 84)
 - **GUID**: 495971434
 - **Can Fly**: No
 - **Features**: Vampire
@@ -2379,13 +2379,13 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Vampire BloodKnight" 0 true "2-hit combo, Channeled, effect"
+.bb ability-slot "YourBoss" "General Valencia the Depraved" 0 true "2-hit combo, Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Vampire BloodKnight" 1 true "Channeled, buff, Hover"
+.bb ability-slot "YourBoss" "General Valencia the Depraved" 1 true "Channeled, buff, Hover"
 ```
 ```
-.bb ability-slot "YourBoss" "Vampire BloodKnight" 2 true "Channeled, projectile/buff"
+.bb ability-slot "YourBoss" "General Valencia the Depraved" 2 true "Channeled, projectile/buff"
 ```
 
 ---
@@ -2795,7 +2795,7 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 ---
 
-### ChurchOfLight Paladin (Level 86)
+### Solarus the Immaculate (Level 86)
 - **GUID**: -740796338
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Church
@@ -2820,18 +2820,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "ChurchOfLight Paladin" 0 true "2-hit combo, Channeled, effect"
+.bb ability-slot "YourBoss" "Solarus the Immaculate" 0 true "2-hit combo, Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "ChurchOfLight Paladin" 1 true "Channeled, effect, Dash"
+.bb ability-slot "YourBoss" "Solarus the Immaculate" 1 true "Channeled, effect, Dash"
 ```
 ```
-.bb ability-slot "YourBoss" "ChurchOfLight Paladin" 2 true "Channeled, buff"
+.bb ability-slot "YourBoss" "Solarus the Immaculate" 2 true "Channeled, buff"
 ```
 
 ---
 
-### Manticore (Level 86)
+### Talzur the Winged Horror (Level 86)
 - **GUID**: -393555055
 - **Can Fly**: Yes
 - **Features**: UnitCategory:Beast, Beast, CanFly
@@ -2862,13 +2862,13 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Manticore" 0 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Talzur the Winged Horror" 0 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Manticore" 1 true "Channeled, effect, Channeling"
+.bb ability-slot "YourBoss" "Talzur the Winged Horror" 1 true "Channeled, effect, Channeling"
 ```
 ```
-.bb ability-slot "YourBoss" "Manticore" 2 true "Channeled, Requires flight, effect"
+.bb ability-slot "YourBoss" "Talzur the Winged Horror" 2 true "Channeled, Requires flight, effect"
 ```
 
 ---
@@ -2926,7 +2926,7 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 ---
 
-### Gloomrot Monster (Level 88)
+### Adam the Firstborn (Level 88)
 - **GUID**: 1233988687
 - **Can Fly**: No
 - **Features**: UnitCategory:Human, Human, Humanoid, Gloomrot
@@ -2959,18 +2959,18 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Gloomrot Monster" 0 true "3-hit combo, Channeled, effect"
+.bb ability-slot "YourBoss" "Adam the Firstborn" 0 true "3-hit combo, Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Gloomrot Monster" 1 true "Channeled, effect"
+.bb ability-slot "YourBoss" "Adam the Firstborn" 1 true "Channeled, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Gloomrot Monster" 2 true "Channeled, effect, Travel"
+.bb ability-slot "YourBoss" "Adam the Firstborn" 2 true "Channeled, effect, Travel"
 ```
 
 ---
 
-### Vampire Dracula (Level 91)
+### Dracula the Immortal King (Level 91)
 - **GUID**: -327335305
 - **Can Fly**: No
 - **Features**: Vampire
@@ -3019,13 +3019,13 @@ This document lists all available VBlood bosses and their abilities that can be 
 
 **Example Commands:**
 ```
-.bb ability-slot "YourBoss" "Vampire Dracula" 0 true "2-hit combo, Channeled, projectile"
+.bb ability-slot "YourBoss" "Dracula the Immortal King" 0 true "2-hit combo, Channeled, projectile"
 ```
 ```
-.bb ability-slot "YourBoss" "Vampire Dracula" 1 true "Channeled, Requires flight, effect"
+.bb ability-slot "YourBoss" "Dracula the Immortal King" 1 true "Channeled, Requires flight, effect"
 ```
 ```
-.bb ability-slot "YourBoss" "Vampire Dracula" 2 true "Channeled, buff, Hover"
+.bb ability-slot "YourBoss" "Dracula the Immortal King" 2 true "Channeled, buff, Hover"
 ```
 
 ---

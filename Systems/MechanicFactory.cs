@@ -10,12 +10,11 @@ namespace BloodyBoss.Systems
 
         static MechanicFactory()
         {
-            // Register all available mechanics (25 total)
+            // Register all available mechanics (24 total - TeleportMechanic removed)
             RegisterMechanic(new EnrageMechanic());
             RegisterMechanic(new ShieldMechanic());
             RegisterMechanic(new SummonMechanic());
             RegisterMechanic(new HealMechanic());
-            RegisterMechanic(new TeleportMechanic());
             RegisterMechanic(new PhaseMechanic());
             RegisterMechanic(new AoeMechanic());
             RegisterMechanic(new StunMechanic());

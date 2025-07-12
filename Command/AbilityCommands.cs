@@ -540,8 +540,50 @@ namespace BloodyBoss.Command
                         ctx.Reply($"└─ The ability will work but may have visual or gameplay issues");
                     }
                     
-                    // Crear o actualizar el slot
-                    boss.CustomAbilities[slotName] = new CustomAbilitySlot(sourcePrefabGUID, abilityIndex, enabled, description);
+                    // Crear o actualizar el slot usando AbilitySwaps
+                    if (boss.AbilitySwaps == null)
+                    {
+                        boss.AbilitySwaps = new Dictionary<int, AbilitySwapConfig>();
+                    }
+                    
+                    // Parse slot name to index (e.g., "Slot1" -> 0, "Slot2" -> 1)
+                    int slotIndex = -1;
+                    if (slotName.ToLower().StartsWith("slot"))
+                    {
+                        if (int.TryParse(slotName.Substring(4), out int slotNum))
+                        {
+                            slotIndex = slotNum - 1; // Convert to 0-based index
+                        }
+                    }
+                    else if (int.TryParse(slotName, out int directIndex))
+                    {
+                        slotIndex = directIndex;
+                    }
+                    
+                    if (slotIndex < 0)
+                    {
+                        throw ctx.Error($"Invalid slot name '{slotName}'. Use 'Slot1', 'Slot2', etc. or numeric index");
+                    }
+                    
+                    if (enabled)
+                    {
+                        // Get VBlood name
+                        var vbloodList = AbilitySwapSystem.GetKnownVBloodPrefabs();
+                        var sourceName = vbloodList.FirstOrDefault(x => x.Value == sourcePrefabGUID).Key ?? sourceInfo?.Name ?? "Unknown VBlood";
+                        
+                        boss.AbilitySwaps[slotIndex] = new AbilitySwapConfig
+                        {
+                            SourcePrefabGUID = sourcePrefabGUID,
+                            SourceVBloodName = sourceName,
+                            SlotIndex = abilityIndex,
+                            Description = description
+                        };
+                    }
+                    else if (boss.AbilitySwaps.ContainsKey(slotIndex))
+                    {
+                        boss.AbilitySwaps.Remove(slotIndex);
+                    }
+                    
                     Database.saveDatabase();
                     
                     ctx.Reply($"🎯 Configured ability slot '{slotName}' for boss '{bossName}':");
@@ -573,16 +615,35 @@ namespace BloodyBoss.Command
             {
                 if (Database.GetBoss(bossName, out BossEncounterModel boss))
                 {
-                    if (!boss.CustomAbilities.ContainsKey(slotName))
+                    // Parse slot name to index
+                    int slotIndex = -1;
+                    if (slotName.ToLower().StartsWith("slot"))
                     {
-                        throw ctx.Error($"Ability slot '{slotName}' does not exist for boss '{bossName}'");
+                        if (int.TryParse(slotName.Substring(4), out int slotNum))
+                        {
+                            slotIndex = slotNum - 1; // Convert to 0-based index
+                        }
+                    }
+                    else if (int.TryParse(slotName, out int directIndex))
+                    {
+                        slotIndex = directIndex;
                     }
                     
-                    boss.CustomAbilities.Remove(slotName);
+                    if (slotIndex < 0)
+                    {
+                        throw ctx.Error($"Invalid slot name '{slotName}'. Use 'Slot1', 'Slot2', etc. or numeric index");
+                    }
+                    
+                    if (boss.AbilitySwaps == null || !boss.AbilitySwaps.ContainsKey(slotIndex))
+                    {
+                        throw ctx.Error($"Ability slot {slotIndex} does not exist for boss '{bossName}'");
+                    }
+                    
+                    boss.AbilitySwaps.Remove(slotIndex);
                     Database.saveDatabase();
                     
-                    ctx.Reply($"🗑️ Removed ability slot '{slotName}' from boss '{bossName}'");
-                    ctx.Reply($"└─ Remaining slots: {boss.CustomAbilities.Count}");
+                    ctx.Reply($"🗑️ Removed ability slot {slotIndex} from boss '{bossName}'");
+                    ctx.Reply($"└─ Remaining slots: {boss.AbilitySwaps?.Count ?? 0}");
                 }
                 else
                 {
@@ -595,35 +656,6 @@ namespace BloodyBoss.Command
             }
         }
 
-        [Command("ability-slot-toggle", usage: "<BossName> <SlotName>", description: "Enable/disable a specific ability slot", adminOnly: true)]
-        public static void ToggleAbilitySlot(ChatCommandContext ctx, string bossName, string slotName)
-        {
-            try
-            {
-                if (Database.GetBoss(bossName, out BossEncounterModel boss))
-                {
-                    if (!boss.CustomAbilities.ContainsKey(slotName))
-                    {
-                        throw ctx.Error($"Ability slot '{slotName}' does not exist for boss '{bossName}'");
-                    }
-                    
-                    var slot = boss.CustomAbilities[slotName];
-                    slot.Enabled = !slot.Enabled;
-                    Database.saveDatabase();
-                    
-                    ctx.Reply($"🔄 Toggled ability slot '{slotName}' for boss '{bossName}':");
-                    ctx.Reply($"└─ Status: {(slot.Enabled ? "✅ Enabled" : "❌ Disabled")}");
-                }
-                else
-                {
-                    throw new BossDontExistException();
-                }
-            }
-            catch (BossDontExistException)
-            {
-                throw ctx.Error($"Boss '{bossName}' does not exist");
-            }
-        }
 
         [Command("ability-slot-list", usage: "<BossName>", description: "List all configured ability slots for a boss", adminOnly: true)]
         public static void ListAbilitySlots(ChatCommandContext ctx, string bossName)
@@ -632,31 +664,25 @@ namespace BloodyBoss.Command
             {
                 if (Database.GetBoss(bossName, out BossEncounterModel boss))
                 {
-                    if (boss.CustomAbilities.Count == 0)
+                    if (boss.AbilitySwaps == null || boss.AbilitySwaps.Count == 0)
                     {
-                        ctx.Reply($"📋 Boss '{bossName}' has no custom ability slots configured");
-                        ctx.Reply($"└─ Use .bb ability-slot-set to configure abilities");
+                        ctx.Reply($"📋 Boss '{bossName}' has no ability swaps configured");
+                        ctx.Reply($"└─ Use .bb ability-slot to configure abilities");
                         return;
                     }
                     
-                    ctx.Reply($"📋 Custom ability slots for boss '{bossName}':");
+                    ctx.Reply($"📋 Ability swaps for boss '{bossName}':");
                     ctx.Reply($"────────────────────────────────────────────────");
                     
-                    var knownVBloods = AbilitySwapSystem.GetKnownVBloodPrefabs();
-                    
-                    foreach (var slot in boss.CustomAbilities)
+                    foreach (var swap in boss.AbilitySwaps.OrderBy(x => x.Key))
                     {
-                        var vbloodName = knownVBloods.FirstOrDefault(x => x.Value == slot.Value.SourcePrefabGUID).Key ?? "Unknown";
-                        var status = slot.Value.Enabled ? "✅" : "❌";
-                        
-                        ctx.Reply($"├─ Slot '{slot.Key}': {status}");
-                        ctx.Reply($"│  ├─ Source: {vbloodName} ({slot.Value.SourcePrefabGUID})");
-                        ctx.Reply($"│  ├─ Ability Index: {slot.Value.AbilityIndex}");
-                        ctx.Reply($"│  └─ Description: {(string.IsNullOrEmpty(slot.Value.Description) ? "None" : slot.Value.Description)}");
+                        ctx.Reply($"├─ Slot {swap.Key}:");
+                        ctx.Reply($"│  ├─ Source: {swap.Value.SourceVBloodName} ({swap.Value.SourcePrefabGUID})");
+                        ctx.Reply($"│  ├─ Source Slot: {swap.Value.SlotIndex}");
+                        ctx.Reply($"│  └─ Description: {(string.IsNullOrEmpty(swap.Value.Description) ? "None" : swap.Value.Description)}");
                     }
                     
-                    var enabledCount = boss.CustomAbilities.Values.Count(s => s.Enabled);
-                    ctx.Reply($"└─ Total: {boss.CustomAbilities.Count} slots ({enabledCount} enabled)");
+                    ctx.Reply($"└─ Total: {boss.AbilitySwaps.Count} slots configured");
                 }
                 else
                 {
@@ -676,12 +702,15 @@ namespace BloodyBoss.Command
             {
                 if (Database.GetBoss(bossName, out BossEncounterModel boss))
                 {
-                    var removedCount = boss.CustomAbilities.Count;
-                    boss.CustomAbilities.Clear();
+                    var removedCount = boss.AbilitySwaps?.Count ?? 0;
+                    if (boss.AbilitySwaps != null)
+                    {
+                        boss.AbilitySwaps.Clear();
+                    }
                     Database.saveDatabase();
                     
-                    ctx.Reply($"🧹 Cleared all custom ability slots from boss '{bossName}'");
-                    ctx.Reply($"└─ Removed {removedCount} slots");
+                    ctx.Reply($"🧹 Cleared all ability swaps from boss '{bossName}'");
+                    ctx.Reply($"└─ Removed {removedCount} swaps");
                 }
                 else
                 {
@@ -936,26 +965,65 @@ namespace BloodyBoss.Command
             {
                 if (Database.GetBoss(bossName, out BossEncounterModel boss))
                 {
-                    var preset = GetAbilityPreset(presetName.ToLower());
-                    if (preset == null)
+                    // Define presets using AbilitySwaps format
+                    Dictionary<int, AbilitySwapConfig> preset = null;
+                    
+                    switch (presetName.ToLower())
                     {
-                        ctx.Reply($"❌ Unknown preset '{presetName}'. Available presets:");
-                        foreach (var availablePreset in GetAvailablePresets())
-                        {
-                            ctx.Reply($"├─ {availablePreset}");
-                        }
-                        return;
+                        case "dracula-mix":
+                            preset = new Dictionary<int, AbilitySwapConfig>
+                            {
+                                [0] = new AbilitySwapConfig { SourcePrefabGUID = -327335305, SourceVBloodName = "Dracula", SlotIndex = 0, Description = "Dracula melee attack" },
+                                [1] = new AbilitySwapConfig { SourcePrefabGUID = -327335305, SourceVBloodName = "Dracula", SlotIndex = 2, Description = "Dracula spell" },
+                                [2] = new AbilitySwapConfig { SourcePrefabGUID = 939467639, SourceVBloodName = "Vincent", SlotIndex = 1, Description = "Vincent frost ability" }
+                            };
+                            break;
+                            
+                        case "frost-warrior":
+                            preset = new Dictionary<int, AbilitySwapConfig>
+                            {
+                                [0] = new AbilitySwapConfig { SourcePrefabGUID = 1112948824, SourceVBloodName = "Tristan", SlotIndex = 0, Description = "Tristan melee" },
+                                [1] = new AbilitySwapConfig { SourcePrefabGUID = 1112948824, SourceVBloodName = "Tristan", SlotIndex = 1, Description = "Tristan charge" },
+                                [2] = new AbilitySwapConfig { SourcePrefabGUID = 939467639, SourceVBloodName = "Vincent", SlotIndex = 2, Description = "Vincent frost blast" }
+                            };
+                            break;
+                            
+                        case "spell-caster":
+                            preset = new Dictionary<int, AbilitySwapConfig>
+                            {
+                                [0] = new AbilitySwapConfig { SourcePrefabGUID = -99012450, SourceVBloodName = "Christina", SlotIndex = 1, Description = "Christina heal" },
+                                [1] = new AbilitySwapConfig { SourcePrefabGUID = -99012450, SourceVBloodName = "Christina", SlotIndex = 2, Description = "Christina light" },
+                                [2] = new AbilitySwapConfig { SourcePrefabGUID = -327335305, SourceVBloodName = "Dracula", SlotIndex = 3, Description = "Dracula dark spell" }
+                            };
+                            break;
+                            
+                        default:
+                            ctx.Reply($"❌ Unknown preset '{presetName}'. Available presets:");
+                            ctx.Reply($"├─ dracula-mix");
+                            ctx.Reply($"├─ frost-warrior");
+                            ctx.Reply($"└─ spell-caster");
+                            return;
                     }
                     
-                    boss.CustomAbilities.Clear();
+                    // Clear existing swaps and apply preset
+                    if (boss.AbilitySwaps == null)
+                    {
+                        boss.AbilitySwaps = new Dictionary<int, AbilitySwapConfig>();
+                    }
+                    else
+                    {
+                        boss.AbilitySwaps.Clear();
+                    }
+                    
                     foreach (var slot in preset)
                     {
-                        boss.CustomAbilities[slot.Key] = slot.Value;
+                        boss.AbilitySwaps[slot.Key] = slot.Value;
                     }
+                    
                     Database.saveDatabase();
                     
                     ctx.Reply($"📦 Applied preset '{presetName}' to boss '{bossName}':");
-                    ctx.Reply($"└─ Configured {preset.Count} ability slots");
+                    ctx.Reply($"└─ Configured {preset.Count} ability swaps");
                 }
                 else
                 {
@@ -968,36 +1036,5 @@ namespace BloodyBoss.Command
             }
         }
         
-        // Presets helper methods
-        private static Dictionary<string, CustomAbilitySlot> GetAbilityPreset(string presetName)
-        {
-            return presetName switch
-            {
-                "dracula-mix" => new Dictionary<string, CustomAbilitySlot>
-                {
-                    ["melee1"] = new CustomAbilitySlot(-327335305, 0, true, "Dracula melee attack"),
-                    ["spell1"] = new CustomAbilitySlot(-327335305, 2, true, "Dracula spell"),
-                    ["special"] = new CustomAbilitySlot(939467639, 1, true, "Vincent frost ability")
-                },
-                "frost-warrior" => new Dictionary<string, CustomAbilitySlot>
-                {
-                    ["melee1"] = new CustomAbilitySlot(1112948824, 0, true, "Tristan melee"),
-                    ["melee2"] = new CustomAbilitySlot(1112948824, 1, true, "Tristan charge"),
-                    ["frost"] = new CustomAbilitySlot(939467639, 2, true, "Vincent frost blast")
-                },
-                "spell-caster" => new Dictionary<string, CustomAbilitySlot>
-                {
-                    ["spell1"] = new CustomAbilitySlot(-99012450, 1, true, "Christina heal"),
-                    ["spell2"] = new CustomAbilitySlot(-99012450, 2, true, "Christina light"),
-                    ["spell3"] = new CustomAbilitySlot(-327335305, 3, true, "Dracula dark spell")
-                },
-                _ => null
-            };
-        }
-        
-        private static string[] GetAvailablePresets()
-        {
-            return new[] { "dracula-mix", "frost-warrior", "spell-caster" };
-        }
     }
 }

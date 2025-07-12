@@ -13,6 +13,7 @@ using Stunlock.Core;
 using Unity.Collections;
 using System.Linq;
 using ProjectM.Shared;
+using BloodyBoss.Data;
 
 namespace BloodyBoss.Systems.Mechanics
 {
@@ -114,8 +115,7 @@ namespace BloodyBoss.Systems.Mechanics
         private void ApplySlowToPlayer(Entity target)
         {
             // Apply actual slow buff
-            var slowBuff = new PrefabGUID(2072256768); // Buff_General_Slow - This actually slows!
-            BuffCharacter(target, slowBuff);
+            BuffCharacter(target, PrefabConstants.Slow);
             
             // Apply visual effect
             var energyDrainVisual = new PrefabGUID(178387762); // AB_Blood_VampiricCurse_Buff_Lesser

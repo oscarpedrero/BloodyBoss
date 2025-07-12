@@ -417,10 +417,12 @@ namespace BloodyBoss.Command
                     break;
 
                 case "summon":
+                    parameters["summon_type"] = parser.GetString("summon_type", "npc");
                     parameters["add_prefab"] = parser.GetInt("prefab", -1905691330);
                     parameters["count"] = parser.GetInt("count", 3);
                     parameters["pattern"] = parser.GetString("pattern", "circle");
                     parameters["despawn_on_boss_death"] = parser.GetBool("despawn", true);
+                    parameters["clone_health_percent"] = parser.GetFloat("clone_health_percent", 50f);
                     parameters["announcement"] = parser.GetString("announce", "Minions answer the call!");
                     break;
 

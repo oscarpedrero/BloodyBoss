@@ -14,6 +14,7 @@ using System.Linq;
 using ProjectM.Shared;
 using Bloody.Core.Models.v1;
 using Stunlock.Network;
+using BloodyBoss.Data;
 
 namespace BloodyBoss.Systems.Mechanics
 {
@@ -30,11 +31,11 @@ namespace BloodyBoss.Systems.Mechanics
         };
         
         // Boss visual effects
-        private readonly Dictionary<string, int> BossAbsorbEffects = new Dictionary<string, int>
+        private readonly Dictionary<string, PrefabGUID> BossAbsorbEffects = new Dictionary<string, PrefabGUID>
         {
-            { "health", 636617116 },    // Blood_Vampire_Buff_Leech_SelfHeal - Healing effect!
-            { "shield", -1605515615 },   // AB_Blood_BloodRage_SpellMod_Buff_Shield - REAL shield with AbsorbBuff!
-            { "all", 636617116 }         // Default to healing for combined effect
+            { "health", PrefabConstants.VampireLeechHeal },    // Blood_Vampire_Buff_Leech_SelfHeal - Healing effect!
+            { "shield", PrefabConstants.BloodRageShield },     // AB_Blood_BloodRage_SpellMod_Buff_Shield - REAL shield with AbsorbBuff!
+            { "all", PrefabConstants.VampireLeechHeal }        // Default to healing for combined effect
         };
 
         public void Execute(Entity bossEntity, Dictionary<string, object> parameters, World world)
@@ -114,7 +115,7 @@ namespace BloodyBoss.Systems.Mechanics
             var bossEffect = BossAbsorbEffects.ContainsKey(absorbType.ToLower()) 
                 ? BossAbsorbEffects[absorbType.ToLower()] 
                 : BossAbsorbEffects["health"];
-            BuffCharacter(bossEntity, new PrefabGUID(bossEffect), 3f);
+            BuffCharacter(bossEntity, bossEffect, 3f);
             
             // Check if minimum players requirement is met
             if (minPlayersRequired > 0 && playersInRange.Count < minPlayersRequired)
@@ -173,7 +174,7 @@ namespace BloodyBoss.Systems.Mechanics
             var bossEffect = BossAbsorbEffects.ContainsKey(absorbType.ToLower()) 
                 ? BossAbsorbEffects[absorbType.ToLower()] 
                 : BossAbsorbEffects["health"];
-            BuffCharacter(bossEntity, new PrefabGUID(bossEffect), duration);
+            BuffCharacter(bossEntity, bossEffect, duration);
             
             // Save parameters for coroutine
             var savedBossEntity = bossEntity;
@@ -234,8 +235,7 @@ namespace BloodyBoss.Systems.Mechanics
                         boss.Write(bossHealth);
                         
                         // Also give boss temporary health boost buff
-                        var healthBoostBuff = new PrefabGUID(636617116); // Blood_Vampire_Buff_Leech_SelfHeal
-                        BuffCharacter(boss, healthBoostBuff, 15f); // 15 seconds of boosted health
+                        BuffCharacter(boss, PrefabConstants.VampireLeechHeal, 15f); // 15 seconds of boosted health
                         
                         Plugin.BLogger.Debug(LogCategory.Mechanic, $"Boss absorbed {actualAbsorbed} health, temporary boost applied");
                     }
@@ -273,13 +273,11 @@ namespace BloodyBoss.Systems.Mechanics
                     if (shieldsRemoved > 0)
                     {
                         // Apply visual effect to show shield break
-                        var shieldBreakBuff = new PrefabGUID(-1807398295); // Holy effect to show shield break
-                        BuffCharacter(target, shieldBreakBuff, 2f);
+                        BuffCharacter(target, PrefabConstants.HolyNuke, 2f);
                         
                         // Give boss REAL shield buff that actually absorbs damage!
                         // Shield strength and duration are FIXED by the buff itself
-                        var realShieldBuff = new PrefabGUID(-1605515615); // AB_Blood_BloodRage_SpellMod_Buff_Shield
-                        BuffCharacter(boss, realShieldBuff); // Duration is controlled by the buff
+                        BuffCharacter(boss, PrefabConstants.BloodRageShield); // Duration is controlled by the buff
                         
                         Plugin.BLogger.Debug(LogCategory.Mechanic, $"Boss stole {shieldsRemoved} shields and gained REAL damage absorbing shield!");
                     }

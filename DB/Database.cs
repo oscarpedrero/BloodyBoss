@@ -78,6 +78,28 @@ namespace BloodyBoss.DB
             catch (Exception error)
             {
                 Plugin.BLogger.Error(LogCategory.Database, $"Error LoadDatabase: {error.Message}");
+                
+                // Backup corrupted file instead of deleting it
+                if (File.Exists(BOSSESListFile))
+                {
+                    string backupFile = Path.Combine(ConfigPath, $"Bosses-{DateTime.Now:yyyy-MM-dd-HHmmss}.json.backup");
+                    try
+                    {
+                        File.Move(BOSSESListFile, backupFile);
+                        Plugin.BLogger.Warning(LogCategory.Database, $"Corrupted Bosses.json backed up to: {backupFile}");
+                        
+                        // Create new empty file
+                        File.WriteAllText(BOSSESListFile, "[]");
+                        BOSSES = new List<BossEncounterModel>();
+                        Plugin.BLogger.Info(LogCategory.Database, $"Created new empty Bosses.json file");
+                        return true;
+                    }
+                    catch (Exception backupError)
+                    {
+                        Plugin.BLogger.Error(LogCategory.Database, $"Error creating backup: {backupError.Message}");
+                    }
+                }
+                
                 return false;
             }
         }

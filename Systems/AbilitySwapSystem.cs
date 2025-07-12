@@ -436,32 +436,20 @@ namespace BloodyBoss.Systems
             
             try
             {
-                // Primero, obtener todos los nombres amigables del mapeo
-                var friendlyNames = BloodyBoss.Data.VBloodNameMapping.GetAllFriendlyNames();
-                foreach (var kvp in friendlyNames)
-                {
-                    vbloods[kvp.Key] = kvp.Value;
-                }
-                
-                // Luego, agregar cualquier VBlood de la base de datos que no esté en el mapeo
+                // Obtener todos los VBloods directamente de la base de datos
                 var allVBloods = BloodyBoss.Data.VBloodDatabase.GetAllVBloods();
                 
                 foreach (var vblood in allVBloods)
                 {
-                    // Si este VBlood no tiene un nombre amigable, usar el nombre interno
-                    var friendlyName = BloodyBoss.Data.VBloodNameMapping.GetFriendlyName(vblood.Key);
-                    if (friendlyName == null && !string.IsNullOrEmpty(vblood.Value.Name))
+                    // Usar el nombre de la base de datos que ya tiene los nombres correctos
+                    if (!string.IsNullOrEmpty(vblood.Value.Name))
                     {
-                        // Agregar con el nombre interno si no hay mapeo
-                        if (!vbloods.ContainsKey(vblood.Value.Name))
-                        {
-                            vbloods[vblood.Value.Name] = vblood.Key;
-                            Plugin.BLogger.Debug(LogCategory.System, $"No friendly name for {vblood.Key}, using internal name: {vblood.Value.Name}");
-                        }
+                        vbloods[vblood.Value.Name] = vblood.Key;
+                        Plugin.BLogger.Debug(LogCategory.System, $"Added VBlood: {vblood.Value.Name} ({vblood.Key})");
                     }
                 }
                 
-                Plugin.BLogger.Info(LogCategory.System, $"Loaded {vbloods.Count} VBloods (with friendly names)");
+                Plugin.BLogger.Info(LogCategory.System, $"Loaded {vbloods.Count} VBloods from database");
             }
             catch (Exception ex)
             {
@@ -470,23 +458,21 @@ namespace BloodyBoss.Systems
                 // Fallback al diccionario estático si falla
                 return new Dictionary<string, int>
                 {
-                    { "Alpha Wolf", -1905691330 },
+                    { "Alpha the White Wolf", -1905691330 },
                     { "Solarus the Immaculate", -740796338 },
-                    { "Vincent the Frostbringer", 939467639 },
+                    { "Vincent the Frostbringer", -29797003 },
                     { "Christina the Sun Priestess", -99012450 },
-                    { "Dracula", -327335305 },
-                    { "Vampire Dracula", -327335305 },
-                    { "Tristan the Vampire Hunter", 1112948824 },
-                    { "Beatrice the Tailor", 297942716 },
+                    { "Dracula the Immortal King", -327335305 },
+                    { "Tristan the Vampire Hunter", -1449631170 },
+                    { "Beatrice the Tailor", -1942352521 },
                     { "Gorecrusher the Behemoth", -1936575244 },
-                    { "Terrorclaw the Ogre", 2054432370 },
-                    { "Nightmarshal Styx", 1124739990 },
-                    { "Adam the Firstborn", -203043163 },
+                    { "Terrorclaw the Ogre", -1347412392 },
+                    { "Lord Styx the Night Champion", 1112948824 },
+                    { "Adam the Firstborn", 1233988687 },
                     { "Raziel the Shepherd", -680831417 },
-                    { "The Duke of Balaton", -1018894152 },
-                    { "Azariel the Sunbringer", -1144062226 },
-                    { "Willfred the Werewolf", -260770077 },
-                    { "Jade the Vampire Hunter", 476186894 },
+                    { "Albert the Duke of Balaton", -203043163 },
+                    { "Azariel the Sunbringer", 114912615 },
+                    { "Jade the Vampire Hunter", -1968372384 },
                     { "Frostmaw the Mountain Terror", 24378719 },
                     { "Morian the Stormwing Matriarch", 685266977 },
                     { "Clive the Firestarter", 1896428751 },
