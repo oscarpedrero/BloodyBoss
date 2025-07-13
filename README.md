@@ -305,7 +305,8 @@ If you enjoy BloodyBoss and want to support continued development:
 
 - 👨‍💻 **[@Deca](https://github.com/decaprime)** - VampireCommandFramework creator
 - 🎮 **[V Rising Mod Community](https://discord.gg/vrisingmods)** - Premier modding community
-- 🧪 **Beta Testers** - @Bromelda, @Wolfyowns, and the [BloodCraft server](https://discord.gg/aDh98KtEWZ) community
+- 🌟 **@erza_belserion** - For invaluable testing of the mod and configuration tool
+- 👑 **Imperivm Draconis** - For their incredible support and the countless hours spent testing every single new feature and for the promotional video ( :P ), Your dedication and feedback have been absolutely invaluable in making BloodyBoss what it is today!
 - 🔧 **Contributors** - Everyone who reported issues and suggested improvements
 
 ---
