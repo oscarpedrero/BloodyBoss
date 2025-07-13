@@ -4,15 +4,15 @@ schemaVersion = "0.0.1"
 [package]
 namespace = "Trodi"
 name = "BloodyBoss"
-versionNumber = "2.0.0"
-description = "BloodyBoss is a mod for V Rising that allows you to create VBlood world bosses with random rewards that can be set for each of the world bosses."
+versionNumber = "2.1.0"
+description = "Advanced VBlood world boss system with dynamic scaling, boss mechanics, ability discovery, and visual configuration tool. Create epic encounters that adapt to your server population."
 websiteUrl = "https://github.com/oscarpedrero/BloodyBoss"
 containsNsfwContent = false
 
 [package.dependencies]
-BepInEx-BepInExPack_V_Rising = "1.691.3"
-deca-VampireCommandFramework = "0.9.0"
-Trodi-BloodyCore = "2.0.0"
+BepInEx-BepInExPack_V_Rising = "1.733.2"
+deca-VampireCommandFramework = "0.10.4"
+Trodi-BloodyCore = "2.0.2"
 
 [build]
 icon = "./icon.png"
