@@ -10,6 +10,7 @@ using Unity.Transforms;
 using Unity.Entities;
 using VampireCommandFramework;
 using Bloody.Core;
+using Bloody.Core.API.v1;
 
 namespace BloodyBoss.Command
 {
@@ -37,7 +38,7 @@ namespace BloodyBoss.Command
                 DateTime oneMinLater = currentTime.AddMinutes(1);
                 boss.SetHour(oneMinLater.ToString("HH:mm"));
                 
-                ctx.Reply($"🧪 Test setup for boss '{bossName}':");
+                ctx.Reply($"{FontColorChatSystem.Blue("[TEST]")} Test setup for boss '{bossName}':");
                 ctx.Reply($"├─ Location: {pos.x:F1}, {pos.y:F1}, {pos.z:F1}");
                 ctx.Reply($"└─ Spawn time: {oneMinLater:HH:mm} (in 1 minute)");
             }
@@ -54,7 +55,7 @@ namespace BloodyBoss.Command
             {
                 if (Database.GetBoss(bossName, out BossEncounterModel boss))
                 {
-                    ctx.Reply($"🔧 Debug Info for '{bossName}':");
+                    ctx.Reply($"{FontColorChatSystem.Blue("[DEBUG]")} Debug Info for '{bossName}':");
                     ctx.Reply($"├─ Asset Name: {boss.AssetName}");
                     ctx.Reply($"├─ PrefabGUID: {boss.PrefabGUID}");
                     ctx.Reply($"├─ Name Hash: {boss.nameHash}");
@@ -69,7 +70,7 @@ namespace BloodyBoss.Command
                     }
                     else
                     {
-                        ctx.Reply($"├─ Entity: ❌ Not found/Invalid");
+                        ctx.Reply($"├─ Entity: {FontColorChatSystem.Red("Not found/Invalid")}");
                     }
                     
                     // Technical stats
@@ -106,16 +107,16 @@ namespace BloodyBoss.Command
                     
                     var killer = killerName ?? ctx.Event.User.CharacterName.Value;
                     
-                    ctx.Reply($"🎭 Simulating death of boss '{bossName}' killed by '{killer}'...");
+                    ctx.Reply($"{FontColorChatSystem.Blue("[SIMULATE]")} Simulating death of boss '{bossName}' killed by '{killer}'...");
                     
                     // Simulate death process
                     boss.AddKiller(killer);
                     boss.BuffKillers();
                     boss.SendAnnouncementMessage();
                     
-                    ctx.Reply($"✅ Death simulation completed:");
+                    ctx.Reply($"{FontColorChatSystem.Green("[SUCCESS]")} Death simulation completed:");
                     ctx.Reply($"├─ Killer added: {killer}");
-                    ctx.Reply($"├─ Buffs applied: {(PluginConfig.BuffAfterKillingEnabled.Value ? "Yes" : "No")}");
+                    ctx.Reply($"├─ Buffs applied: {(PluginConfig.BuffAfterKillingEnabled.Value ? FontColorChatSystem.Green("Yes") : FontColorChatSystem.Red("No"))}");
                     ctx.Reply($"├─ Items dropped: {boss.items.Count} configured");
                     ctx.Reply($"└─ Boss despawned: Yes");
                 }
@@ -144,13 +145,13 @@ namespace BloodyBoss.Command
                         boss.AddKiller(targetPlayer);
                     }
                     
-                    ctx.Reply($"💰 Forcing item drop for boss '{bossName}'...");
+                    ctx.Reply($"{FontColorChatSystem.Blue("[ITEMS]")} Forcing item drop for boss '{bossName}'...");
                     
                     var dropped = boss.DropItems();
                     
                     if (dropped)
                     {
-                        ctx.Reply($"✅ Items dropped successfully to:");
+                        ctx.Reply($"{FontColorChatSystem.Green("[SUCCESS]")} Items dropped successfully to:");
                         foreach (var killer in boss.GetKillers())
                         {
                             ctx.Reply($"└─ {killer}");
@@ -158,7 +159,7 @@ namespace BloodyBoss.Command
                     }
                     else
                     {
-                        ctx.Reply($"❌ No items were dropped (check boss configuration)");
+                        ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} No items were dropped (check boss configuration)");
                     }
                 }
                 else
@@ -184,7 +185,7 @@ namespace BloodyBoss.Command
                     boss.vbloodFirstKill = false;
                     Database.saveDatabase();
                     
-                    ctx.Reply($"🧹 Cleared {previousKillers} killers from boss '{bossName}'");
+                    ctx.Reply($"{FontColorChatSystem.Blue("[RESET]")} Cleared {previousKillers} killers from boss '{bossName}'");
                     ctx.Reply($"└─ VBlood first kill flag reset");
                 }
                 else
@@ -215,7 +216,7 @@ namespace BloodyBoss.Command
                         throw ctx.Error($"Could not find boss entity for '{bossName}'");
                     }
                     
-                    ctx.Reply($"🔍 Ability Debug Info for '{bossName}':");
+                    ctx.Reply($"{FontColorChatSystem.Blue("[ABILITIES]")} Ability Debug Info for '{bossName}':");
                     var debugInfo = AbilitySwapSystem.GetAbilityDebugInfo(boss.bossEntity);
                     
                     foreach (var line in debugInfo.Split('\n'))

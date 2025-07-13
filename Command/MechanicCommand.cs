@@ -12,6 +12,7 @@ using Bloody.Core.Helper.v1;
 using Unity.Entities;
 using System.IO;
 using System.Text.Json;
+using Bloody.Core.API.v1;
 
 namespace BloodyBoss.Command
 {
@@ -139,7 +140,7 @@ namespace BloodyBoss.Command
                 
                 foreach (var mechanic in boss.Mechanics.OrderBy(m => m.Trigger?.Value))
                 {
-                    ctx.Reply($"├─ {mechanic.Type} [{mechanic.Id.Substring(0, 8)}] {(mechanic.Enabled ? "✅" : "❌")}");
+                    ctx.Reply($"├─ {mechanic.Type} [{mechanic.Id.Substring(0, 8)}] {(mechanic.Enabled ? FontColorChatSystem.Green("Enabled") : FontColorChatSystem.Red("Disabled"))}");
                     ctx.Reply($"│  └─ {mechanic.GetDescription()}");
                     if (mechanic.TriggerCount > 0)
                     {
@@ -174,7 +175,7 @@ namespace BloodyBoss.Command
                 mechanic.Enabled = !mechanic.Enabled;
                 Database.saveDatabase();
 
-                ctx.Reply($"{mechanic.Type} mechanic is now {(mechanic.Enabled ? "enabled ✅" : "disabled ❌")}");
+                ctx.Reply($"{mechanic.Type} mechanic is now {(mechanic.Enabled ? "enabled " + FontColorChatSystem.Green("Yes") : "disabled " + FontColorChatSystem.Red("No"))}");
             }
             catch (Exception e)
             {
@@ -202,9 +203,9 @@ namespace BloodyBoss.Command
                 // If no parameters provided, show current configuration
                 if (string.IsNullOrWhiteSpace(parameters))
                 {
-                    ctx.Reply($"⚙️ {mechanic.Type} mechanic configuration:");
+                    ctx.Reply($"{FontColorChatSystem.Blue("[CONFIG]")} {mechanic.Type} mechanic configuration:");
                     ctx.Reply($"├─ Index: {mechanicIndex}");
-                    ctx.Reply($"├─ Enabled: {(mechanic.Enabled ? "Yes ✅" : "No ❌")}");
+                    ctx.Reply($"├─ Enabled: {(mechanic.Enabled ? "Yes " + FontColorChatSystem.Green("[ON]") : "No " + FontColorChatSystem.Red("[OFF]"))}");
                     ctx.Reply($"├─ Trigger: {mechanic.GetDescription()}");
                     ctx.Reply($"└─ Parameters:");
                     
@@ -227,7 +228,7 @@ namespace BloodyBoss.Command
                     var parts = pair.Split('=', 2);
                     if (parts.Length != 2)
                     {
-                        ctx.Reply($"⚠️ Invalid format: '{pair}'. Use parameter=value");
+                        ctx.Reply($"{FontColorChatSystem.Yellow("[WARNING]")} Invalid format: '{pair}'. Use parameter=value");
                         continue;
                     }
 
@@ -258,7 +259,7 @@ namespace BloodyBoss.Command
 
                 Database.saveDatabase();
                 
-                ctx.Reply($"✅ Updated {mechanic.Type} mechanic parameters:");
+                ctx.Reply($"{FontColorChatSystem.Green("[SUCCESS]")} Updated {mechanic.Type} mechanic parameters:");
                 foreach (var update in updatedParams)
                 {
                     ctx.Reply($"   ├─ {update}");
@@ -268,7 +269,7 @@ namespace BloodyBoss.Command
                 if (mechanic.Type == "stun")
                 {
                     ctx.Reply($"");
-                    ctx.Reply($"📝 Example for stun:");
+                    ctx.Reply($"{FontColorChatSystem.Blue("[EXAMPLE]")} Example for stun:");
                     ctx.Reply($".bb mechanic-config \"{bossName}\" {mechanicIndex} \"target=nearest duration=3 mark_duration=2.5 max_targets=2 announcement='The void gazes upon you!' flash_before_stun=true\"");
                 }
             }
@@ -327,12 +328,12 @@ namespace BloodyBoss.Command
                     throw ctx.Error($"Boss '{bossName}' is not currently spawned. Use .bb start to spawn it first.");
                 }
 
-                ctx.Reply($"🧪 Testing {mechanic.Type} mechanic...");
+                ctx.Reply($"{FontColorChatSystem.Blue("[TEST]")} Testing {mechanic.Type} mechanic...");
                 
                 // TODO: Execute mechanic through BossMechanicSystem
                 // BossMechanicSystem.ExecuteMechanic(bossEntity, mechanic);
                 
-                ctx.Reply($"✅ Mechanic test completed");
+                ctx.Reply($"{FontColorChatSystem.Green("[SUCCESS]")} Mechanic test completed");
             }
             catch (Exception e)
             {
@@ -478,7 +479,7 @@ namespace BloodyBoss.Command
         [Command("mechanic-help", usage: "", description: "Show mechanic command examples", adminOnly: true)]
         public static void ShowHelp(ChatCommandContext ctx)
         {
-            ctx.Reply("📋 Mechanic Command Examples:");
+            ctx.Reply($"{FontColorChatSystem.Blue("[HELP]")} Mechanic Command Examples:");
             ctx.Reply("─────────────────────────────");
             
             ctx.Reply("Add enrage at 25% HP:");

@@ -225,9 +225,9 @@ namespace BloodyBoss.Command
             {
                 if (Database.GetBoss(bossName, out BossEncounterModel boss))
                 {
-                    ctx.Reply($"📊 Status for Boss '{bossName}':");
-                    ctx.Reply($"├─ Currently Spawned: {(boss.bossSpawn ? "✅ Yes" : "❌ No")}");
-                    ctx.Reply($"├─ Timer Status: {(boss.IsPaused ? "⏸️ Paused" : "▶️ Running")}");
+                    ctx.Reply($"{FontColorChatSystem.Blue("[STATUS]")} Status for Boss '{bossName}':");
+                    ctx.Reply($"├─ Currently Spawned: {(boss.bossSpawn ? FontColorChatSystem.Green("Yes") : FontColorChatSystem.Red("No"))}");
+                    ctx.Reply($"├─ Timer Status: {(boss.IsPaused ? FontColorChatSystem.Yellow("Paused") : FontColorChatSystem.Green("Running"))}");
                     ctx.Reply($"├─ Spawn Time: {boss.Hour}");
                     ctx.Reply($"├─ Level: {boss.level} | Multiplier: {boss.multiplier}x");
                     ctx.Reply($"├─ Lifetime: {boss.Lifetime}s ({boss.Lifetime/60}min)");

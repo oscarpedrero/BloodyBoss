@@ -94,6 +94,7 @@ public class Plugin : BasePlugin
         BossSystem.CheckBoss();
         BossSystem.StartTimer(); // Iniciar el timer independiente
 
+
     }
 
     private static void ConfigureLogger()

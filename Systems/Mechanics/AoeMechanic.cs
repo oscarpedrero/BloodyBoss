@@ -77,7 +77,7 @@ namespace BloodyBoss.Systems.Mechanics
             var telegraphDuration = GetParameter<float>(parameters, "telegraph_duration", 1.8f);
             var persistDuration = GetParameter<float>(parameters, "persist_duration", 0f);
             var tickRate = GetParameter<float>(parameters, "tick_rate", 0.5f);
-            var announcement = GetParameter<string>(parameters, "announcement", "💥 Area attack incoming!");
+            var announcement = GetParameter<string>(parameters, "announcement", "Area attack incoming!");
             var targetPlayers = GetParameter<bool>(parameters, "target_players", false);
             
             var bossPos = bossEntity.Read<LocalToWorld>().Position;
@@ -530,14 +530,14 @@ namespace BloodyBoss.Systems.Mechanics
         {
             var typeMessage = aoeType.ToLower() switch
             {
-                "fire" => "🔥 Fire zone",
-                "frost" => "❄️ Frost zone",
-                "blood" => "🩸 Blood zone",
-                "holy" => "✨ Holy zone",
-                "shadow" => "👁️ Shadow zone",
-                "poison" => "☠️ Poison zone",
-                "electric" => "⚡ Electric zone",
-                _ => "⚠️ Danger zone"
+                "fire" => $"{FontColorChatSystem.Red("[FIRE]")} zone",
+                "frost" => $"{FontColorChatSystem.Blue("[FROST]")} zone",
+                "blood" => $"{FontColorChatSystem.Red("[BLOOD]")} zone",
+                "holy" => $"{FontColorChatSystem.Yellow("[HOLY]")} zone",
+                "shadow" => $"{FontColorChatSystem.Blue("[SHADOW]")} zone",
+                "poison" => $"{FontColorChatSystem.Green("[POISON]")} zone",
+                "electric" => $"{FontColorChatSystem.Yellow("[ELECTRIC]")} zone",
+                _ => $"{FontColorChatSystem.Yellow("[DANGER]")} zone"
             };
             
             return $"{typeMessage} incoming! Radius: {radius:F0}m";

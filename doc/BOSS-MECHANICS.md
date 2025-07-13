@@ -165,6 +165,88 @@ Currently, BloodyBoss features four fully functional and tested mechanics that c
 
 ---
 
+## Boss-Specific Recommendations & Limitations
+
+### Animation Priority Considerations
+
+While the mechanics system works well with most VBlood bosses, certain bosses have unique animation priorities that may affect mechanic performance. Understanding these limitations helps create better encounters.
+
+#### High Priority Animation Bosses
+
+**⚠️ Simon Belmont (PrefabGUID: -1905691330)**
+- **Issue**: Massive attack delay/freezing when abilities are swapped
+- **Impact**: Boss becomes vulnerable during long animation freeze periods
+- **Recommendation**: **Use pure mechanics only** - avoid ability swapping
+- **Safe Mechanics**: Stun, AoE, Slow, Absorb work well
+- **Avoid**: Ability replacements from the VBlood Ability System
+
+```bash
+# ✅ GOOD: Pure mechanics work perfectly with Simon
+.bb mechanic-add "Simon Fight" stun "--hp 80 --target random --duration 3"
+.bb mechanic-add "Simon Fight" aoe "--hp 60 --aoe_type fire --radius 12"
+.bb mechanic-add "Simon Fight" absorb "--hp 40 --type health --amount 100"
+
+# ❌ AVOID: Ability swapping causes major delays
+# Don't use ability commands with Simon Belmont
+```
+
+#### Minor Animation Delays
+
+Most other bosses experience only minor casting delays that are considered normal:
+- **Cause**: Nature of certain spells and how they were rigged for original models
+- **Impact**: Tiny casting delays during mechanic activation
+- **Verdict**: Acceptable and doesn't significantly affect encounter quality
+
+### Hybrid Approach Recommendations
+
+For optimal boss encounters, consider a **hybrid approach**:
+
+#### Pure Mechanics Bosses
+Best for bosses with animation issues:
+```bash
+# Focus on environmental and status effects
+.bb mechanic-add "Problematic Boss" aoe "--hp 75 --pattern spiral"
+.bb mechanic-add "Problematic Boss" slow "--hp 50 --min_players 3"
+.bb mechanic-add "Problematic Boss" absorb "--hp 25 --continuous true"
+```
+
+#### Ability + Mechanics Hybrid
+Works great with most stable bosses:
+```bash
+# Combine custom abilities with mechanics for rich encounters
+.bb ability-swap "Stable Boss" 0 834735104  # Add custom ability
+.bb mechanic-add "Stable Boss" stun "--hp 60 --target closest"
+.bb mechanic-add "Stable Boss" aoe "--hp 30 --aoe_type shadow"
+```
+
+#### Mechanics-Only Encounters
+Safest approach for any boss:
+```bash
+# Pure mechanics are universally stable
+.bb mechanic-add "Any Boss" stun "--hp 90 --duration 2"
+.bb mechanic-add "Any Boss" aoe "--hp 70 --pattern cross"
+.bb mechanic-add "Any Boss" slow "--hp 50 --radius 15"
+.bb mechanic-add "Any Boss" absorb "--hp 25 --type all"
+```
+
+### Testing Guidelines
+
+When working with untested bosses:
+
+1. **Start with pure mechanics** - test stun, AoE, slow, absorb
+2. **Monitor for delays** - watch for unusual animation freezes
+3. **Test ability swaps separately** - add abilities only after mechanics prove stable
+4. **Document behavior** - note any issues for future reference
+
+### Community Feedback Integration
+
+Based on extensive testing by community members, these patterns have emerged:
+- **Most VBlood bosses**: Work well with hybrid ability + mechanics approaches
+- **High animation priority bosses**: Stick to pure mechanics for best results
+- **Unknown bosses**: Test mechanics first, add abilities cautiously
+
+---
+
 ## Creating Dynamic Encounters
 
 ### Phase Design Philosophy

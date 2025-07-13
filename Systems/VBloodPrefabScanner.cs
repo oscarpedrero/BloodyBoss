@@ -19,7 +19,7 @@ namespace BloodyBoss.Systems
     {
         private static Dictionary<int, VBloodInfo> _vbloodCache = new();
 
-        public static void ScanVBloodPrefabs()
+        public static void ScanVBloodPrefabs(bool forceQueryComponents = false)
         {
             try
             {
@@ -33,8 +33,14 @@ namespace BloodyBoss.Systems
                     return;
                 }
 
-                // Usar QueryComponents como método principal
-                ScanUsingQueryComponents();
+                // Primero intentar con QueryComponents para VBloods (como originalmente)
+                if (forceQueryComponents)
+                {
+                    ScanUsingQueryComponents();
+                }
+                
+                // Luego hacer scan de prefabs para obtener todos los NPCs
+                ScanUsingVBloodQuery();
             }
             catch (Exception ex)
             {
@@ -42,37 +48,76 @@ namespace BloodyBoss.Systems
             }
         }
 
-        private static void ScanUsingQueryComponents()
+        private static void ScanUsingVBloodQuery()
         {
             try
             {
-                Plugin.BLogger.Info(LogCategory.System, "Using QueryComponents to find VBloods...");
+                Plugin.BLogger.Info(LogCategory.System, "Using PrefabCollectionSystem to scan all entities...");
                 
-                // Usar el helper de BloodyCore
-                var vBloods = Bloody.Core.Helper.v1.QueryComponents.GetEntitiesByComponentTypes<VBloodUnit>(EntityQueryOptions.Default, true);
-                
-                Plugin.BLogger.Info(LogCategory.System, $"QueryComponents found {vBloods.Length} VBlood entities");
-                
-                foreach (var entity in vBloods)
+                var prefabSystem = Plugin.SystemsCore?.PrefabCollectionSystem;
+                if (prefabSystem == null)
                 {
+                    Plugin.BLogger.Error(LogCategory.System, "PrefabCollectionSystem not available");
+                    return;
+                }
+
+                int totalScanned = 0;
+                int validEntities = 0;
+
+                // Volver al método original que funcionaba
+                foreach (var kvp in prefabSystem._PrefabGuidToEntityMap)
+                {
+                    totalScanned++;
                     try
                     {
-                        var prefabGuid = entity.Read<PrefabGUID>();
-                        if (!_vbloodCache.ContainsKey(prefabGuid.GuidHash))
+                        var prefabGuid = kvp.Key;
+                        var entity = kvp.Value;
+                        
+                        // Verificar que la entidad existe y es válida
+                        if (Core.World.EntityManager.Exists(entity))
                         {
-                            var vbloodInfo = ExtractVBloodInfo(entity, prefabGuid);
-                            if (vbloodInfo != null)
+                            // Usar el mismo filtro que funcionaba antes
+                            if (entity.Has<UnitStats>() && entity.Has<CharacterHUD>() && entity.Has<UnitLevel>())
                             {
-                                _vbloodCache[prefabGuid.GuidHash] = vbloodInfo;
+                                validEntities++;
+                                
+                                // Get entity name for debugging
+                                string entityName = "Unknown";
+                                try
+                                {
+                                    entityName = GetVBloodName(entity, prefabGuid);
+                                }
+                                catch { }
+                                
+                                // Debug: verificar si tiene AbilityGroupSlotBuffer
+                                bool hasAbilityBuffer = Core.World.EntityManager.HasBuffer<AbilityGroupSlotBuffer>(entity);
+                                Plugin.BLogger.Info(LogCategory.System, $"Entity {entityName} ({prefabGuid.GuidHash}) has AbilityGroupSlotBuffer: {hasAbilityBuffer}");
+                                
+                                if (!_vbloodCache.ContainsKey(prefabGuid.GuidHash))
+                                {
+                                    var vbloodInfo = ExtractVBloodInfo(entity, prefabGuid);
+                                    if (vbloodInfo != null)
+                                    {
+                                        Plugin.BLogger.Info(LogCategory.System, $"Extracted {vbloodInfo.Name} with {vbloodInfo.Abilities.Count} abilities");
+                                        _vbloodCache[prefabGuid.GuidHash] = vbloodInfo;
+                                    }
+                                }
                             }
                         }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        Plugin.BLogger.Debug(LogCategory.System, $"Error processing entity: {ex.Message}");
+                    }
                 }
+                
+                Plugin.BLogger.Info(LogCategory.System, $"Scanned {totalScanned} VBlood entities");
+                Plugin.BLogger.Info(LogCategory.System, $"Found {validEntities} valid entities");
+                Plugin.BLogger.Info(LogCategory.System, $"Added {_vbloodCache.Count} entities to cache");
             }
             catch (Exception ex)
             {
-                Plugin.BLogger.Error(LogCategory.System, $"Error in QueryComponents scan: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.System, $"Error in VBlood query scan: {ex.Message}");
             }
         }
 
@@ -98,9 +143,6 @@ namespace BloodyBoss.Systems
                     {
                         var entityCategory = internals.EntityCategory.Value;
                         var unitCategory = entityCategory.UnitCategory;
-                        
-                        // Agregar categoría principal
-                        vbloodInfo.Features.Add($"UnitCategory:{unitCategory}");
                         
                         // Marcar según categoría
                         switch (unitCategory)
@@ -181,10 +223,12 @@ namespace BloodyBoss.Systems
             {
                 if (!Core.World.EntityManager.HasBuffer<AbilityGroupSlotBuffer>(entity))
                 {
+                    Plugin.BLogger.Warning(LogCategory.System, $"Entity {vbloodInfo.Name} does not have AbilityGroupSlotBuffer - no abilities to extract");
                     return;
                 }
 
                 var abilityBuffer = Core.World.EntityManager.GetBuffer<AbilityGroupSlotBuffer>(entity);
+                Plugin.BLogger.Info(LogCategory.System, $"Entity {vbloodInfo.Name} has {abilityBuffer.Length} ability slots");
                 var entityManager = Core.World.EntityManager;
                 var prefabSystem = Plugin.SystemsCore?.PrefabCollectionSystem;
                 
@@ -197,8 +241,11 @@ namespace BloodyBoss.Systems
                         
                         if (abilityPrefabGuid.GuidHash == 0)
                         {
+                            Plugin.BLogger.Debug(LogCategory.System, $"Slot {i} is empty for {vbloodInfo.Name}");
                             continue; // Skip empty slots
                         }
+                        
+                        Plugin.BLogger.Info(LogCategory.System, $"Processing ability slot {i} for {vbloodInfo.Name}: {abilityPrefabGuid.GuidHash}");
                         
                         var abilityInfo = new VBloodAbilityInfo
                         {
@@ -945,6 +992,97 @@ namespace BloodyBoss.Systems
             }
             
             return true; // Permitimos la mayoría de combinaciones con advertencias
+        }
+        
+        private static void ScanUsingQueryComponents()
+        {
+            try
+            {
+                Plugin.BLogger.Info(LogCategory.System, "Scanning VBloodDatabase entries against prefab entities...");
+                
+                // Obtener toda la base de datos de VBloods existente
+                var vbloodDatabase = Data.VBloodDatabase.GetAllVBloods();
+                Plugin.BLogger.Info(LogCategory.System, $"VBloodDatabase has {vbloodDatabase.Count} entries to check");
+                
+                var prefabSystem = Plugin.SystemsCore?.PrefabCollectionSystem;
+                if (prefabSystem == null)
+                {
+                    Plugin.BLogger.Error(LogCategory.System, "PrefabCollectionSystem not available");
+                    return;
+                }
+                
+                int checkedCount = 0;
+                int foundInPrefabs = 0;
+                int withAbilities = 0;
+                
+                // Para cada entrada en la base de datos, verificar si existe en los prefabs
+                foreach (var dbEntry in vbloodDatabase)
+                {
+                    var guidHash = dbEntry.Key;
+                    var vbloodStaticInfo = dbEntry.Value;
+                    checkedCount++;
+                    
+                    try
+                    {
+                        var prefabGuid = new PrefabGUID(guidHash);
+                        
+                        // Verificar si existe en el PrefabCollectionSystem
+                        if (prefabSystem._PrefabGuidToEntityMap.TryGetValue(prefabGuid, out Entity prefabEntity))
+                        {
+                            foundInPrefabs++;
+                            
+                            // Verificar que la entidad existe y es válida
+                            if (Core.World.EntityManager.Exists(prefabEntity))
+                            {
+                                // Verificar si tiene habilidades
+                                bool hasAbilityBuffer = Core.World.EntityManager.HasBuffer<AbilityGroupSlotBuffer>(prefabEntity);
+                                
+                                if (hasAbilityBuffer)
+                                {
+                                    withAbilities++;
+                                    var abilityBuffer = Core.World.EntityManager.GetBuffer<AbilityGroupSlotBuffer>(prefabEntity);
+                                    Plugin.BLogger.Info(LogCategory.System, $"✓ {vbloodStaticInfo.Name} - {abilityBuffer.Length} ability slots");
+                                }
+                                else
+                                {
+                                    Plugin.BLogger.Debug(LogCategory.System, $"✗ {vbloodStaticInfo.Name} - No ability buffer");
+                                }
+                                
+                                // Extraer información actualizada
+                                if (!_vbloodCache.ContainsKey(guidHash))
+                                {
+                                    var vbloodInfo = ExtractVBloodInfo(prefabEntity, prefabGuid);
+                                    if (vbloodInfo != null)
+                                    {
+                                        // Preservar el nombre original de la base de datos
+                                        vbloodInfo.Name = vbloodStaticInfo.Name;
+                                        vbloodInfo.Level = vbloodStaticInfo.Level;
+                                        _vbloodCache[guidHash] = vbloodInfo;
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Plugin.BLogger.Debug(LogCategory.System, $"Not found in prefabs: {vbloodStaticInfo.Name} ({guidHash})");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Plugin.BLogger.Debug(LogCategory.System, $"Error processing {vbloodStaticInfo.Name}: {ex.Message}");
+                    }
+                }
+                
+                Plugin.BLogger.Info(LogCategory.System, $"Database scan complete:");
+                Plugin.BLogger.Info(LogCategory.System, $"  - Database entries checked: {checkedCount}");
+                Plugin.BLogger.Info(LogCategory.System, $"  - Found in prefabs: {foundInPrefabs}");
+                Plugin.BLogger.Info(LogCategory.System, $"  - With ability buffers: {withAbilities}");
+                Plugin.BLogger.Info(LogCategory.System, $"  - Added to cache: {_vbloodCache.Count}");
+            }
+            catch (Exception ex)
+            {
+                Plugin.BLogger.Error(LogCategory.System, $"Error in database scan: {ex.Message}");
+            }
         }
     }
 }

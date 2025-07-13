@@ -65,7 +65,7 @@ namespace BloodyBoss.Command
         public static void DebugVBloodSearch(ChatCommandContext ctx, string searchTerm)
         {
             var knownVBloods = AbilitySwapSystem.GetKnownVBloodPrefabs();
-            ctx.Reply($"🔍 Debugging search for: '{searchTerm}'");
+            ctx.Reply($"{FontColorChatSystem.Blue("[DEBUG]")} Debugging search for: '{searchTerm}'");
             ctx.Reply($"Total VBloods loaded: {knownVBloods.Count}");
             
             // Show first 10 VBloods for reference
@@ -97,7 +97,7 @@ namespace BloodyBoss.Command
             var result = FindVBlood(vbloodName, ctx);
             if (!result.HasValue)
             {
-                ctx.Reply(FontColorChatSystem.Red($"VBlood '{vbloodName}' not found"));
+                ctx.Reply($"{FontColorChatSystem.Red($"VBlood '{vbloodName}' not found")}");
                 ctx.Reply("Use .bb ability-list to see available VBloods");
                 return;
             }
@@ -107,11 +107,11 @@ namespace BloodyBoss.Command
             var vbloodInfo = VBloodDatabase.GetVBlood(vblood.Value);
             if (vbloodInfo == null)
             {
-                ctx.Reply($"❌ No database information for {vblood.Key}");
+                ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} No database information for {vblood.Key}");
                 return;
             }
 
-            ctx.Reply($"🩸 {vbloodInfo.Name} (Level {vbloodInfo.Level})");
+            ctx.Reply($"{FontColorChatSystem.Blue("[VBLOOD]")} {vbloodInfo.Name} (Level {vbloodInfo.Level})");
             ctx.Reply($"├─ Category: {string.Join(", ", vbloodInfo.Features)}");
             ctx.Reply($"├─ Can Fly: {(vbloodInfo.CanFly ? "Yes" : "No")}");
             ctx.Reply($"└─ Abilities: {vbloodInfo.Abilities.Count}");
@@ -130,13 +130,13 @@ namespace BloodyBoss.Command
             }
             else
             {
-                ctx.Reply($"❌ No ability at slot {slotIndex}");
+                ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} No ability at slot {slotIndex}");
             }
         }
 
         private static void ShowAbilityDetails(ChatCommandContext ctx, int slot, AbilityStaticInfo ability, string prefix)
         {
-            ctx.Reply($"{prefix}🎯 Slot {slot}: {ability.Category}");
+            ctx.Reply($"{prefix}{FontColorChatSystem.Blue("[SLOT]")} {slot}: {ability.Category}");
             ctx.Reply($"{prefix}├─ GUID: {ability.GUID}");
             
             if (ability.CastTime > 0 || ability.PostCastTime > 0)
@@ -198,18 +198,18 @@ namespace BloodyBoss.Command
         {
             if (!Database.GetBoss(bossName, out BossEncounterModel boss))
             {
-                ctx.Reply($"❌ Boss '{bossName}' not found");
+                ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} Boss '{bossName}' not found");
                 return;
             }
 
             var bossInfo = VBloodDatabase.GetVBlood(boss.PrefabGUID);
             if (bossInfo == null)
             {
-                ctx.Reply($"❌ No database information for boss");
+                ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} No database information for boss");
                 return;
             }
 
-            ctx.Reply($"🎯 Compatible abilities for {bossInfo.Name}:");
+            ctx.Reply($"{FontColorChatSystem.Blue("[ABILITIES]")} Compatible abilities for {bossInfo.Name}:");
             ctx.Reply($"├─ Boss Category: {string.Join(", ", bossInfo.Features)}");
             ctx.Reply($"├─ Can Fly: {(bossInfo.CanFly ? "Yes" : "No")}");
             ctx.Reply($"└─ Searching for compatible abilities...");
@@ -272,14 +272,14 @@ namespace BloodyBoss.Command
         {
             if (!Database.GetBoss(bossName, out BossEncounterModel boss))
             {
-                ctx.Reply($"❌ Boss '{bossName}' not found");
+                ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} Boss '{bossName}' not found");
                 return;
             }
 
             var result = FindVBlood(sourceVBlood, ctx);
             if (!result.HasValue)
             {
-                ctx.Reply($"❌ VBlood '{sourceVBlood}' not found");
+                ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} VBlood '{sourceVBlood}' not found");
                 return;
             }
             
@@ -291,7 +291,7 @@ namespace BloodyBoss.Command
             var bossInfo = VBloodDatabase.GetVBlood(boss.PrefabGUID);
             var sourceInfo = VBloodDatabase.GetVBlood(source.Value);
 
-            ctx.Reply($"🧪 Compatibility Test:");
+            ctx.Reply($"{FontColorChatSystem.Blue("[TEST]")} Compatibility Test:");
             ctx.Reply($"├─ Boss: {bossInfo?.Name ?? bossName}");
             ctx.Reply($"├─ Source: {sourceInfo?.Name ?? source.Key}");
             ctx.Reply($"├─ Slot: {slotIndex}");
@@ -300,14 +300,14 @@ namespace BloodyBoss.Command
             if (sourceInfo?.Abilities.TryGetValue(slotIndex, out var ability) == true)
             {
                 ctx.Reply("");
-                ctx.Reply($"📊 Ability Details:");
+                ctx.Reply($"{FontColorChatSystem.Blue("[DETAILS]")} Ability Details:");
                 ShowAbilityDetails(ctx, slotIndex, ability, "");
             }
 
             if (compatibility.Errors.Count > 0)
             {
                 ctx.Reply("");
-                ctx.Reply($"❌ Errors:");
+                ctx.Reply($"{FontColorChatSystem.Red("[ERRORS]")} Errors:");
                 foreach (var error in compatibility.Errors)
                 {
                     ctx.Reply($"├─ {error}");
@@ -317,7 +317,7 @@ namespace BloodyBoss.Command
             if (compatibility.Warnings.Count > 0)
             {
                 ctx.Reply("");
-                ctx.Reply($"⚠️ Warnings:");
+                ctx.Reply($"{FontColorChatSystem.Yellow("[WARNINGS]")} Warnings:");
                 foreach (var warning in compatibility.Warnings)
                 {
                     ctx.Reply($"├─ {warning}");
@@ -327,7 +327,7 @@ namespace BloodyBoss.Command
             if (compatibility.IsCompatible)
             {
                 ctx.Reply("");
-                ctx.Reply($"✅ This ability can be used with command:");
+                ctx.Reply($"{FontColorChatSystem.Green("[SUCCESS]")} This ability can be used with command:");
                 ctx.Reply($".bb ability-slot \"{bossName}\" \"custom_slot\" {source.Value} {slotIndex} true \"Test ability\"");
             }
         }
@@ -339,14 +339,14 @@ namespace BloodyBoss.Command
             {
                 if (!Database.GetBoss(bossName, out BossEncounterModel boss))
                 {
-                    ctx.Reply($"❌ Boss '{bossName}' not found");
+                    ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} Boss '{bossName}' not found");
                     return;
                 }
 
                 var result = FindVBlood(sourceVBlood, ctx);
                 if (!result.HasValue)
                 {
-                    ctx.Reply($"❌ VBlood '{sourceVBlood}' not found");
+                    ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} VBlood '{sourceVBlood}' not found");
                     ctx.Reply("Use .bb ability-info to see available VBloods");
                     return;
                 }
@@ -362,7 +362,7 @@ namespace BloodyBoss.Command
 
                 if (!compatResult.IsCompatible)
                 {
-                    ctx.Reply($"❌ Ability is incompatible!");
+                    ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} Ability is incompatible!");
                     foreach (var error in compatResult.Errors)
                     {
                         ctx.Reply($"  • {error}");
@@ -393,10 +393,10 @@ namespace BloodyBoss.Command
                     
                     if (compatResult.Warnings.Any())
                     {
-                        ctx.Reply(FontColorChatSystem.Yellow("Warnings:"));
+                        ctx.Reply($"{FontColorChatSystem.Yellow("[WARNINGS]")} Warnings:");
                         foreach (var warning in compatResult.Warnings)
                         {
-                            ctx.Reply($"  - {FontColorChatSystem.Yellow(warning)}");
+                            ctx.Reply($"  - {warning}");
                             Plugin.BLogger.Debug(LogCategory.Command, $"Ability compatibility warning: {warning}");
                         }
                     }
@@ -407,17 +407,17 @@ namespace BloodyBoss.Command
                     {
                         boss.AbilitySwaps.Remove(slotIndex);
                         Database.saveDatabase();
-                        ctx.Reply($"✅ Removed ability swap from slot {slotIndex}");
+                        ctx.Reply($"{FontColorChatSystem.Green("[SUCCESS]")} Removed ability swap from slot {slotIndex}");
                     }
                     else
                     {
-                        ctx.Reply($"ℹ️ No ability swap configured for slot {slotIndex}");
+                        ctx.Reply($"{FontColorChatSystem.Blue("[INFO]")} No ability swap configured for slot {slotIndex}");
                     }
                 }
             }
             catch (Exception e)
             {
-                ctx.Reply($"❌ Error configuring ability: {e.Message}");
+                ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} Error configuring ability: {e.Message}");
                 Plugin.BLogger.Error(LogCategory.Command, $"Error in ability-slot command: {e}");
             }
         }
@@ -446,7 +446,7 @@ namespace BloodyBoss.Command
                 ? knownVBloods 
                 : knownVBloods.Where(kvp => kvp.Key.ToLower().Contains(filter.ToLower())).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
             
-            ctx.Reply($"🩸 Known VBloods ({filteredVBloods.Count} of {knownVBloods.Count}):");
+            ctx.Reply($"{FontColorChatSystem.Blue("[VBLOODS]")} Known VBloods ({filteredVBloods.Count} of {knownVBloods.Count}):");
             ctx.Reply($"────────────────────────────────────────────────");
             
             int count = 0;
@@ -475,7 +475,7 @@ namespace BloodyBoss.Command
             
             // Debug info
             ctx.Reply($"");
-            ctx.Reply($"📝 Examples:");
+            ctx.Reply($"{FontColorChatSystem.Blue("[EXAMPLES]")} Examples:");
             ctx.Reply($"   .bb ability-info \"alpha\"");
             ctx.Reply($"   .bb ability-list wolf");
         }
@@ -509,20 +509,20 @@ namespace BloodyBoss.Command
                     
                     if (!compatibilityResult.IsCompatible)
                     {
-                        ctx.Reply($"❌ ERROR: This ability is incompatible with {bossInfo?.Name ?? "this boss"}");
+                        ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} This ability is incompatible with {bossInfo?.Name ?? "this boss"}");
                         foreach (var error in compatibilityResult.Errors)
                         {
-                            ctx.Reply($"├─ ⛔ {error}");
+                            ctx.Reply($"├─ {FontColorChatSystem.Red(error)}");
                         }
                         ctx.Reply($"└─ This ability cannot be used on this boss");
                         return;
                     }
                     else if (compatibilityResult.Level != AbilityCompatibilitySystem.CompatibilityLevel.Perfect)
                     {
-                        ctx.Reply($"⚠️ WARNING: Compatibility level: {compatibilityResult.Level}");
+                        ctx.Reply($"{FontColorChatSystem.Yellow("[WARNING]")} Compatibility level: {compatibilityResult.Level}");
                         foreach (var warning in compatibilityResult.Warnings)
                         {
-                            ctx.Reply($"├─ ⚡ {warning}");
+                            ctx.Reply($"├─ {FontColorChatSystem.Yellow(warning)}");
                         }
                         
                         if (sourceInfo != null && sourceInfo.Abilities.TryGetValue(abilityIndex, out var abilityInfo))
@@ -586,16 +586,16 @@ namespace BloodyBoss.Command
                     
                     Database.saveDatabase();
                     
-                    ctx.Reply($"🎯 Configured ability slot '{slotName}' for boss '{bossName}':");
+                    ctx.Reply($"{FontColorChatSystem.Blue("[CONFIG]")} Configured ability slot '{slotName}' for boss '{bossName}':");
                     ctx.Reply($"├─ Source PrefabGUID: {sourcePrefabGUID}");
                     ctx.Reply($"├─ Ability Index: {abilityIndex}");
-                    ctx.Reply($"├─ Enabled: {(enabled ? "✅ Yes" : "❌ No")}");
+                    ctx.Reply($"├─ Enabled: {(enabled ? FontColorChatSystem.Green("Yes") : FontColorChatSystem.Red("No"))}");
                     ctx.Reply($"├─ Description: {(string.IsNullOrEmpty(description) ? "None" : description)}");
                     ctx.Reply($"└─ Compatibility: {GetCompatibilityIcon(compatibilityResult.Level)} {compatibilityResult.Level}");
                     
                     var knownVBloods = AbilitySwapSystem.GetKnownVBloodPrefabs();
                     var vbloodName = knownVBloods.FirstOrDefault(x => x.Value == sourcePrefabGUID).Key ?? "Unknown VBlood";
-                    ctx.Reply($"🩸 Source VBlood: {vbloodName}");
+                    ctx.Reply($"{FontColorChatSystem.Blue("[SOURCE]")} VBlood: {vbloodName}");
                 }
                 else
                 {
@@ -642,7 +642,7 @@ namespace BloodyBoss.Command
                     boss.AbilitySwaps.Remove(slotIndex);
                     Database.saveDatabase();
                     
-                    ctx.Reply($"🗑️ Removed ability slot {slotIndex} from boss '{bossName}'");
+                    ctx.Reply($"{FontColorChatSystem.Blue("[REMOVED]")} Removed ability slot {slotIndex} from boss '{bossName}'");
                     ctx.Reply($"└─ Remaining slots: {boss.AbilitySwaps?.Count ?? 0}");
                 }
                 else
@@ -666,12 +666,12 @@ namespace BloodyBoss.Command
                 {
                     if (boss.AbilitySwaps == null || boss.AbilitySwaps.Count == 0)
                     {
-                        ctx.Reply($"📋 Boss '{bossName}' has no ability swaps configured");
+                        ctx.Reply($"{FontColorChatSystem.Blue("[INFO]")} Boss '{bossName}' has no ability swaps configured");
                         ctx.Reply($"└─ Use .bb ability-slot to configure abilities");
                         return;
                     }
                     
-                    ctx.Reply($"📋 Ability swaps for boss '{bossName}':");
+                    ctx.Reply($"{FontColorChatSystem.Blue("[SWAPS]")} Ability swaps for boss '{bossName}':");
                     ctx.Reply($"────────────────────────────────────────────────");
                     
                     foreach (var swap in boss.AbilitySwaps.OrderBy(x => x.Key))
@@ -709,7 +709,7 @@ namespace BloodyBoss.Command
                     }
                     Database.saveDatabase();
                     
-                    ctx.Reply($"🧹 Cleared all ability swaps from boss '{bossName}'");
+                    ctx.Reply($"{FontColorChatSystem.Blue("[CLEARED]")} Cleared all ability swaps from boss '{bossName}'");
                     ctx.Reply($"└─ Removed {removedCount} swaps");
                 }
                 else
@@ -738,17 +738,17 @@ namespace BloodyBoss.Command
                 var knownVBloods = AbilitySwapSystem.GetKnownVBloodPrefabs();
                 var vbloodName = knownVBloods.FirstOrDefault(x => x.Value == sourcePrefabGUID).Key ?? "Unknown VBlood";
                 
-                ctx.Reply($"🔍 Detailed abilities for {vbloodName} (PrefabGUID: {sourcePrefabGUID}):");
+                ctx.Reply($"{FontColorChatSystem.Blue("[INSPECT]")} Detailed abilities for {vbloodName} (PrefabGUID: {sourcePrefabGUID}):");
                 ctx.Reply($"────────────────────────────────────────────────");
                 
                 // Check AbilityBar_Shared
                 if (sourceEntity.Has<AbilityBar_Shared>())
                 {
-                    ctx.Reply($"✅ Has AbilityBar_Shared component");
+                    ctx.Reply($"{FontColorChatSystem.Green("[FOUND]")} Has AbilityBar_Shared component");
                 }
                 else
                 {
-                    ctx.Reply($"❌ No AbilityBar_Shared component");
+                    ctx.Reply($"{FontColorChatSystem.Red("[MISSING]")} No AbilityBar_Shared component");
                     return;
                 }
                 
@@ -756,7 +756,7 @@ namespace BloodyBoss.Command
                 if (entityManager.HasBuffer<AbilityGroupSlotBuffer>(sourceEntity))
                 {
                     var buffer = entityManager.GetBuffer<AbilityGroupSlotBuffer>(sourceEntity);
-                    ctx.Reply($"✅ Found {buffer.Length} ability groups:");
+                    ctx.Reply($"{FontColorChatSystem.Green("[FOUND]")} {buffer.Length} ability groups:");
                     ctx.Reply($"");
                     
                     for (int i = 0; i < buffer.Length && i < 20; i++)
@@ -779,7 +779,7 @@ namespace BloodyBoss.Command
                     }
                     
                     ctx.Reply($"");
-                    ctx.Reply($"💡 Usage examples:");
+                    ctx.Reply($"{FontColorChatSystem.Blue("[USAGE]")} Examples:");
                     for (int i = 0; i < Math.Min(buffer.Length, 3); i++)
                     {
                         ctx.Reply($"   .bb ability-slot-set \"YourBoss\" \"slot{i + 1}\" {sourcePrefabGUID} {i} true \"{vbloodName} ability {i + 1}\"");
@@ -787,7 +787,7 @@ namespace BloodyBoss.Command
                 }
                 else
                 {
-                    ctx.Reply($"❌ No AbilityGroupSlotBuffer - VBlood may not be compatible with modular system");
+                    ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} No AbilityGroupSlotBuffer - VBlood may not be compatible with modular system");
                 }
             }
             catch (Exception ex)
@@ -998,7 +998,7 @@ namespace BloodyBoss.Command
                             break;
                             
                         default:
-                            ctx.Reply($"❌ Unknown preset '{presetName}'. Available presets:");
+                            ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} Unknown preset '{presetName}'. Available presets:");
                             ctx.Reply($"├─ dracula-mix");
                             ctx.Reply($"├─ frost-warrior");
                             ctx.Reply($"└─ spell-caster");
@@ -1022,7 +1022,7 @@ namespace BloodyBoss.Command
                     
                     Database.saveDatabase();
                     
-                    ctx.Reply($"📦 Applied preset '{presetName}' to boss '{bossName}':");
+                    ctx.Reply($"{FontColorChatSystem.Blue("[PRESET]")} Applied preset '{presetName}' to boss '{bossName}':");
                     ctx.Reply($"└─ Configured {preset.Count} ability swaps");
                 }
                 else

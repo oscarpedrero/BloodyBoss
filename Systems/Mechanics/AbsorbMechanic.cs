@@ -49,7 +49,7 @@ namespace BloodyBoss.Systems.Mechanics
             var radius = GetParameter<float>(parameters, "radius", 20f);
             var duration = GetParameter<float>(parameters, "duration", 5f);
             var continuous = GetParameter<bool>(parameters, "continuous", false);
-            var announcement = GetParameter<string>(parameters, "announcement", "💀 Life force drains away!");
+            var announcement = GetParameter<string>(parameters, "announcement", "Life force drains away!");
             
             // New mechanic: Minimum players required in range
             var minPlayersRequired = GetParameter<int>(parameters, "min_players", 0);
@@ -124,7 +124,7 @@ namespace BloodyBoss.Systems.Mechanics
                 Plugin.BLogger.Info(LogCategory.Mechanic, $"Only {playersInRange.Count}/{minPlayersRequired} players in range! GLOBAL DRAIN ACTIVATED!");
                 
                 // Send warning to all players
-                var warningMsg = $"⚠️ NOT ENOUGH PLAYERS IN RANGE! {playersInRange.Count}/{minPlayersRequired} - GLOBAL DRAIN ACTIVE!";
+                var warningMsg = $"{FontColorChatSystem.Yellow("[WARNING]")} NOT ENOUGH PLAYERS IN RANGE! {playersInRange.Count}/{minPlayersRequired} - GLOBAL DRAIN ACTIVE!";
                 var warningRef = (FixedString512Bytes)warningMsg;
                 ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref warningRef);
                 

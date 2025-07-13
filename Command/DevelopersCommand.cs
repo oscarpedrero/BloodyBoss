@@ -42,7 +42,7 @@ namespace BloodyBoss.Command
                 Plugin.BLogger.Info(LogCategory.Debug, $"Testing boss: {bossName}");
                 Plugin.BLogger.Info(LogCategory.Debug, "==============================================================");
                 
-                ctx.Reply($"🧪 Testing BossEntityExtensions for '{bossName}':");
+                ctx.Reply($"{FontColorChatSystem.Blue("[TEST]")} Testing BossEntityExtensions for '{bossName}':");
                 ctx.Reply($"├─ Looking for spawned boss entities...");
                 
                 // Find all entities with NameableInteractable
@@ -59,7 +59,7 @@ namespace BloodyBoss.Command
                         if (model != null && model.name == bossName)
                         {
                             found++;
-                            ctx.Reply($"├─ ✅ Found boss entity!");
+                            ctx.Reply($"├─ {FontColorChatSystem.Green("Found boss entity!")}");
                             Plugin.BLogger.Info(LogCategory.Debug, $"[✓] Found boss entity for: {bossName}");
                             
                             // Test health extensions
@@ -109,7 +109,7 @@ namespace BloodyBoss.Command
                 
                 if (found == 0)
                 {
-                    ctx.Reply($"└─ ❌ No spawned boss found. Spawn it first!");
+                    ctx.Reply($"└─ {FontColorChatSystem.Red("No spawned boss found. Spawn it first!")}");
                     Plugin.BLogger.Warning(LogCategory.Debug, $"No spawned boss found for: {bossName}");
                 }
                 
@@ -129,7 +129,7 @@ namespace BloodyBoss.Command
             try
             {
                 Plugin.BLogger.Info(LogCategory.Debug, "================== Find All BloodyBosses ==================");
-                ctx.Reply($"🔍 Searching for all BloodyBoss entities...");
+                ctx.Reply($"{FontColorChatSystem.Blue("[SEARCH]")} Searching for all BloodyBoss entities...");
                 
                 var entities = QueryComponents.GetEntitiesByComponentTypes<NameableInteractable>(EntityQueryOptions.IncludeAll);
                 int count = 0;
@@ -203,7 +203,7 @@ namespace BloodyBoss.Command
                         var bossName = model?.name ?? "Unknown";
                         var bossPos = entity.GetBossPosition();
                         
-                        ctx.Reply($"🎯 Testing radius detection for '{bossName}':");
+                        ctx.Reply($"{FontColorChatSystem.Blue("[RADIUS]")} Testing radius detection for '{bossName}':");
                         Plugin.BLogger.Info(LogCategory.Debug, $"Boss: {bossName}");
                         Plugin.BLogger.Info(LogCategory.Debug, $"Boss Position: ({bossPos.x:F1}, {bossPos.y:F1}, {bossPos.z:F1})");
                         
@@ -239,7 +239,7 @@ namespace BloodyBoss.Command
                 
                 if (!found)
                 {
-                    ctx.Reply($"❌ No BloodyBoss spawned to test with!");
+                    ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} No BloodyBoss spawned to test with!");
                     Plugin.BLogger.Warning(LogCategory.Debug, "No BloodyBoss entity found for radius test");
                 }
                 
@@ -259,7 +259,7 @@ namespace BloodyBoss.Command
             try
             {
                 Plugin.BLogger.Info(LogCategory.Debug, "================== Performance Benchmark ==================");
-                ctx.Reply($"⏱️ Starting performance benchmark...");
+                ctx.Reply($"{FontColorChatSystem.Blue("[BENCHMARK]")} Starting performance benchmark...");
                 
                 var stopwatch = System.Diagnostics.Stopwatch.StartNew();
                 
@@ -319,7 +319,7 @@ namespace BloodyBoss.Command
                 stopwatch.Stop();
                 
                 // Display results
-                ctx.Reply($"📊 Benchmark Results:");
+                ctx.Reply($"{FontColorChatSystem.Blue("[RESULTS]")} Benchmark Results:");
                 ctx.Reply($"├─ Find all bosses: {findTime}ms (found {bossCount})");
                 ctx.Reply($"├─ Get boss models: {modelTime}ms (found {modelCount})");
                 ctx.Reply($"├─ Health checks: {healthTime}ms (alive {aliveCount})");
@@ -362,7 +362,7 @@ namespace BloodyBoss.Command
         public static void ValidateExtensions(ChatCommandContext ctx)
         {
             Plugin.BLogger.Info(LogCategory.Debug, "================== Extension Methods Validation ==================");
-            ctx.Reply($"🔬 Validating BossEntityExtensions...");
+            ctx.Reply($"{FontColorChatSystem.Blue("[VALIDATE]")} Validating BossEntityExtensions...");
             
             int tests = 0;
             int passed = 0;
@@ -376,28 +376,28 @@ namespace BloodyBoss.Command
                 bool test1 = !emptyEntity.IsBloodyBoss();
                 if (test1) passed++;
                 results.AppendLine($"[Test 1] Empty entity IsBloodyBoss: {(test1 ? "PASSED" : "FAILED")}");
-                if (!test1) ctx.Reply($"❌ Empty entity check failed");
+                if (!test1) ctx.Reply($"{FontColorChatSystem.Red("[FAILED]")} Empty entity check failed");
                 
                 // Test 2: SafeRead with missing component
                 tests++;
                 bool test2 = emptyEntity.SafeRead<Health>().Value == 0;
                 if (test2) passed++;
                 results.AppendLine($"[Test 2] SafeRead default value: {(test2 ? "PASSED" : "FAILED")}");
-                if (!test2) ctx.Reply($"❌ SafeRead default failed");
+                if (!test2) ctx.Reply($"{FontColorChatSystem.Red("[FAILED]")} SafeRead default failed");
                 
                 // Test 3: GetBossModel with non-boss
                 tests++;
                 bool test3 = emptyEntity.GetBossModel() == null;
                 if (test3) passed++;
                 results.AppendLine($"[Test 3] GetBossModel null entity: {(test3 ? "PASSED" : "FAILED")}");
-                if (!test3) ctx.Reply($"❌ GetBossModel null check failed");
+                if (!test3) ctx.Reply($"{FontColorChatSystem.Red("[FAILED]")} GetBossModel null check failed");
                 
                 // Test 4: Health percentage with dead boss
                 tests++;
                 bool test4 = emptyEntity.GetBossHealthPercentage() == 0;
                 if (test4) passed++;
                 results.AppendLine($"[Test 4] Health percentage null entity: {(test4 ? "PASSED" : "FAILED")}");
-                if (!test4) ctx.Reply($"❌ Health percentage zero check failed");
+                if (!test4) ctx.Reply($"{FontColorChatSystem.Red("[FAILED]")} Health percentage zero check failed");
                 
                 // Test 5: Position of null entity
                 tests++;
@@ -434,15 +434,15 @@ namespace BloodyBoss.Command
                 results.AppendLine($"[Test 8] GetPlayersInRadius null entity: {(test8 ? "PASSED" : "FAILED")}");
                 
                 // Display results
-                ctx.Reply($"✅ Validation complete: {passed}/{tests} tests passed");
+                ctx.Reply($"{FontColorChatSystem.Green("[VALIDATION]")} Complete: {passed}/{tests} tests passed");
                 
                 if (passed < tests)
                 {
-                    ctx.Reply($"⚠️ Some tests failed! Check console for details.");
+                    ctx.Reply($"{FontColorChatSystem.Yellow("[WARNING]")} Some tests failed! Check console for details.");
                 }
                 else
                 {
-                    ctx.Reply($"🎉 All tests passed! Extensions are working correctly.");
+                    ctx.Reply($"{FontColorChatSystem.Green("[SUCCESS]")} All tests passed! Extensions are working correctly.");
                 }
                 
                 // Log detailed results
@@ -453,7 +453,7 @@ namespace BloodyBoss.Command
             }
             catch (Exception e)
             {
-                ctx.Reply($"❌ Validation error: {e.Message}");
+                ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} Validation error: {e.Message}");
                 Plugin.BLogger.Error(LogCategory.Debug, $"Validation error: {e.Message}");
                 Plugin.BLogger.Error(LogCategory.Debug, $"Stack trace: {e.StackTrace}");
             }
@@ -467,7 +467,7 @@ namespace BloodyBoss.Command
                 Plugin.BLogger.Info(LogCategory.Debug, "================== BossComponents Test ==================");
                 Plugin.BLogger.Info(LogCategory.Debug, $"Testing components for boss: {bossName}");
                 
-                ctx.Reply($"🧪 Testing BossComponents for '{bossName}':");
+                ctx.Reply($"{FontColorChatSystem.Blue("[TEST]")} Testing BossComponents for '{bossName}':");
                 
                 // Test 1: Find boss using new query system
                 var entityManager = Plugin.SystemsCore.EntityManager;
@@ -484,7 +484,7 @@ namespace BloodyBoss.Command
                     if (identifier == bossName)
                     {
                         targetBoss = entity;
-                        ctx.Reply($"├─ ✅ Found target boss: {bossName}");
+                        ctx.Reply($"├─ {FontColorChatSystem.Green($"Found target boss: {bossName}")}");
                         Plugin.BLogger.Info(LogCategory.Debug, $"[Identifier Test] Found boss with identifier: {identifier}");
                         break;
                     }
@@ -494,7 +494,7 @@ namespace BloodyBoss.Command
                 
                 if (targetBoss == Entity.Null)
                 {
-                    ctx.Reply($"└─ ❌ Boss '{bossName}' not found!");
+                    ctx.Reply($"└─ {FontColorChatSystem.Red($"Boss '{bossName}' not found!")}");
                     Plugin.BLogger.Warning(LogCategory.Debug, $"Boss '{bossName}' not found in spawned entities");
                     return;
                 }
@@ -502,7 +502,7 @@ namespace BloodyBoss.Command
                 // Test 3: Get/Create boss state
                 if (!Database.GetBoss(bossName, out BossEncounterModel model))
                 {
-                    ctx.Reply($"└─ ❌ Boss model not found in database!");
+                    ctx.Reply($"└─ {FontColorChatSystem.Red("Boss model not found in database!")}");
                     return;
                 }
                 
@@ -557,7 +557,7 @@ namespace BloodyBoss.Command
             }
             catch (Exception e)
             {
-                ctx.Reply($"❌ Test failed: {e.Message}");
+                ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} Test failed: {e.Message}");
                 Plugin.BLogger.Error(LogCategory.Debug, $"Component test error: {e.Message}");
                 Plugin.BLogger.Error(LogCategory.Debug, $"Stack trace: {e.StackTrace}");
             }
@@ -570,7 +570,7 @@ namespace BloodyBoss.Command
             {
                 if (healthPercent < 0 || healthPercent > 100)
                 {
-                    ctx.Reply($"❌ Health percent must be between 0 and 100");
+                    ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} Health percent must be between 0 and 100");
                     return;
                 }
                 
@@ -579,16 +579,16 @@ namespace BloodyBoss.Command
                 // Get phases for health percentage
                 var phase = BossComponents.Phases.GetCurrentPhase(healthPercent);
                 
-                ctx.Reply($"🎭 Phase at {healthPercent}% health:");
+                ctx.Reply($"{FontColorChatSystem.Blue("[PHASE]")} Phase at {healthPercent}% health:");
                 ctx.Reply($"├─ Phase Number: {phase.PhaseNumber}");
                 ctx.Reply($"├─ Threshold: {phase.HealthThreshold}%");
                 ctx.Reply($"└─ Message: {phase.AnnouncementText}");
                 
                 // Show all phases
-                ctx.Reply($"📊 All Phase Thresholds:");
+                ctx.Reply($"{FontColorChatSystem.Blue("[PHASES]")} All Phase Thresholds:");
                 foreach (var p in BossComponents.Phases.StandardPhases)
                 {
-                    var marker = healthPercent <= p.HealthThreshold ? "→" : " ";
+                    var marker = healthPercent <= p.HealthThreshold ? FontColorChatSystem.Green(">>") : "  ";
                     ctx.Reply($"{marker} Phase {p.PhaseNumber}: ≤{p.HealthThreshold}%");
                 }
                 
@@ -597,7 +597,7 @@ namespace BloodyBoss.Command
             }
             catch (Exception e)
             {
-                ctx.Reply($"❌ Test failed: {e.Message}");
+                ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} Test failed: {e.Message}");
                 Plugin.BLogger.Error(LogCategory.Debug, $"Phase test error: {e.Message}");
             }
         }
@@ -612,11 +612,11 @@ namespace BloodyBoss.Command
                 // Get boss model
                 if (!Database.GetBoss(bossName, out BossEncounterModel model))
                 {
-                    ctx.Reply($"❌ Boss '{bossName}' not found in database");
+                    ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} Boss '{bossName}' not found in database");
                     return;
                 }
                 
-                ctx.Reply($"🏭 Testing BossEntityFactory for '{bossName}':");
+                ctx.Reply($"{FontColorChatSystem.Blue("[FACTORY]")} Testing BossEntityFactory for '{bossName}':");
                 ctx.Reply($"├─ Using PrefabGUID: {model.PrefabGUID}");
                 ctx.Reply($"├─ Level: {model.level}");
                 ctx.Reply($"├─ Lifetime: {model.Lifetime}s");
@@ -701,12 +701,12 @@ namespace BloodyBoss.Command
                     }, 5, 1); // Wait 5 frames
                 });
                 
-                ctx.Reply($"└─ ✅ Factory spawn initiated!");
+                ctx.Reply($"└─ {FontColorChatSystem.Green("Factory spawn initiated!")}");
                 Plugin.BLogger.Info(LogCategory.Debug, "================== Test Complete ==================");
             }
             catch (Exception e)
             {
-                ctx.Reply($"❌ Factory test failed: {e.Message}");
+                ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} Factory test failed: {e.Message}");
                 Plugin.BLogger.Error(LogCategory.Debug, $"Factory test error: {e.Message}");
                 Plugin.BLogger.Error(LogCategory.Debug, $"Stack trace: {e.StackTrace}");
             }
@@ -749,6 +749,196 @@ namespace BloodyBoss.Command
             {
                 ctx.Reply($"Error testing time: {ex.Message}");
                 Plugin.BLogger.Error(LogCategory.Debug, $"Time test error: {ex.Message}");
+            }
+        }
+        
+        
+        [Command("scan-vbloods", "scanvb", "Scan server for VBlood entities and show stats", adminOnly: true)]
+        public static void ScanVBloods(ChatCommandContext ctx)
+        {
+            try
+            {
+                ctx.Reply($"{FontColorChatSystem.Blue("[SCAN]")} Scanning server for VBlood entities...");
+                
+                Plugin.BLogger.Info(LogCategory.Debug, "================== VBlood Server Scan ==================");
+                
+                // Execute scan
+                VBloodPrefabScanner.ScanVBloodPrefabs();
+                var serverData = VBloodPrefabScanner.GetAllVBloods();
+                
+                ctx.Reply($"├─ {FontColorChatSystem.Green($"Found {serverData.Count} VBlood entities on server")}");
+                
+                // Stats
+                int withAbilities = serverData.Values.Count(v => v.Abilities.Count > 0);
+                int withoutAbilities = serverData.Count - withAbilities;
+                int canFly = serverData.Values.Count(v => v.CanFly);
+                
+                ctx.Reply($"├─ With abilities: {withAbilities}");
+                ctx.Reply($"├─ Without abilities: {withoutAbilities}");
+                ctx.Reply($"├─ Can fly: {canFly}");
+                
+                // Show sample entities
+                ctx.Reply($"├─ Sample entities:");
+                var sampleEntities = serverData.Take(5);
+                foreach (var kvp in sampleEntities)
+                {
+                    var info = kvp.Value;
+                    var abilityCount = info.Abilities.Count;
+                    var featureCount = info.Features.Count;
+                    ctx.Reply($"├─   {info.Name} (L{info.Level}) - {abilityCount} abilities, {featureCount} features");
+                }
+                
+                ctx.Reply($"└─ Check console for detailed scan results");
+                
+                Plugin.BLogger.Info(LogCategory.Debug, $"Server scan summary:");
+                Plugin.BLogger.Info(LogCategory.Debug, $"- Total entities: {serverData.Count}");
+                Plugin.BLogger.Info(LogCategory.Debug, $"- With abilities: {withAbilities}");
+                Plugin.BLogger.Info(LogCategory.Debug, $"- Without abilities: {withoutAbilities}");
+                Plugin.BLogger.Info(LogCategory.Debug, $"- Can fly: {canFly}");
+                Plugin.BLogger.Info(LogCategory.Debug, "================== Scan Complete ==================");
+            }
+            catch (Exception ex)
+            {
+                ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} Scan failed: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.Debug, $"VBlood scan error: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.Debug, $"Stack trace: {ex.StackTrace}");
+            }
+        }
+        
+        [Command("debug-vblood", "debugvb", "Debug a specific VBlood entity abilities", adminOnly: true)]
+        public static void DebugVBlood(ChatCommandContext ctx, string nameOrGuid = "")
+        {
+            try
+            {
+                ctx.Reply($"{FontColorChatSystem.Blue("[DEBUG]")} Debugging VBlood entities...");
+                
+                var prefabSystem = Plugin.SystemsCore?.PrefabCollectionSystem;
+                if (prefabSystem == null)
+                {
+                    ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} PrefabCollectionSystem not available");
+                    return;
+                }
+                
+                int found = 0;
+                int withAbilities = 0;
+                
+                foreach (var kvp in prefabSystem._PrefabGuidToEntityMap)
+                {
+                    var entity = kvp.Value;
+                    var prefabGuid = kvp.Key;
+                    
+                    if (Core.World.EntityManager.Exists(entity) && 
+                        entity.Has<UnitStats>() && 
+                        entity.Has<CharacterHUD>() && 
+                        entity.Has<UnitLevel>())
+                    {
+                        var name = "";
+                        try
+                        {
+                            // Try to get name from PrefabDataLookup
+                            if (prefabSystem._PrefabDataLookup.TryGetValue(prefabGuid, out var prefabData))
+                            {
+                                name = prefabData.AssetName.ToString();
+                            }
+                        }
+                        catch
+                        {
+                            name = $"Entity_{prefabGuid.GuidHash}";
+                        }
+                        
+                        // Filter by name or guid if provided
+                        if (!string.IsNullOrEmpty(nameOrGuid))
+                        {
+                            if (!name.ToLower().Contains(nameOrGuid.ToLower()) && 
+                                !prefabGuid.GuidHash.ToString().Contains(nameOrGuid))
+                            {
+                                continue;
+                            }
+                        }
+                        
+                        found++;
+                        bool hasAbilityBuffer = Core.World.EntityManager.HasBuffer<AbilityGroupSlotBuffer>(entity);
+                        
+                        if (hasAbilityBuffer)
+                        {
+                            withAbilities++;
+                            var abilityBuffer = Core.World.EntityManager.GetBuffer<AbilityGroupSlotBuffer>(entity);
+                            ctx.Reply($"├─ {FontColorChatSystem.Yellow(name)} ({prefabGuid.GuidHash})");
+                            ctx.Reply($"│  └─ Ability slots: {abilityBuffer.Length}");
+                            
+                            for (int i = 0; i < abilityBuffer.Length && i < 5; i++) // Show first 5 abilities
+                            {
+                                var slot = abilityBuffer[i];
+                                var abilityGuid = slot.BaseAbilityGroupOnSlot;
+                                if (abilityGuid.GuidHash != 0)
+                                {
+                                    var abilityName = "Unknown";
+                                    try
+                                    {
+                                        if (prefabSystem._PrefabDataLookup.TryGetValue(abilityGuid, out var abilityData))
+                                        {
+                                            abilityName = abilityData.AssetName.ToString();
+                                        }
+                                    }
+                                    catch { }
+                                    ctx.Reply($"│     ├─ Slot {i}: {abilityName} ({abilityGuid.GuidHash})");
+                                }
+                                else
+                                {
+                                    ctx.Reply($"│     ├─ Slot {i}: [EMPTY]");
+                                }
+                            }
+                            
+                            if (abilityBuffer.Length > 5)
+                            {
+                                ctx.Reply($"│     └─ ... and {abilityBuffer.Length - 5} more abilities");
+                            }
+                        }
+                        else
+                        {
+                            ctx.Reply($"├─ {FontColorChatSystem.Red(name)} ({prefabGuid.GuidHash}) - NO ABILITY BUFFER");
+                        }
+                        
+                        // If specific entity, show more details
+                        if (!string.IsNullOrEmpty(nameOrGuid) && found == 1)
+                        {
+                            ctx.Reply($"│");
+                            ctx.Reply($"│  {FontColorChatSystem.Green("Components:")}");
+                            
+                            // Check for specific components
+                            if (entity.Has<VBloodUnit>()) ctx.Reply($"│  ├─ VBloodUnit: YES");
+                            if (entity.Has<CanFly>()) ctx.Reply($"│  ├─ CanFly: YES");
+                            if (entity.Has<EntityCategory>())
+                            {
+                                try
+                                {
+                                    var category = entity.Read<EntityCategory>();
+                                    ctx.Reply($"│  ├─ EntityCategory: {category.UnitCategory}");
+                                }
+                                catch { }
+                            }
+                            
+                            // Show component count
+                            var componentTypes = Core.World.EntityManager.GetComponentTypes(entity, Allocator.Temp);
+                            ctx.Reply($"│  └─ Total components: {componentTypes.Length}");
+                            componentTypes.Dispose();
+                        }
+                    }
+                }
+                
+                if (string.IsNullOrEmpty(nameOrGuid))
+                {
+                    ctx.Reply($"└─ Summary: {found} VBlood entities, {withAbilities} have abilities ({(withAbilities * 100 / Math.Max(found, 1))}%)");
+                }
+                else if (found == 0)
+                {
+                    ctx.Reply($"└─ No VBlood entity found matching '{nameOrGuid}'");
+                }
+            }
+            catch (Exception ex)
+            {
+                ctx.Reply($"{FontColorChatSystem.Red("[ERROR]")} Debug failed: {ex.Message}");
+                Plugin.BLogger.Error(LogCategory.Debug, $"VBlood debug error: {ex.Message}");
             }
         }
     }

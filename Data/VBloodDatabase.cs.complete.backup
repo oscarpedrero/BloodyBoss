@@ -9,7 +9,7 @@ using BloodyBoss.Models;
 
 namespace BloodyBoss.Data
 {
-    public static class VBloodDatabase
+    public static class VBloodDatabase_complete
     {
         private static readonly Dictionary<int, VBloodStaticInfo> _database = new()
         {
@@ -82444,41 +82444,9 @@ namespace BloodyBoss.Data
                 }
             }
         };
-        public static VBloodStaticInfo GetVBlood(int guid) => _database.TryGetValue(guid, out var info) ? info : null;
-        public static bool HasVBlood(int guid) => _database.ContainsKey(guid);
-        public static int Count => _database.Count;
+
         public static Dictionary<int, VBloodStaticInfo> GetAllVBloods() => new Dictionary<int, VBloodStaticInfo>(_database);
-    }
-
-    public class VBloodStaticInfo
-    {
-        public string Name { get; set; }
-        public int Level { get; set; }
-        public bool CanFly { get; set; }
-        public HashSet<string> Features { get; set; }
-        public Dictionary<int, AbilityStaticInfo> Abilities { get; set; }
-    }
-
-    public class AbilityStaticInfo
-    {
-        public AbilityCategory Category { get; set; }
-        public int GUID { get; set; }
-        public float CastTime { get; set; }
-        public float PostCastTime { get; set; }
-        public bool HideCastBar { get; set; }
-        public bool IsChanneled { get; set; }
-        public bool IsCombo { get; set; }
-        public int ComboLength { get; set; }
-        public float Cooldown { get; set; }
-        public int Charges { get; set; }
-        public bool RequiresAnimation { get; set; }
-        public bool RequiresFlight { get; set; }
-        public bool CanMoveWhileCasting { get; set; }
-        public bool CanRotateWhileCasting { get; set; }
-        public string AnimationSequence { get; set; }
-        public Dictionary<string, object> ExtraData { get; set; } = new Dictionary<string, object>();
-        public List<SpawnInfo> SpawnedPrefabs { get; set; } = new List<SpawnInfo>();
-        public List<BuffInfo> AppliedBuffs { get; set; } = new List<BuffInfo>();
-        public List<string> CastConditions { get; set; } = new List<string>();
+        public static VBloodStaticInfo GetVBlood(int guidHash) => _database.TryGetValue(guidHash, out var info) ? info : null;
+        public static int Count => _database.Count;
     }
 }

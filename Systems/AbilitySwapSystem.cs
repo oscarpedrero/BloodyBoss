@@ -400,7 +400,7 @@ namespace BloodyBoss.Systems
                 }
                 catch
                 {
-                    info.Add("⚠️ VBloodData check skipped (Il2Cpp issue)");
+                    info.Add("WARNING: VBloodData check skipped (Il2Cpp issue)");
                 }
                 
                 var entityManager = Core.World.EntityManager;

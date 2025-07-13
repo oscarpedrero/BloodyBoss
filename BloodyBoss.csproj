@@ -21,9 +21,4 @@
 	<Target Name="Thunderstore Copy to Dist" AfterTargets="AfterBuild" Condition=" '$(Configuration' == 'Release'">
 		<Copy SourceFiles="$(OutDir)\$(ProjectName).dll" DestinationFolder="$(SolutionDir)/dist" />
 	</Target>
-	<Target Name="CopyDLLsServer" AfterTargets="Build">
-		<Message Text="DLL to V Rising Server" Importance="High" />
-		<Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="/home/trodi/vrising_server/BepInEx/plugins/" />
-		<Message Text="DLL Server Copied OK" Importance="High" />
-	</Target>
 </Project>

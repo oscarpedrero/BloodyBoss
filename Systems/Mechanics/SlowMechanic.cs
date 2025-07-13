@@ -28,7 +28,7 @@ namespace BloodyBoss.Systems.Mechanics
 
             // Get parameters
             var radius = GetParameter<float>(parameters, "radius", 15f);
-            var announcement = GetParameter<string>(parameters, "announcement", "🐌 Time slows down!");
+            var announcement = GetParameter<string>(parameters, "announcement", "Time slows down!");
             
             // New mechanic: Minimum players required in range
             var minPlayersRequired = GetParameter<int>(parameters, "min_players", 0);
@@ -86,7 +86,7 @@ namespace BloodyBoss.Systems.Mechanics
                 Plugin.BLogger.Info(LogCategory.Mechanic, $"Only {playersInRange.Count}/{minPlayersRequired} players in range! GLOBAL SLOW ACTIVATED!");
                 
                 // Send warning to all players
-                var warningMsg = $"⚠️ NOT ENOUGH PLAYERS IN RANGE! {playersInRange.Count}/{minPlayersRequired} - GLOBAL SLOW ACTIVE!";
+                var warningMsg = $"{FontColorChatSystem.Yellow("[WARNING]")} NOT ENOUGH PLAYERS IN RANGE! {playersInRange.Count}/{minPlayersRequired} - GLOBAL SLOW ACTIVE!";
                 var warningRef = (FixedString512Bytes)warningMsg;
                 ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref warningRef);
                 

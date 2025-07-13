@@ -44,7 +44,7 @@ namespace BloodyBoss.Systems.Mechanics
             var markDuration = GetParameter<float>(parameters, "mark_duration", 2.5f);
             var radius = GetParameter<float>(parameters, "radius", 0f);
             var maxTargets = GetParameter<int>(parameters, "max_targets", 1);
-            var announcement = GetParameter<string>(parameters, "announcement", "👁️ The boss's psychic gaze locks onto its target!");
+            var announcement = GetParameter<string>(parameters, "announcement", "The boss's psychic gaze locks onto its target!");
             var flashBeforeStun = GetParameter<bool>(parameters, "flash_before_stun", true);
             var canBeCleansed = GetParameter<bool>(parameters, "can_be_cleansed", true);
             var markEffect = GetParameter<string>(parameters, "mark_effect", "auto");
@@ -105,7 +105,7 @@ namespace BloodyBoss.Systems.Mechanics
                 if (target.Has<PlayerCharacter>())
                 {
                     var playerName = target.Read<PlayerCharacter>().Name.ToString();
-                    var warningMsg = $"⚠️ {playerName} is being targeted! Stun incoming in {markDuration:F1} seconds!";
+                    var warningMsg = $"{FontColorChatSystem.Yellow("[WARNING]")} {playerName} is being targeted! Stun incoming in {markDuration:F1} seconds!";
                     var warningRef = (FixedString512Bytes)warningMsg;
                     ServerChatUtils.SendSystemMessageToAllClients(Core.SystemsCore.EntityManager, ref warningRef);
                     

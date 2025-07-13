@@ -63,6 +63,25 @@ Add special combat mechanics to create challenging encounters:
 - **Multi-language ready** - easily adapt to any language
 - **Server-specific branding** with custom prefixes and suffixes
 
+### 🖥️ **NEW: BloodyBoss Configuration Tool**
+- **Visual Boss Editor** - Modern desktop app for configuring BloodyBoss
+- **Cross-Platform** - Native app for Windows, Linux, and macOS
+- **Advanced Item Selector** - Browse and filter from 1082+ items with tags
+- **VBlood Integration** - Select from 459+ VBlood prefabs with ability recommendations
+- **Mechanics Editor** - Configure boss mechanics with visual editor and real-time validation
+- **Import/Export** - Full compatibility with existing BloodyBoss configurations
+
+<div align="center">
+  <a href="https://thunderstore.io/c/v-rising/p/Trodi/BloodyBossConfig/" target="_blank">
+    <img src="https://img.shields.io/badge/Download%20on-Thunderstore-blue?style=for-the-badge" alt="Download on Thunderstore">
+  </a>
+  <a href="https://github.com/oscarpedrero/BloodyBossConfig/" target="_blank">
+    <img src="https://img.shields.io/badge/Source%20Code-GitHub-181717?style=for-the-badge&logo=github" alt="GitHub Repository">
+  </a>
+</div>
+
+💡 **Highly Recommended**: Use the visual configuration tool for an easier and error-free setup experience!
+
 ## ✨ Key Features
 
 - 🎯 **Boss Mechanics** - Add stun, AoE, slow and absorb mechanics to encounters
@@ -105,9 +124,6 @@ Ensure the following mods are installed for seamless integration:
 | [⚙️ Configuration](doc/CONFIGURATION.md) | Detailed configuration options and examples |
 | [🎮 Commands](doc/commands/index.md) | Complete command reference with examples |
 | [🧪 Boss Mechanics](doc/BOSS-MECHANICS.md) | Available combat mechanics (stun, aoe, slow, absorb) |
-| [🚀 Advanced Features](doc/ADVANCED-FEATURES.md) | Dynamic scaling, progressive difficulty, and phase systems |
-| [🛠️ Troubleshooting](doc/TROUBLESHOOTING.md) | Common issues and solutions |
-| [📝 Examples](doc/EXAMPLES.md) | Step-by-step setup guides and use cases |
 
 ## 🎯 Example Boss Encounter
 

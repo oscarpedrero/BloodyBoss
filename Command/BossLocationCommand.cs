@@ -10,6 +10,7 @@ using System;
 using Unity.Transforms;
 using Unity.Mathematics;
 using VampireCommandFramework;
+using Bloody.Core.API.v1;
 
 namespace BloodyBoss.Command
 {
@@ -27,7 +28,7 @@ namespace BloodyBoss.Command
                 if (Database.GetBoss(bossName, out BossEncounterModel boss))
                 {
                     boss.SetLocation(pos);
-                    ctx.Reply($"✅ Position {pos.x:F1}, {pos.y:F1}, {pos.z:F1} set for boss '{bossName}'");
+                    ctx.Reply($"{FontColorChatSystem.Green("[SUCCESS]")} Position {pos.x:F1}, {pos.y:F1}, {pos.z:F1} set for boss '{bossName}'");
                 }
                 else
                 {
@@ -61,7 +62,7 @@ namespace BloodyBoss.Command
                 // Verify permissions (admin only if configured)
                 if (PluginConfig.TeleportAdminOnly.Value && !ctx.Event.User.IsAdmin)
                 {
-                    throw ctx.Error("🚫 Teleport command is restricted to administrators only");
+                    throw ctx.Error($"{FontColorChatSystem.Red("[DENIED]")} Teleport command is restricted to administrators only");
                 }
                 
                 // Verify if the boss exists
@@ -85,7 +86,7 @@ namespace BloodyBoss.Command
                 // Teleport the player
                 userModel.TeleportTo(new float3(boss.x, boss.y, boss.z));
                 
-                ctx.Reply($"📍 Teleporting to boss '{bossName}' at {boss.x:F1}, {boss.y:F1}, {boss.z:F1}");
+                ctx.Reply($"{FontColorChatSystem.Blue("[TELEPORT]")} Teleporting to boss '{bossName}' at {boss.x:F1}, {boss.y:F1}, {boss.z:F1}");
             }
             catch (Exception e)
             {
@@ -106,11 +107,11 @@ namespace BloodyBoss.Command
                 
                 if (boss.x == 0 && boss.y == 0 && boss.z == 0)
                 {
-                    ctx.Reply($"⚠️ Boss '{bossName}' does not have a location set");
+                    ctx.Reply($"{FontColorChatSystem.Yellow("[WARNING]")} Boss '{bossName}' does not have a location set");
                 }
                 else
                 {
-                    ctx.Reply($"📍 Boss '{bossName}' location: {boss.x:F1}, {boss.y:F1}, {boss.z:F1}");
+                    ctx.Reply($"{FontColorChatSystem.Blue("[LOCATION]")} Boss '{bossName}' location: {boss.x:F1}, {boss.y:F1}, {boss.z:F1}");
                 }
             }
             catch (Exception e)

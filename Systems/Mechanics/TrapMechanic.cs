@@ -9,6 +9,7 @@ using Bloody.Core.GameData.v1;
 using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Collections;
+using Bloody.Core.API.v1;
 
 namespace BloodyBoss.Systems.Mechanics
 {
@@ -28,7 +29,7 @@ namespace BloodyBoss.Systems.Mechanics
             var damage = GetParameter<float>(parameters, "damage", 50f);
             var radius = GetParameter<float>(parameters, "radius", 30f);
             var triggerDelay = GetParameter<float>(parameters, "trigger_delay", 1.5f);
-            var announcement = GetParameter<string>(parameters, "announcement", "⚠️ Watch your step!");
+            var announcement = GetParameter<string>(parameters, "announcement", "Watch your step!");
 
             var bossPos = bossEntity.Read<LocalToWorld>().Position;
             SpawnTraps(bossPos, trapType, pattern, count, damage, radius, triggerDelay);
