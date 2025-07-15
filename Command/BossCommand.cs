@@ -257,6 +257,146 @@ namespace BloodyBoss.Command
             }
         }
 
+        [Command("cleanup", description: "Clean up all BloodyBoss entities and icons from the server", adminOnly: true)]
+        public static void CleanupServer(ChatCommandContext ctx)
+        {
+            try
+            {
+                ctx.Reply($"{FontColorChatSystem.Yellow("[CLEANUP]")} Starting server cleanup...");
+                
+                var entityManager = Plugin.SystemsCore.EntityManager;
+                var userModel = GameData.Users.GetUserByCharacterName(ctx.Event.User.CharacterName.Value);
+                
+                int bossesRemoved = 0;
+                int iconsRemoved = 0;
+                int databaseUpdated = 0;
+                
+                // 1. Clean up all spawned bosses
+                foreach (var boss in Database.BOSSES.ToList())
+                {
+                    if (boss.bossSpawn)
+                    {
+                        try
+                        {
+                            // Remove boss entity
+                            if (boss.bossEntity != Entity.Null && entityManager.Exists(boss.bossEntity))
+                            {
+                                StatChangeUtility.KillOrDestroyEntity(entityManager, boss.bossEntity, userModel.Entity, userModel.Entity, 0, StatChangeReason.Any, true);
+                                bossesRemoved++;
+                            }
+                            
+                            // Remove icon entity
+                            if (boss.iconEntity != Entity.Null && entityManager.Exists(boss.iconEntity))
+                            {
+                                StatChangeUtility.KillOrDestroyEntity(entityManager, boss.iconEntity, userModel.Entity, userModel.Entity, 0, StatChangeReason.Any, true);
+                                iconsRemoved++;
+                            }
+                            
+                            // Update boss state
+                            boss.bossSpawn = false;
+                            boss.bossEntity = Entity.Null;
+                            boss.iconEntity = Entity.Null;
+                            boss.RemoveKillers();
+                            BossMechanicSystem.CleanupBossMechanics(boss);
+                            databaseUpdated++;
+                        }
+                        catch (Exception ex)
+                        {
+                            Plugin.BLogger.Warning(LogCategory.Boss, $"Error cleaning boss {boss.name}: {ex.Message}");
+                        }
+                    }
+                }
+                
+                // 2. Clean up orphaned boss entities (by nameHash pattern)
+                var nameableEntities = QueryComponents.GetEntitiesByComponentTypes<NameableInteractable>(EntityQueryOptions.IncludeDisabledEntities);
+                foreach (var entity in nameableEntities)
+                {
+                    try
+                    {
+                        var nameable = entity.Read<NameableInteractable>();
+                        var entityName = nameable.Name.ToString();
+                        
+                        // Check if it's a BloodyBoss entity (ends with "bb")
+                        if (entityName.EndsWith("bb") && entityName.Length >= 34) // 32 chars GUID + "bb"
+                        {
+                            var nameHash = entityName.Substring(0, entityName.Length - 2);
+                            
+                            // Check if this nameHash exists in our database
+                            bool foundInDatabase = Database.BOSSES.Any(b => b.nameHash == nameHash);
+                            
+                            if (!foundInDatabase)
+                            {
+                                // Orphaned boss entity, remove it
+                                StatChangeUtility.KillOrDestroyEntity(entityManager, entity, userModel.Entity, userModel.Entity, 0, StatChangeReason.Any, true);
+                                bossesRemoved++;
+                                Plugin.BLogger.Info(LogCategory.Boss, $"Removed orphaned boss entity: {entityName}");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Plugin.BLogger.Warning(LogCategory.Boss, $"Error checking entity: {ex.Message}");
+                    }
+                }
+                nameableEntities.Dispose();
+                
+                // 3. Clean up orphaned icon entities
+                var iconEntities = QueryComponents.GetEntitiesByComponentTypes<NameableInteractable, MapIconData>(EntityQueryOptions.IncludeDisabledEntities);
+                foreach (var entity in iconEntities)
+                {
+                    try
+                    {
+                        var nameable = entity.Read<NameableInteractable>();
+                        var entityName = nameable.Name.ToString();
+                        
+                        // Check if it's a BloodyBoss icon (ends with "ibb")
+                        if (entityName.EndsWith("ibb") && entityName.Length >= 35) // 32 chars GUID + "ibb"
+                        {
+                            var nameHash = entityName.Substring(0, entityName.Length - 3);
+                            
+                            // Check if this nameHash exists in our database
+                            bool foundInDatabase = Database.BOSSES.Any(b => b.nameHash == nameHash);
+                            
+                            if (!foundInDatabase)
+                            {
+                                // Orphaned icon entity, remove it
+                                StatChangeUtility.KillOrDestroyEntity(entityManager, entity, userModel.Entity, userModel.Entity, 0, StatChangeReason.Any, true);
+                                iconsRemoved++;
+                                Plugin.BLogger.Info(LogCategory.Boss, $"Removed orphaned icon entity: {entityName}");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Plugin.BLogger.Warning(LogCategory.Boss, $"Error checking icon entity: {ex.Message}");
+                    }
+                }
+                iconEntities.Dispose();
+                
+                // 4. Clean up tracking systems
+                BossTrackingSystem.Clear();
+                
+                // 5. Save database changes
+                if (databaseUpdated > 0)
+                {
+                    Database.saveDatabase();
+                }
+                
+                // 6. Report results
+                ctx.Reply($"{FontColorChatSystem.Green("[CLEANUP]")} Server cleanup completed:");
+                ctx.Reply($"├─ Bosses removed: {FontColorChatSystem.Yellow(bossesRemoved.ToString())}");
+                ctx.Reply($"├─ Icons removed: {FontColorChatSystem.Yellow(iconsRemoved.ToString())}");
+                ctx.Reply($"├─ Database entries updated: {FontColorChatSystem.Yellow(databaseUpdated.ToString())}");
+                ctx.Reply($"└─ Tracking systems cleared: {FontColorChatSystem.Green("Yes")}");
+                
+                Plugin.BLogger.Info(LogCategory.Boss, $"Server cleanup completed: {bossesRemoved} bosses, {iconsRemoved} icons removed, {databaseUpdated} database entries updated");
+            }
+            catch (Exception e)
+            {
+                throw ctx.Error($"Error during cleanup: {e.Message}");
+            }
+        }
+
         // COMENTADO: Comando para exportar la base de datos de VBloods
         // Mantener para futuras actualizaciones del juego
         // Para usar: descomentar temporalmente, ejecutar el comando, copiar el archivo generado

@@ -1,8 +1,17 @@
-# BloodyBoss v2.1.0
+# BloodyBoss v2.1.1
 
 **BloodyBoss** is an advanced mod for V Rising that allows you to create dynamic VBlood world bosses with intelligent scaling, progressive difficulty, and extensive customization options. Create epic encounters that adapt to your player base and provide engaging challenges for solo players and large groups alike.
 
-## 🆕 What's New in v2.1.0
+## 🆕 What's New in v2.1.1
+
+### 🔧 **Bug Fixes & Improvements**
+- **Boss persistence fix** - Bosses are now properly validated on server restart, preventing invalid entities
+- **Hash collision prevention** - Using GUID instead of GetHashCode for unique boss identifiers
+- **VBlood reward prevention** - Critical components removed to prevent unintended VBlood unlocks from world bosses
+- **Server cleanup command** - New `.bb cleanup` command for server maintenance and entity cleanup
+- **Enhanced clone mechanics** - Clones can no longer be consumed for VBlood rewards
+
+## 📜 Previous Updates - v2.1.0
 
 ### 🎯 **Dynamic Scaling System**
 - **Automatic scaling** based on online players - bosses become stronger with more players
@@ -315,6 +324,13 @@ If you enjoy BloodyBoss and want to support continued development:
 
 <details>
 <summary>Version History</summary>
+
+### `2.1.1` - Bug Fixes & Stability Improvements
+- 🐛 **FIXED**: Boss persistence validation on server restart
+- 🐛 **FIXED**: Hash collision prevention using GUID instead of GetHashCode
+- 🐛 **FIXED**: VBlood reward prevention by removing critical components
+- ✨ **NEW**: Server cleanup command `.bb cleanup` for maintenance
+- 🔧 **IMPROVED**: Clone mechanics - clones can no longer be consumed for VBlood
 
 ### `2.1.0` - Performance & Stability Update
 - ✨ **NEW**: **Boss Mechanics System** - Add stun, AoE, slow and absorb mechanics to create challenging encounters

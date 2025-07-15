@@ -16,6 +16,9 @@ Welcome to the comprehensive command reference for BloodyBoss. This documentatio
 - [**Debug Commands**](debug.md) - Testing and troubleshooting tools
 - [**Logging System**](logging.md) - Control log verbosity and categories
 
+### Server Maintenance
+- [**Server Cleanup**](boss-management.md#server-cleanup) - Clean up all BloodyBoss entities and icons
+
 ### Configuration
 - [**Configuration Guide**](../CONFIGURATION.md) - Complete BloodyBoss.cfg documentation
 
