@@ -136,7 +136,7 @@ namespace BloodyBoss.DB
             Entity bossEntity = Plugin.SystemsCore.PrefabCollectionSystem._PrefabGuidToEntityMap[new PrefabGUID(prefabGUIDOfNPC)];
             boss = new BossEncounterModel();
             boss.name = NPCName;
-            boss.nameHash = NPCName.GetHashCode().ToString();
+            boss.nameHash = System.Guid.NewGuid().ToString("N"); // Use GUID instead of GetHashCode to prevent collisions
             boss.PrefabGUID = prefabGUIDOfNPC;
             boss.AssetName = assetName;
             boss.level = level;

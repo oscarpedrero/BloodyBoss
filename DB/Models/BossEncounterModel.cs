@@ -20,12 +20,13 @@ using Bloody.Core.GameData.v1;
 using Bloody.Core.Patch.Server;
 using Bloody.Core.Methods;
 using Bloody.Core.Models.v1;
+using ProjectM.Gameplay.Scripting;
 
 namespace BloodyBoss.DB.Models
 {
     internal class BossEncounterModel
     {
-        private Entity iconEntity;
+        public Entity iconEntity;
 
         public string name { get; set; } = string.Empty;
         public string nameHash { get; set; } = string.Empty;
@@ -407,6 +408,9 @@ namespace BloodyBoss.DB.Models
             RenameBoss(boss);
             bossSpawn = true;
             LastSpawn = DateTime.Now;
+            
+            // Remove VBloodUnlockTechBuffer to prevent tech unlocks from world boss
+            RemoveVBloodUnlockBuffer(boss);
             
             // Save database to persist spawn state
             Database.saveDatabase();
@@ -1049,6 +1053,238 @@ namespace BloodyBoss.DB.Models
             catch (Exception ex)
             {
                 Plugin.BLogger.Error(LogCategory.Boss, $"Error applying individual ability swaps: {ex.Message}");
+            }
+        }
+        
+        private void RemoveVBloodUnlockBuffer(Entity boss)
+        {
+            try
+            {
+                var entityManager = Plugin.SystemsCore.EntityManager;
+                
+                // Check if boss has VBloodUnlockTechBuffer
+                if (entityManager.HasBuffer<VBloodUnlockTechBuffer>(boss))
+                {
+                    // Get the buffer and clear it
+                    var unlockBuffer = entityManager.GetBuffer<VBloodUnlockTechBuffer>(boss);
+                    int techCount = unlockBuffer.Length;
+                    
+                    // Contents logged before clearing (if debug needed)
+                    
+                    // Try removing the entire buffer component instead of just clearing it
+                    entityManager.RemoveComponent<VBloodUnlockTechBuffer>(boss);
+                    
+                    Plugin.BLogger.Info(LogCategory.Boss, $"Removed entire VBloodUnlockTechBuffer component ({techCount} techs) from boss {name} to prevent VBlood rewards");
+                }
+                else
+                {
+                    Plugin.BLogger.Debug(LogCategory.Boss, $"Boss {name} doesn't have VBloodUnlockTechBuffer");
+                }
+                
+                // Also remove GiveProgressionOnConsume component which gives VBlood rewards
+                if (boss.Has<GiveProgressionOnConsume>())
+                {
+                    entityManager.RemoveComponent<GiveProgressionOnConsume>(boss);
+                    Plugin.BLogger.Info(LogCategory.Boss, $"Removed GiveProgressionOnConsume component from boss {name} to prevent VBlood rewards");
+                }
+                else
+                {
+                    Plugin.BLogger.Debug(LogCategory.Boss, $"Boss {name} doesn't have GiveProgressionOnConsume");
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.BLogger.Error(LogCategory.Boss, $"Error removing VBloodUnlockTechBuffer: {ex.Message}");
+            }
+        }
+        
+        private void LogBossComponents(Entity boss)
+        {
+            try
+            {
+                var entityManager = Plugin.SystemsCore.EntityManager;
+                
+                Plugin.BLogger.Warning(LogCategory.Boss, $"=== BOSS COMPONENTS DEBUG for {name} ===");
+                Plugin.BLogger.Warning(LogCategory.Boss, $"Boss Entity: {boss.Index}:{boss.Version}");
+                
+                // Get all component types on the entity
+                var componentTypes = entityManager.GetComponentTypes(boss, Unity.Collections.Allocator.Temp);
+                Plugin.BLogger.Warning(LogCategory.Boss, $"=== ALL COMPONENTS ({componentTypes.Length}) ===");
+                
+                foreach (var componentType in componentTypes)
+                {
+                    Plugin.BLogger.Warning(LogCategory.Boss, $"  Component: {componentType.GetManagedType().Name}");
+                }
+                componentTypes.Dispose();
+                
+                // List all buffs
+                if (entityManager.HasBuffer<BuffBuffer>(boss))
+                {
+                    var buffBuffer = entityManager.GetBuffer<BuffBuffer>(boss);
+                    Plugin.BLogger.Warning(LogCategory.Boss, $"=== BOSS BUFFS ({buffBuffer.Length}) ===");
+                    
+                    for (int i = 0; i < buffBuffer.Length; i++)
+                    {
+                        var buff = buffBuffer[i];
+                        if (entityManager.Exists(buff.Entity))
+                        {
+                            var buffName = "Unknown";
+                            var buffGuid = 0;
+                            
+                            if (buff.Entity.Has<PrefabGUID>())
+                            {
+                                var buffPrefab = buff.Entity.Read<PrefabGUID>();
+                                buffGuid = buffPrefab.GuidHash;
+                                
+                                try
+                                {
+                                    if (Plugin.SystemsCore.PrefabCollectionSystem._PrefabDataLookup.ContainsKey(buffPrefab))
+                                    {
+                                        buffName = Plugin.SystemsCore.PrefabCollectionSystem._PrefabDataLookup[buffPrefab].AssetName.ToString();
+                                    }
+                                }
+                                catch { }
+                            }
+                            
+                            Plugin.BLogger.Warning(LogCategory.Boss, $"  Buff [{i}]: {buffGuid} - {buffName}");
+                            
+                            // Log buff components
+                            var buffComponentTypes = entityManager.GetComponentTypes(buff.Entity, Unity.Collections.Allocator.Temp);
+                            Plugin.BLogger.Warning(LogCategory.Boss, $"    Buff Components ({buffComponentTypes.Length}):");
+                            foreach (var buffCompType in buffComponentTypes)
+                            {
+                                Plugin.BLogger.Warning(LogCategory.Boss, $"      - {buffCompType.GetManagedType().Name}");
+                            }
+                            buffComponentTypes.Dispose();
+                        }
+                    }
+                }
+                
+                // Check specific components we care about
+                Plugin.BLogger.Warning(LogCategory.Boss, "=== SPECIFIC COMPONENTS CHECK ===");
+                Plugin.BLogger.Warning(LogCategory.Boss, $"VBloodUnit: {(boss.Has<VBloodUnit>() ? "YES" : "NO")}");
+                if (boss.Has<VBloodUnit>())
+                {
+                    var vblood = boss.Read<VBloodUnit>();
+                    Plugin.BLogger.Warning(LogCategory.Boss, $"  - VBloodUnit type: {vblood.GetType().FullName}");
+                    
+                    // Use reflection to show ALL fields and properties
+                    var type = vblood.GetType();
+                    
+                    // Get all fields (public, private, instance)
+                    var fields = type.GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    Plugin.BLogger.Warning(LogCategory.Boss, $"  - VBloodUnit FIELDS ({fields.Length}):");
+                    foreach (var field in fields)
+                    {
+                        try
+                        {
+                            var value = field.GetValue(vblood);
+                            Plugin.BLogger.Warning(LogCategory.Boss, $"    * Field: {field.Name} ({field.FieldType.Name}) = {value}");
+                            
+                            // If it's a struct or complex type, show its contents too
+                            if (value != null && !field.FieldType.IsPrimitive && field.FieldType != typeof(string))
+                            {
+                                var valueType = value.GetType();
+                                if (valueType.IsValueType && !valueType.IsEnum)
+                                {
+                                    var valueFields = valueType.GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                                    foreach (var vf in valueFields)
+                                    {
+                                        try
+                                        {
+                                            var vfValue = vf.GetValue(value);
+                                            Plugin.BLogger.Warning(LogCategory.Boss, $"      -> {vf.Name}: {vfValue}");
+                                        }
+                                        catch { }
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Plugin.BLogger.Warning(LogCategory.Boss, $"    * {field.Name}: Error reading - {ex.Message}");
+                        }
+                    }
+                    
+                    // Also check properties
+                    var properties = type.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    Plugin.BLogger.Warning(LogCategory.Boss, $"  - VBloodUnit PROPERTIES ({properties.Length}):");
+                    foreach (var prop in properties)
+                    {
+                        try
+                        {
+                            if (prop.CanRead)
+                            {
+                                var value = prop.GetValue(vblood);
+                                Plugin.BLogger.Warning(LogCategory.Boss, $"    * Property: {prop.Name} ({prop.PropertyType.Name}) = {value}");
+                            }
+                            else
+                            {
+                                Plugin.BLogger.Warning(LogCategory.Boss, $"    * Property: {prop.Name} ({prop.PropertyType.Name}) [Write-Only]");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Plugin.BLogger.Warning(LogCategory.Boss, $"    * {prop.Name}: Error reading - {ex.Message}");
+                        }
+                    }
+                    
+                    // Show base type info
+                    if (type.BaseType != null && type.BaseType != typeof(object))
+                    {
+                        Plugin.BLogger.Warning(LogCategory.Boss, $"  - VBloodUnit BASE TYPE: {type.BaseType.FullName}");
+                    }
+                    
+                    // Show implemented interfaces
+                    var interfaces = type.GetInterfaces();
+                    if (interfaces.Length > 0)
+                    {
+                        Plugin.BLogger.Warning(LogCategory.Boss, $"  - VBloodUnit INTERFACES ({interfaces.Length}):");
+                        foreach (var iface in interfaces)
+                        {
+                            Plugin.BLogger.Warning(LogCategory.Boss, $"    * {iface.Name}");
+                        }
+                    }
+                }
+                Plugin.BLogger.Warning(LogCategory.Boss, $"BloodConsumeSource: {(boss.Has<BloodConsumeSource>() ? "YES" : "NO")}");
+                if (boss.Has<BloodConsumeSource>())
+                {
+                    var bloodSource = boss.Read<BloodConsumeSource>();
+                    Plugin.BLogger.Warning(LogCategory.Boss, $"  - CanBeConsumed: {bloodSource.CanBeConsumed}");
+                }
+                Plugin.BLogger.Warning(LogCategory.Boss, $"VBloodConsumed: {(boss.Has<VBloodConsumed>() ? "YES" : "NO")}");
+                Plugin.BLogger.Warning(LogCategory.Boss, $"Interactable: {(boss.Has<Interactable>() ? "YES" : "NO")}");
+                Plugin.BLogger.Warning(LogCategory.Boss, $"NameableInteractable: {(boss.Has<NameableInteractable>() ? "YES" : "NO")}");
+                if (boss.Has<NameableInteractable>())
+                {
+                    var nameable = boss.Read<NameableInteractable>();
+                    Plugin.BLogger.Warning(LogCategory.Boss, $"  - Name: {nameable.Name}");
+                }
+                
+                // Check VBloodUnlockTechBuffer
+                if (entityManager.HasBuffer<VBloodUnlockTechBuffer>(boss))
+                {
+                    var unlockBuffer = entityManager.GetBuffer<VBloodUnlockTechBuffer>(boss);
+                    Plugin.BLogger.Warning(LogCategory.Boss, $"VBloodUnlockTechBuffer: YES ({unlockBuffer.Length} techs) - SHOULD BE CLEARED!");
+                    
+                    // Log contents of the buffer
+                    for (int i = 0; i < unlockBuffer.Length; i++)
+                    {
+                        var unlock = unlockBuffer[i];
+                        Plugin.BLogger.Warning(LogCategory.Boss, $"  Tech [{i}]: {unlock.Guid.GuidHash}");
+                    }
+                }
+                else
+                {
+                    Plugin.BLogger.Warning(LogCategory.Boss, "VBloodUnlockTechBuffer: NO (Component removed) ✅");
+                }
+                
+                
+                Plugin.BLogger.Warning(LogCategory.Boss, "=== END BOSS COMPONENTS DEBUG ===");
+            }
+            catch (Exception ex)
+            {
+                Plugin.BLogger.Error(LogCategory.Boss, $"Error logging boss components: {ex.Message}");
             }
         }
         

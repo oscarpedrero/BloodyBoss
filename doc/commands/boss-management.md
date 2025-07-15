@@ -232,6 +232,51 @@ Configured Features:
 
 ---
 
+## Server Cleanup
+
+Completely removes all BloodyBoss entities and icons from the server.
+
+### Syntax
+```
+.bb cleanup
+```
+
+### What it does
+- **Removes all active bosses** - Destroys all currently spawned boss entities
+- **Removes all boss icons** - Clears map markers and icons
+- **Cleans orphaned entities** - Removes leftover boss/icon entities not in database
+- **Updates database** - Marks all bosses as not spawned
+- **Clears tracking systems** - Resets all internal tracking and caches
+
+### Output Example
+```
+🧹 Starting server cleanup...
+✅ Server cleanup completed:
+├─ Bosses removed: 3
+├─ Icons removed: 5
+├─ Database entries updated: 3
+└─ Tracking systems cleared: Yes
+```
+
+### When to Use
+- **Server maintenance** - Clean up after testing or development
+- **Before major updates** - Clear state before mod updates
+- **Troubleshooting** - Reset everything to a known clean state
+- **Performance issues** - Remove potentially corrupted entities
+
+### Safety Notes
+- ⚠️ **Admin only command** - Requires administrator privileges
+- ⚠️ **Destructive operation** - Cannot be undone
+- ⚠️ **All active bosses will be removed** - Even if players are fighting them
+- ✅ **Database preserved** - Boss configurations remain intact, only spawn states are reset
+
+### Related Commands
+- Use `.bb list` to see which bosses are configured after cleanup
+- Use `.bb start <BossName>` to manually spawn bosses after cleanup
+- Use `.bb status <BossName>` to verify boss states after cleanup
+
+---
+
 ## Best Practices
 
 ### Naming Conventions
