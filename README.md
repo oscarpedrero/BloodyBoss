@@ -414,4 +414,4 @@ If you enjoy BloodyBoss and want to support continued development:
 
 ---
 
-*BloodyBoss v2.1.2 - Creating legendary encounters for V Rising servers worldwide* 🧛‍♂️⚔️
+*BloodyBoss v2.1.3 - Creating legendary encounters for V Rising servers worldwide* 🧛‍♂️⚔️
