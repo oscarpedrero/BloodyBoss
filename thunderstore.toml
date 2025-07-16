@@ -4,7 +4,7 @@ schemaVersion = "0.0.1"
 [package]
 namespace = "Trodi"
 name = "BloodyBoss"
-versionNumber = "2.1.1"
+versionNumber = "2.1.2"
 description = "Advanced VBlood world boss system with dynamic scaling, boss mechanics, ability discovery, and visual configuration tool. Create epic encounters that adapt to your server population."
 websiteUrl = "https://github.com/oscarpedrero/BloodyBoss"
 containsNsfwContent = false
