@@ -41,9 +41,15 @@ jobs:
           cp manifest.json thunderstore_package/
           cp thunderstore.toml thunderstore_package/
           
+          # Create dist directory and copy DLL there (as expected by thunderstore.toml)
+          mkdir -p thunderstore_package/dist
+          cp thunderstore_package/BloodyBoss.dll thunderstore_package/dist/
+          
           # Verify all required files exist
           echo "Package contents:"
           ls -la thunderstore_package/
+          echo "Dist contents:"
+          ls -la thunderstore_package/dist/
 
       - name: Install Thunderstore CLI
         run: dotnet tool install --global tcli

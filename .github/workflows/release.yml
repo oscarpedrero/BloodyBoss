@@ -103,11 +103,14 @@ jobs:
       - name: Prepare Thunderstore package
         run: |
           mkdir -p thunderstore_package
-          cp bin/Release/net6.0/BloodyBoss.dll thunderstore_package/
           cp README.md thunderstore_package/
           cp icon.png thunderstore_package/
           cp manifest.json thunderstore_package/
           cp thunderstore.toml thunderstore_package/
+          
+          # Create dist directory and copy DLL there (as expected by thunderstore.toml)
+          mkdir -p thunderstore_package/dist
+          cp bin/Release/net6.0/BloodyBoss.dll thunderstore_package/dist/
 
       - name: Install tcli
         run: dotnet tool install --global tcli
