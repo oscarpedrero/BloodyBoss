@@ -4,7 +4,7 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<AssemblyName>BloodyBoss</AssemblyName>
 		<Description>Advanced BloodyBoss mod for VRising with dynamic scaling, progressive difficulty, and phase announcements</Description>
-		<Version>2.1.2</Version>
+		<Version>2.1.3</Version>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<LangVersion>latest</LangVersion>
 	</PropertyGroup>

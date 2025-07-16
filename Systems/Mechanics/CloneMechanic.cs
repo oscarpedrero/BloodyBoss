@@ -75,6 +75,9 @@ namespace BloodyBoss.Systems.Mechanics
         {
             SpawnSystem.SpawnUnitWithCallback(originalBoss, bossPrefab, position, -1, (Entity cloneEntity) =>
             {
+                // REMOVED: Team copying was causing clones to not despawn with boss
+                // Clones will keep their default team
+                
                 // Configure clone - Copy ALL stats from customized boss
                 if (cloneEntity.Has<UnitStats>() && originalBoss.Has<UnitStats>())
                 {
@@ -174,7 +177,9 @@ namespace BloodyBoss.Systems.Mechanics
                 {
                     var lifeTime = cloneEntity.Read<LifeTime>();
                     lifeTime.Duration = duration;
+                    lifeTime.EndAction = LifeTimeEndAction.Destroy;
                     cloneEntity.Write(lifeTime);
+                    Plugin.BLogger.Info(LogCategory.Mechanic, $"Set clone lifetime to {duration} seconds");
                 }
                 
                 // Mark clone as owned by boss so it despawns when boss dies
@@ -185,6 +190,10 @@ namespace BloodyBoss.Systems.Mechanics
                     cloneEntity.Write(owner);
                     Plugin.BLogger.Info(LogCategory.Mechanic, "Clone marked as owned by boss - will despawn on boss death");
                 }
+                
+                // Register clone for tracking
+                MinionTrackingSystem.RegisterMinion(cloneEntity, originalBoss, "clone");
+                Plugin.BLogger.Info(LogCategory.Mechanic, "Clone registered with MinionTrackingSystem");
                 
                 // Disable VBlood consumption if this is a VBlood unit
                 if (cloneEntity.Has<VBloodUnit>())

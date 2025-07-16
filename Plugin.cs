@@ -15,6 +15,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ProjectM;
+using ProjectM.Network;
+using Stunlock.Network;
+using Bloody.Core.Patch.Server;
 
 namespace BloodyBoss;
 
@@ -24,6 +27,7 @@ namespace BloodyBoss;
 public class Plugin : BasePlugin
 {
     Harmony _harmony;
+    private static bool _needsBossReconfiguration = false;
 
     public static Bloody.Core.Helper.v1.Logger Logger;
     public static BloodyLogger BLogger;
@@ -68,6 +72,7 @@ public class Plugin : BasePlugin
     public override bool Unload()
     {
         EventsHandlerSystem.OnInitialize -= GameDataOnInitialize;
+        EventsHandlerSystem.OnUserConnected -= OnUserConnected;
         BossSystem.StopTimer(); // Detener el timer independiente
         Cache.ComponentCache.Dispose(); // Limpiar cache de componentes
         CommandRegistry.UnregisterAssembly();
@@ -95,6 +100,9 @@ public class Plugin : BasePlugin
         
         // Clean up boss states on server startup
         CleanupBossStatesOnStartup();
+        
+        // Register for user connected event to reconfigure bosses if needed
+        EventsHandlerSystem.OnUserConnected += OnUserConnected;
         
         BossSystem.CheckBoss();
         BossSystem.StartTimer(); // Iniciar el timer independiente
@@ -211,9 +219,8 @@ public class Plugin : BasePlugin
                     BLogger.Info(LogCategory.Boss, $"[STARTUP] Boss '{boss.name}' nameHash updated from '{oldNameHash}' to '{newGuid}'");
                 }
                 
-                if (boss.bossSpawn)
+                // Check all bosses, regardless of spawn state
                 {
-                    // Boss is marked as spawned, verify it exists
                     bool bossExists = false;
                     
                     // First check if the stored entity is still valid
@@ -236,6 +243,46 @@ public class Plugin : BasePlugin
                                 entityManager.SetComponentData(boss.bossEntity, nameable);
                                 BLogger.Info(LogCategory.Boss, $"[STARTUP] Boss '{boss.name}' entity name updated to '{newGuid}bb'");
                             }
+                            
+                            // IMPORTANT: Reapply boss configuration after server restart
+                            BLogger.Info(LogCategory.Boss, $"[STARTUP] Reapplying configuration to boss '{boss.name}'");
+                            
+                            // Get first online user for ModifyBoss
+                            var userModel = Bloody.Core.GameData.v1.GameData.Users.Online.FirstOrDefault();
+                            if (userModel != null)
+                            {
+                                // Reapply all boss modifications
+                                boss.ModifyBoss(userModel.Entity, boss.bossEntity);
+                                
+                                // Reapply team configuration
+                                BossSystem.CheckTeams(boss.bossEntity);
+                                
+                                // Re-register for tracking
+                                BossTrackingSystem.RegisterSpawnedBoss(boss.bossEntity, boss);
+                                BossGameplayEventSystem.RegisterBoss(boss.bossEntity, boss);
+                                
+                                // Re-initialize mechanics
+                                BossMechanicSystem.InitializeBossMechanics(boss.bossEntity, boss);
+                                
+                                // Clear drop table if configured
+                                if (PluginConfig.ClearDropTable.Value)
+                                {
+                                    Bloody.Core.Patch.Server.ActionScheduler.RunActionOnceAfterFrames(() => {
+                                        boss.ClearDropTable(boss.bossEntity);
+                                    }, 10);
+                                }
+                                
+                                BLogger.Info(LogCategory.Boss, $"[STARTUP] Boss '{boss.name}' fully reconfigured");
+                            }
+                            else
+                            {
+                                BLogger.Warning(LogCategory.Boss, $"[STARTUP] No online users found to reapply boss '{boss.name}' configuration");
+                                _needsBossReconfiguration = true;
+                            }
+                            
+                            // ALWAYS register for tracking, even without users
+                            BossTrackingSystem.RegisterSpawnedBoss(boss.bossEntity, boss);
+                            BossGameplayEventSystem.RegisterBoss(boss.bossEntity, boss);
                             
                             // Try to find and update the icon
                             if (boss.iconEntity == Entity.Null || !entityManager.Exists(boss.iconEntity))
@@ -311,6 +358,46 @@ public class Plugin : BasePlugin
                                 BLogger.Info(LogCategory.Boss, $"[STARTUP] Boss '{boss.name}' entity name updated to '{newGuid}bb'");
                             }
                             
+                            // IMPORTANT: Reapply boss configuration after entity re-link
+                            BLogger.Info(LogCategory.Boss, $"[STARTUP] Reapplying configuration to re-linked boss '{boss.name}'");
+                            
+                            // Get first online user for ModifyBoss
+                            var userModel = Bloody.Core.GameData.v1.GameData.Users.Online.FirstOrDefault();
+                            if (userModel != null)
+                            {
+                                // Reapply all boss modifications
+                                boss.ModifyBoss(userModel.Entity, foundEntity);
+                                
+                                // Reapply team configuration
+                                BossSystem.CheckTeams(foundEntity);
+                                
+                                // Re-register for tracking
+                                BossTrackingSystem.RegisterSpawnedBoss(foundEntity, boss);
+                                BossGameplayEventSystem.RegisterBoss(foundEntity, boss);
+                                
+                                // Re-initialize mechanics
+                                BossMechanicSystem.InitializeBossMechanics(foundEntity, boss);
+                                
+                                // Clear drop table if configured
+                                if (PluginConfig.ClearDropTable.Value)
+                                {
+                                    Bloody.Core.Patch.Server.ActionScheduler.RunActionOnceAfterFrames(() => {
+                                        boss.ClearDropTable(foundEntity);
+                                    }, 10);
+                                }
+                                
+                                BLogger.Info(LogCategory.Boss, $"[STARTUP] Re-linked boss '{boss.name}' fully reconfigured");
+                            }
+                            else
+                            {
+                                BLogger.Warning(LogCategory.Boss, $"[STARTUP] No online users found to reapply re-linked boss '{boss.name}' configuration");
+                                _needsBossReconfiguration = true;
+                            }
+                            
+                            // ALWAYS register for tracking, even without users
+                            BossTrackingSystem.RegisterSpawnedBoss(foundEntity, boss);
+                            BossGameplayEventSystem.RegisterBoss(foundEntity, boss);
+                            
                             // Try to find and update the icon
                             var iconEntities = QueryComponents.GetEntitiesByComponentTypes<NameableInteractable, MapIconData>(EntityQueryOptions.IncludeDisabledEntities);
                             foreach (var iconEntity in iconEntities)
@@ -337,15 +424,29 @@ public class Plugin : BasePlugin
                         }
                     }
                     
-                    // If boss doesn't exist, clean up its state
+                    // Update boss state based on existence
                     if (!bossExists)
                     {
-                        boss.bossSpawn = false;
-                        boss.bossEntity = Entity.Null;
-                        boss.RemoveKillers();
-                        BossMechanicSystem.CleanupBossMechanics(boss);
-                        cleanedCount++;
-                        BLogger.Warning(LogCategory.Boss, $"[STARTUP] Boss '{boss.name}' marked as not spawned (entity not found)");
+                        // Boss doesn't exist, clean up its state
+                        if (boss.bossSpawn)
+                        {
+                            boss.bossSpawn = false;
+                            boss.bossEntity = Entity.Null;
+                            boss.RemoveKillers();
+                            BossMechanicSystem.CleanupBossMechanics(boss);
+                            cleanedCount++;
+                            BLogger.Warning(LogCategory.Boss, $"[STARTUP] Boss '{boss.name}' marked as not spawned (entity not found)");
+                        }
+                    }
+                    else
+                    {
+                        // Boss exists, mark as spawned if not already
+                        if (!boss.bossSpawn)
+                        {
+                            boss.bossSpawn = true;
+                            verifiedCount++;
+                            BLogger.Info(LogCategory.Boss, $"[STARTUP] Boss '{boss.name}' found and marked as spawned");
+                        }
                     }
                 }
             }
@@ -368,6 +469,111 @@ public class Plugin : BasePlugin
         catch (Exception ex)
         {
             Logger.LogError($"[STARTUP] Error during boss state cleanup: {ex.Message}");
+        }
+    }
+
+    private static void OnUserConnected(ServerBootstrapSystem sender, NetConnectionId netConnectionId)
+    {
+        try
+        {
+            BLogger.Warning(LogCategory.Boss, $"[USER ONLINE] OnUserConnected triggered, _needsBossReconfiguration = {_needsBossReconfiguration}");
+            
+            // Get the user entity from the connection
+            var userIndex = sender._NetEndPointToApprovedUserIndex[netConnectionId];
+            var userData = sender._ApprovedUsersLookup[userIndex];
+            var userEntity = userData.UserEntity;
+            
+            // If we need to reconfigure bosses
+            if (_needsBossReconfiguration)
+            {
+                // Delay the reconfiguration to ensure systems are ready
+                Bloody.Core.Patch.Server.ActionScheduler.RunActionOnceAfterDelay(() =>
+                {
+                    BLogger.Warning(LogCategory.Boss, "[USER ONLINE] Reconfiguring existing bosses after user connection");
+                    
+                    // Reconfigure all spawned bosses (removed entity null check as entities might not be set after restart)
+                    foreach (var boss in Database.BOSSES.Where(b => b.bossSpawn))
+                    {
+                        var entityManager = SystemsCore.EntityManager;
+                        
+                        // If boss entity is null, try to find it by name
+                        if (boss.bossEntity == Entity.Null)
+                        {
+                            BLogger.Warning(LogCategory.Boss, $"[USER ONLINE] Boss '{boss.name}' has null entity, searching...");
+                            
+                            // Search for the boss entity by name
+                            var nameableQuery = entityManager.CreateEntityQuery(ComponentType.ReadOnly<NameableInteractable>());
+                            var entities = nameableQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
+                            
+                            for (int i = 0; i < entities.Length; i++)
+                            {
+                                var entity = entities[i];
+                                if (!entityManager.Exists(entity)) continue;
+                                
+                                var nameable = entityManager.GetComponentData<NameableInteractable>(entity);
+                                var entityName = nameable.Name.ToString();
+                                
+                                if (entityName == boss.name || entityName == boss.nameHash + "bb")
+                                {
+                                    boss.bossEntity = entity;
+                                    BLogger.Info(LogCategory.Boss, $"[USER ONLINE] Found boss '{boss.name}' entity: {entity}");
+                                    break;
+                                }
+                            }
+                            
+                            entities.Dispose();
+                            nameableQuery.Dispose();
+                        }
+                        
+                        if (entityManager.Exists(boss.bossEntity))
+                        {
+                            BLogger.Info(LogCategory.Boss, $"[USER ONLINE] Reconfiguring boss '{boss.name}'");
+                            
+                            // Reapply all boss modifications
+                            boss.ModifyBoss(userEntity, boss.bossEntity);
+                            
+                            // Reapply team configuration
+                            BossSystem.CheckTeams(boss.bossEntity);
+                            
+                            // Re-register for tracking if not already tracked
+                            if (!BossTrackingSystem.TryGetBossByName(boss.name, out _))
+                            {
+                                BossTrackingSystem.RegisterSpawnedBoss(boss.bossEntity, boss);
+                                BossGameplayEventSystem.RegisterBoss(boss.bossEntity, boss);
+                            }
+                            
+                            // Re-initialize mechanics
+                            BossMechanicSystem.InitializeBossMechanics(boss.bossEntity, boss);
+                            
+                            // Clear drop table if configured
+                            if (PluginConfig.ClearDropTable.Value)
+                            {
+                                Bloody.Core.Patch.Server.ActionScheduler.RunActionOnceAfterFrames(() => {
+                                    boss.ClearDropTable(boss.bossEntity);
+                                }, 10);
+                            }
+                            
+                            BLogger.Info(LogCategory.Boss, $"[USER ONLINE] Boss '{boss.name}' reconfigured successfully");
+                        }
+                        else if (boss.bossEntity != Entity.Null)
+                        {
+                            BLogger.Warning(LogCategory.Boss, $"[USER ONLINE] Boss '{boss.name}' entity no longer exists, clearing");
+                            boss.bossEntity = Entity.Null;
+                            boss.bossSpawn = false;
+                        }
+                    }
+                    
+                    // Save database if any boss entities were updated
+                    Database.saveDatabase();
+                    
+                    _needsBossReconfiguration = false;
+                    BLogger.Info(LogCategory.Boss, "[USER ONLINE] Boss reconfiguration complete");
+                }, 2.0f); // 2 second delay
+            }
+        }
+        catch (Exception ex)
+        {
+            BLogger.Error(LogCategory.Boss, $"[USER ONLINE] Error reconfiguring bosses: {ex.Message}");
         }
     }
 

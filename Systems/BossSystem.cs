@@ -180,35 +180,31 @@ namespace BloodyBoss.Systems
         {
             if (PluginConfig.TeamBossEnable.Value)
             {
-                Plugin.BLogger.Warning(LogCategory.Boss, "Adding the same team to the boss");
+                var entityManager = Plugin.SystemsCore.EntityManager;
+                if (!entityManager.Exists(boss))
+                    return;
+
+                // If no default team set yet, use this boss's team as the default
                 if (Database.TeamDefault == null)
                 {
-                    var entityManager = Plugin.SystemsCore.EntityManager;
-                    if (entityManager.Exists(boss))
-                    {
-                        Database.TeamDefault = entityManager.GetComponentData<Team>(boss);
-                        Database.TeamReferenceDefault = entityManager.GetComponentData<TeamReference>(boss);
-                    }
-                    Plugin.BLogger.Warning(LogCategory.Boss, "There is no team created, so we create the new Team");
+                    Plugin.BLogger.Warning(LogCategory.Boss, "First boss spawned, setting as default team");
+                    Database.TeamDefault = entityManager.GetComponentData<Team>(boss);
+                    Plugin.BLogger.Info(LogCategory.Boss, $"Default team set to: {Database.TeamDefault.Value.Value}");
+                    
+                    // TeamReference will be handled by BossTrackingSystem when it becomes valid
                 }
                 else
                 {
-                    Plugin.BLogger.Warning(LogCategory.Boss, "There is a team created, we are going to apply the same team to the boss.");
-                    var entityManager = Plugin.SystemsCore.EntityManager;
-                    if (!entityManager.Exists(boss))
-                        return;
+                    // Apply the default team to this boss
+                    var currentTeam = entityManager.GetComponentData<Team>(boss);
                     
-                    var TeamActual = entityManager.GetComponentData<Team>(boss);
-                    var TeamReferenceActual = entityManager.GetComponentData<TeamReference>(boss);
-                    var Team = Database.TeamDefault ?? new();
-                    var TeamReference = Database.TeamReferenceDefault ?? new();
-                    /*if (Team.Value == TeamActual.Value && TeamReference.Value.Value == TeamReferenceActual.Value.Value) {
-                        Plugin.BLogger.Warning(LogCategory.Boss, "You already have the same equipment applied, we skip this step.");
-                        return; 
-                    }*/
-                    entityManager.SetComponentData(boss, Team);
-                    entityManager.SetComponentData(boss, TeamReference);
-                    Plugin.BLogger.Warning(LogCategory.Boss, "We apply the changes so that they are from the same team.");
+                    if (currentTeam.Value != Database.TeamDefault.Value.Value)
+                    {
+                        entityManager.SetComponentData(boss, Database.TeamDefault.Value);
+                        Plugin.BLogger.Info(LogCategory.Boss, $"Boss team changed from {currentTeam.Value} to {Database.TeamDefault.Value.Value}");
+                        
+                        // TeamReference will be synced by BossTrackingSystem after the game creates it
+                    }
                 }
             }
         } 

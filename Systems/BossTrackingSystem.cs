@@ -39,6 +39,10 @@ namespace BloodyBoss.Systems
             public DateTime NextMechanicCheck { get; set; }
             public DateTime SpawnTime { get; set; }
             public bool NeedsTeamCheck { get; set; }
+            public float LastHealthPercent { get; set; } = 100f;
+            public bool WasEngaged { get; set; } = false;
+            public bool NeedsTeamReferenceSync { get; set; } = false;
+            public TeamReference? StoredTeamReference { get; set; } = null;
         }
         
         /// <summary>
@@ -122,6 +126,10 @@ namespace BloodyBoss.Systems
                 if (!entityManager.Exists(entity))
                 {
                     Plugin.BLogger.Info(LogCategory.Boss, $"[BossTracking] Boss {tracked.Model.name} entity no longer exists (despawned by LifeTime)");
+                    
+                    // Clean up minions before removing boss
+                    MinionTrackingSystem.OnBossDeathOrDespawn(entity);
+                    
                     entitiesToRemove.Add(entity);
                     
                     // Perform cleanup since entity was despawned (not killed)
@@ -143,15 +151,51 @@ namespace BloodyBoss.Systems
                     continue;
                 }
                 
-                // Check if boss is dead
+                // Check if boss is dead or has regenerated
                 if (entity.Has<ProjectM.Health>())
                 {
                     var health = entity.Read<ProjectM.Health>();
                     if (health.Value <= 0)
                     {
+                        // Boss is dead, clean up minions first
+                        MinionTrackingSystem.OnBossDeathOrDespawn(entity);
                         entitiesToRemove.Add(entity);
                         continue;
                     }
+                    
+                    // Calculate current health percentage
+                    float currentHealthPercent = (health.Value / health.MaxHealth.Value) * 100f;
+                    
+                    // Check if boss has regenerated back to full health after being engaged
+                    if (tracked.WasEngaged && currentHealthPercent >= 99f && tracked.LastHealthPercent < 99f)
+                    {
+                        Plugin.BLogger.Info(LogCategory.Boss, $"[BossTracking] Boss {tracked.Model.name} regenerated to full health, resetting mechanics");
+                        
+                        // Reset all mechanics
+                        foreach (var mechanic in tracked.Model.Mechanics)
+                        {
+                            mechanic.Reset();
+                        }
+                        
+                        // Reset boss start time for time-based mechanics
+                        var bossKey = $"{tracked.Model.nameHash}";
+                        BossMechanicSystem.InitializeBossMechanics(entity, tracked.Model);
+                        
+                        // Save the database to persist the reset
+                        Database.saveDatabase();
+                        
+                        // Reset tracking flags
+                        tracked.WasEngaged = false;
+                    }
+                    
+                    // Mark as engaged if health drops below 95%
+                    if (currentHealthPercent < 95f)
+                    {
+                        tracked.WasEngaged = true;
+                    }
+                    
+                    // Update last health percent
+                    tracked.LastHealthPercent = currentHealthPercent;
                 }
                 
                 // Despawn check removed - now handled by EntityDestroyHook
@@ -170,6 +214,62 @@ namespace BloodyBoss.Systems
                 {
                     BossSystem.CheckTeams(entity);
                     tracked.NeedsTeamCheck = false;
+                    
+                    // If this is the first boss, store its TeamReference when it's valid
+                    if (Database.TeamDefault != null && Database.TeamReferenceDefault == null)
+                    {
+                        if (entityManager.HasComponent<TeamReference>(entity))
+                        {
+                            var teamRef = entityManager.GetComponentData<TeamReference>(entity);
+                            if (teamRef.Value._Value != Entity.Null)
+                            {
+                                Database.TeamReferenceDefault = teamRef;
+                                Plugin.BLogger.Warning(LogCategory.Boss, $"[BossTracking] Stored valid TeamReference from first boss");
+                            }
+                            else
+                            {
+                                tracked.NeedsTeamReferenceSync = true;
+                                Plugin.BLogger.Debug(LogCategory.Boss, $"[BossTracking] First boss TeamReference still null, will retry");
+                            }
+                        }
+                    }
+                    else if (Database.TeamReferenceDefault.HasValue)
+                    {
+                        // Mark other bosses to sync TeamReference
+                        tracked.NeedsTeamReferenceSync = true;
+                        tracked.StoredTeamReference = Database.TeamReferenceDefault;
+                    }
+                }
+                
+                // TeamReference sync check (wait for valid TeamReference)
+                if (tracked.NeedsTeamReferenceSync)
+                {
+                    if (entityManager.HasComponent<TeamReference>(entity))
+                    {
+                        var currentTeamRef = entityManager.GetComponentData<TeamReference>(entity);
+                        
+                        // If this is the first boss and we're waiting for a valid TeamReference
+                        if (Database.TeamReferenceDefault == null && currentTeamRef.Value._Value != Entity.Null)
+                        {
+                            Database.TeamReferenceDefault = currentTeamRef;
+                            tracked.NeedsTeamReferenceSync = false;
+                            Plugin.BLogger.Warning(LogCategory.Boss, $"[BossTracking] First boss now has valid TeamReference, storing it");
+                            
+                            // Mark all other tracked bosses to sync
+                            foreach (var otherBoss in _activeBosses.Values.Where(b => b != tracked))
+                            {
+                                otherBoss.NeedsTeamReferenceSync = true;
+                                otherBoss.StoredTeamReference = currentTeamRef;
+                            }
+                        }
+                        // If we have a stored TeamReference to apply
+                        else if (tracked.StoredTeamReference.HasValue && currentTeamRef.Value._Value != tracked.StoredTeamReference.Value.Value._Value)
+                        {
+                            entityManager.SetComponentData(entity, tracked.StoredTeamReference.Value);
+                            tracked.NeedsTeamReferenceSync = false;
+                            Plugin.BLogger.Warning(LogCategory.Boss, $"[BossTracking] Applied stored TeamReference to boss {tracked.Model.name}");
+                        }
+                    }
                 }
             }
             
@@ -178,6 +278,9 @@ namespace BloodyBoss.Systems
             {
                 UnregisterBoss(entity);
             }
+            
+            // Update minion tracking
+            MinionTrackingSystem.UpdateMinions();
         }
         
         

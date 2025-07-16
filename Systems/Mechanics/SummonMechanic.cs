@@ -49,6 +49,12 @@ namespace BloodyBoss.Systems.Mechanics
                     SetupSummonedAdd(addEntity, bossEntity, despawnOnBossDeath);
                     spawnedAdds.Add(addEntity);
                     
+                    // Register summon for tracking
+                    if (despawnOnBossDeath)
+                    {
+                        MinionTrackingSystem.RegisterMinion(addEntity, bossEntity, "summon");
+                    }
+                    
                     Plugin.BLogger.Info(LogCategory.Mechanic, $"Spawned add at position {position}");
                 });
             }
@@ -119,12 +125,10 @@ namespace BloodyBoss.Systems.Mechanics
                 addEntity.Write(bossTeam);
             }
             
-            // Set faction alliance to match boss
-            if (bossEntity.Has<FactionReference>() && addEntity.Has<FactionReference>())
-            {
-                var bossFaction = bossEntity.Read<FactionReference>();
-                addEntity.Write(bossFaction);
-            }
+            // TeamReference will be handled by the game based on Team
+            
+            // Important: Do NOT modify FactionReference - let the summon keep its original faction
+            // This preserves the summon's AI behavior with its faction
             
             // Apply aggro settings
             if (addEntity.Has<AggroConsumer>())

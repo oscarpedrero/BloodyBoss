@@ -11,6 +11,7 @@ using VampireCommandFramework;
 using Bloody.Core.GameData.v1;
 using Stunlock.Core;
 using ProjectM;
+using ProjectM.Shared;
 using Bloody.Core.Helper.v1;
 using Unity.Entities;
 using System.Linq;
@@ -271,28 +272,32 @@ namespace BloodyBoss.Command
                 int iconsRemoved = 0;
                 int databaseUpdated = 0;
                 
-                // 1. Clean up all spawned bosses
+                // 1. Clean up ALL bosses from database (regardless of spawn state)
                 foreach (var boss in Database.BOSSES.ToList())
                 {
-                    if (boss.bossSpawn)
+                    try
                     {
-                        try
+                        bool updated = false;
+                        
+                        // Remove boss entity if exists
+                        if (boss.bossEntity != Entity.Null && entityManager.Exists(boss.bossEntity))
                         {
-                            // Remove boss entity
-                            if (boss.bossEntity != Entity.Null && entityManager.Exists(boss.bossEntity))
-                            {
-                                StatChangeUtility.KillOrDestroyEntity(entityManager, boss.bossEntity, userModel.Entity, userModel.Entity, 0, StatChangeReason.Any, true);
-                                bossesRemoved++;
-                            }
-                            
-                            // Remove icon entity
-                            if (boss.iconEntity != Entity.Null && entityManager.Exists(boss.iconEntity))
-                            {
-                                StatChangeUtility.KillOrDestroyEntity(entityManager, boss.iconEntity, userModel.Entity, userModel.Entity, 0, StatChangeReason.Any, true);
-                                iconsRemoved++;
-                            }
-                            
-                            // Update boss state
+                            StatChangeUtility.KillOrDestroyEntity(entityManager, boss.bossEntity, userModel.Entity, userModel.Entity, 0, StatChangeReason.Any, true);
+                            bossesRemoved++;
+                            updated = true;
+                        }
+                        
+                        // Remove icon entity if exists
+                        if (boss.iconEntity != Entity.Null && entityManager.Exists(boss.iconEntity))
+                        {
+                            StatChangeUtility.KillOrDestroyEntity(entityManager, boss.iconEntity, userModel.Entity, userModel.Entity, 0, StatChangeReason.Any, true);
+                            iconsRemoved++;
+                            updated = true;
+                        }
+                        
+                        // Update boss state (always reset state)
+                        if (boss.bossSpawn || updated)
+                        {
                             boss.bossSpawn = false;
                             boss.bossEntity = Entity.Null;
                             boss.iconEntity = Entity.Null;
@@ -300,10 +305,10 @@ namespace BloodyBoss.Command
                             BossMechanicSystem.CleanupBossMechanics(boss);
                             databaseUpdated++;
                         }
-                        catch (Exception ex)
-                        {
-                            Plugin.BLogger.Warning(LogCategory.Boss, $"Error cleaning boss {boss.name}: {ex.Message}");
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Plugin.BLogger.Warning(LogCategory.Boss, $"Error cleaning boss {boss.name}: {ex.Message}");
                     }
                 }
                 
@@ -316,21 +321,41 @@ namespace BloodyBoss.Command
                         var nameable = entity.Read<NameableInteractable>();
                         var entityName = nameable.Name.ToString();
                         
-                        // Check if it's a BloodyBoss entity (ends with "bb")
+                        // Check if it's a BloodyBoss entity (ends with "bb") OR matches a boss name
+                        bool isBloodyBoss = false;
+                        
+                        // Pattern 1: nameHash + "bb"
                         if (entityName.EndsWith("bb") && entityName.Length >= 34) // 32 chars GUID + "bb"
                         {
                             var nameHash = entityName.Substring(0, entityName.Length - 2);
-                            
-                            // Check if this nameHash exists in our database
-                            bool foundInDatabase = Database.BOSSES.Any(b => b.nameHash == nameHash);
-                            
-                            if (!foundInDatabase)
+                            isBloodyBoss = Database.BOSSES.Any(b => b.nameHash == nameHash);
+                        }
+                        
+                        // Pattern 2: Direct boss name match
+                        if (!isBloodyBoss)
+                        {
+                            isBloodyBoss = Database.BOSSES.Any(b => b.name == entityName);
+                        }
+                        
+                        // If it's a BloodyBoss pattern, remove it
+                        if (isBloodyBoss || (entityName.EndsWith("bb") && entityName.Length >= 34))
+                        {
+                            // Clear drop table before destroying to prevent vanilla drops
+                            try
                             {
-                                // Orphaned boss entity, remove it
-                                StatChangeUtility.KillOrDestroyEntity(entityManager, entity, userModel.Entity, userModel.Entity, 0, StatChangeReason.Any, true);
-                                bossesRemoved++;
-                                Plugin.BLogger.Info(LogCategory.Boss, $"Removed orphaned boss entity: {entityName}");
+                                var dropTableBuffer = entity.ReadBuffer<DropTableBuffer>();
+                                dropTableBuffer.Clear();
+                                Plugin.BLogger.Debug(LogCategory.Boss, $"Cleared drop table for boss entity: {entityName}");
                             }
+                            catch (Exception ex)
+                            {
+                                Plugin.BLogger.Debug(LogCategory.Boss, $"Could not clear drop table: {ex.Message}");
+                            }
+                            
+                            // This is a BloodyBoss entity (orphaned or not), remove it
+                            StatChangeUtility.KillOrDestroyEntity(entityManager, entity, userModel.Entity, userModel.Entity, 0, StatChangeReason.Any, true);
+                            bossesRemoved++;
+                            Plugin.BLogger.Info(LogCategory.Boss, $"Removed boss entity: {entityName}");
                         }
                     }
                     catch (Exception ex)

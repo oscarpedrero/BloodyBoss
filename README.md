@@ -1,8 +1,21 @@
-# BloodyBoss v2.1.2
+# BloodyBoss v2.1.3
 
 **BloodyBoss** is an advanced mod for V Rising that allows you to create dynamic VBlood world bosses with intelligent scaling, progressive difficulty, and extensive customization options. Create epic encounters that adapt to your player base and provide engaging challenges for solo players and large groups alike.
 
-## 🆕 What's New in v2.1.2
+## 🆕 What's New in v2.1.3
+
+### 🔧 **Critical Fixes**
+- **Boss persistence on server restart** - Bosses now properly retain all custom configurations after server restarts
+- **TeamReference synchronization** - Fixed Entity.Null errors with smart team synchronization system
+- **Cleanup command improved** - Now properly clears drop tables to prevent vanilla drops
+
+### ✨ **New Features**
+- **Smart boss recovery** - Automatic entity detection and re-linking on server startup
+- **Deferred reconfiguration** - Boss settings are reapplied when players connect after restart
+- **Mechanic reset system** - Boss mechanics automatically reset when boss regenerates to full health
+- **Minion tracking system** - Clones and summons are now properly tracked and destroyed when boss dies
+
+## 📜 Previous Updates - v2.1.2
 
 ### ✨ **New Features**
 - **Item reward notifications** - Players now receive private chat messages showing each item received from boss kills
@@ -333,6 +346,19 @@ If you enjoy BloodyBoss and want to support continued development:
 
 <details>
 <summary>Version History</summary>
+
+### `2.1.3` - Boss Persistence & Team System Improvements
+- 🐛 **FIXED**: Boss configuration loss on server restart - bosses now properly retain all custom settings
+- 🐛 **FIXED**: TeamReference synchronization issues causing Entity.Null errors
+- 🐛 **FIXED**: Cleanup command now clears drop tables to prevent vanilla drops
+- 🐛 **FIXED**: Clone and summon mechanics now properly despawn minions when boss dies
+- ✨ **NEW**: Smart boss entity detection and re-linking on server startup
+- ✨ **NEW**: Deferred boss reconfiguration when players connect after restart
+- ✨ **NEW**: Minion tracking system ensures clones/summons are cleaned up properly
+- 🔧 **IMPROVED**: Boss mechanic reset system when boss regenerates to full health
+- 🔧 **IMPROVED**: Team system now uses smart synchronization for TeamReference
+- 🔧 **IMPROVED**: More robust boss tracking during server lifecycle events
+- 🔧 **IMPROVED**: Clone mechanic LifeTime properly applied with EndAction.Destroy
 
 ### `2.1.2` - Reward Improvements & Bug Fixes
 - 🐛 **FIXED**: Vanilla bosses no longer grant mod rewards when killed - only mod-spawned bosses drop configured items
