@@ -296,6 +296,25 @@ namespace BloodyBoss.DB.Models
                             var itemGuid = new PrefabGUID(item.ItemID);
                             var stacks = item.Stack;
 
+                            // Send chat message to player about received item
+                            try
+                            {
+                                var itemNameColored = $"<color={item.Color}>{item.name}</color>";
+                                var itemMessage = $"You received: {itemNameColored} x{stacks}";
+                                Plugin.BLogger.Info(LogCategory.Boss, $"Sending item message to {user}: {itemMessage}");
+                                
+                                // Get user component and send message
+                                var userEntity = Plugin.SystemsCore.EntityManager.GetComponentData<PlayerCharacter>(player.Character.Entity).UserEntity;
+                                var userComponent = Plugin.SystemsCore.EntityManager.GetComponentData<User>(userEntity);
+                                FixedString512Bytes unityMessage = itemMessage;
+                                ServerChatUtils.SendSystemMessageToClient(Core.World.EntityManager, userComponent, ref unityMessage);
+                                Plugin.BLogger.Info(LogCategory.Boss, $"Chat message sent successfully to {user}");
+                            }
+                            catch (Exception ex)
+                            {
+                                Plugin.BLogger.Error(LogCategory.Boss, $"Error sending chat message to {user}: {ex.Message}");
+                            }
+
                             if(!player.TryGiveItem(itemGuid, stacks, out Entity itemEntity)){
                                 player.DropItemNearby(itemGuid, stacks);
                                 Plugin.BLogger.Info(LogCategory.Boss, $"Item dropped near player {user}");

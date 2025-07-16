@@ -1,8 +1,17 @@
-# BloodyBoss v2.1.1
+# BloodyBoss v2.1.2
 
 **BloodyBoss** is an advanced mod for V Rising that allows you to create dynamic VBlood world bosses with intelligent scaling, progressive difficulty, and extensive customization options. Create epic encounters that adapt to your player base and provide engaging challenges for solo players and large groups alike.
 
-## 🆕 What's New in v2.1.1
+## 🆕 What's New in v2.1.2
+
+### ✨ **New Features**
+- **Item reward notifications** - Players now receive private chat messages showing each item received from boss kills
+- **Customizable item colors** - Each reward item can have its own color in chat messages using the `Color` configuration
+
+### 🐛 **Critical Bug Fix**
+- **Fixed vanilla boss rewards** - Vanilla bosses no longer give mod-configured rewards when killed. Only bosses spawned by BloodyBoss will drop the configured items
+
+## 📜 Previous Updates - v2.1.1
 
 ### 🔧 **Bug Fixes & Improvements**
 - **Boss persistence fix** - Bosses are now properly validated on server restart, preventing invalid entities
@@ -325,6 +334,12 @@ If you enjoy BloodyBoss and want to support continued development:
 <details>
 <summary>Version History</summary>
 
+### `2.1.2` - Reward Improvements & Bug Fixes
+- 🐛 **FIXED**: Vanilla bosses no longer grant mod rewards when killed - only mod-spawned bosses drop configured items
+- ✨ **NEW**: Players now receive private chat notifications for each item received, with customizable color formatting
+- 🔧 **IMPROVED**: Boss identification system now properly validates boss entities before processing rewards
+- 🔧 **IMPROVED**: Item reward messages respect the configured color for each item in the boss configuration
+
 ### `2.1.1` - Bug Fixes & Stability Improvements
 - 🐛 **FIXED**: Boss persistence validation on server restart
 - 🐛 **FIXED**: Hash collision prevention using GUID instead of GetHashCode
@@ -373,4 +388,4 @@ If you enjoy BloodyBoss and want to support continued development:
 
 ---
 
-*BloodyBoss v2.1.0 - Creating legendary encounters for V Rising servers worldwide* 🧛‍♂️⚔️
+*BloodyBoss v2.1.2 - Creating legendary encounters for V Rising servers worldwide* 🧛‍♂️⚔️

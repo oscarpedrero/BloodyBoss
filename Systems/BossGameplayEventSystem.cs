@@ -468,9 +468,30 @@ namespace BloodyBoss.Systems
                     var modelBosses = Database.BOSSES.Where(x => x.AssetName == vblood.ToString() && x.bossSpawn == true).ToList();
                     foreach (var modelBoss in modelBosses)
                     {
+                        // CRITICAL: Verify this is actually OUR boss by checking the custom name
+                        if (!modelBoss.GetBossEntity() || !modelBoss.bossEntity.Has<NameableInteractable>())
+                        {
+                            Plugin.BLogger.Debug(LogCategory.Death, $"Skipping boss {modelBoss.name} - entity not valid");
+                            continue;
+                        }
+                        
+                        var nameableInteractable = modelBoss.bossEntity.Read<NameableInteractable>();
+                        if (nameableInteractable.Name.Value != (modelBoss.nameHash + "bb"))
+                        {
+                            Plugin.BLogger.Debug(LogCategory.Death, $"Skipping boss {modelBoss.name} - name mismatch (expected: {modelBoss.nameHash}bb, actual: {nameableInteractable.Name.Value})");
+                            continue;
+                        }
+                        
                         if (modelBoss.vbloodFirstKill)
                         {
                             // First kill already processed
+                            // Unregister from tracking systems
+                            if (modelBoss.GetBossEntity())
+                            {
+                                UnregisterBoss(modelBoss.bossEntity);
+                                BossTrackingSystem.UnregisterBoss(modelBoss.bossEntity);
+                            }
+                            
                             modelBoss.AddKiller(user.CharacterName.ToString());
                             modelBoss.BuffKillers();
                         } 
@@ -483,6 +504,10 @@ namespace BloodyBoss.Systems
                                 if (health.IsDead || health.Value == 0)
                                 {
                                     Plugin.BLogger.Info(LogCategory.Death, $"VBlood boss {modelBoss.name} killed for first time");
+                                    
+                                    // Unregister from tracking systems
+                                    UnregisterBoss(modelBoss.bossEntity);
+                                    BossTrackingSystem.UnregisterBoss(modelBoss.bossEntity);
                                     
                                     modelBoss.vbloodFirstKill = true;
                                     modelBoss.AddKiller(user.CharacterName.ToString());
@@ -540,6 +565,20 @@ namespace BloodyBoss.Systems
                         {
                             modelBoss.GetBossEntity();
                             
+                            // CRITICAL: Verify this is actually OUR boss by checking the custom name
+                            if (!modelBoss.bossEntity.Has<NameableInteractable>())
+                            {
+                                Plugin.BLogger.Debug(LogCategory.Death, $"Skipping boss {modelBoss.name} - no NameableInteractable");
+                                continue;
+                            }
+                            
+                            var nameableInteractable = modelBoss.bossEntity.Read<NameableInteractable>();
+                            if (nameableInteractable.Name.Value != (modelBoss.nameHash + "bb"))
+                            {
+                                Plugin.BLogger.Debug(LogCategory.Death, $"Skipping boss {modelBoss.name} - name mismatch (expected: {modelBoss.nameHash}bb, actual: {nameableInteractable.Name.Value})");
+                                continue;
+                            }
+                            
                             // Skip VBlood units (handled by OnVBloodConsumed)
                             if (modelBoss.bossEntity.Has<VBloodUnit>())
                             {
@@ -567,12 +606,11 @@ namespace BloodyBoss.Systems
                         {
                             Plugin.BLogger.Error(LogCategory.Death, "Error processing boss death", ex);
                             
-                            // Handle entity not exist case
+                            // Handle entity not exist case - but only if we verified the name first
                             if (ex.Message.Contains("The entity does not exist"))
                             {
-                                modelBoss.AddKiller(user.CharacterName.ToString());
-                                modelBoss.BuffKillers();
-                                modelBoss.SendAnnouncementMessage();
+                                // Don't process rewards if we can't verify it's our boss
+                                Plugin.BLogger.Warning(LogCategory.Death, $"Cannot verify boss {modelBoss.name} identity - skipping rewards");
                             }
                         }
                     }
