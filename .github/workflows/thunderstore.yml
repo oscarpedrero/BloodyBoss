@@ -39,6 +39,7 @@ jobs:
           cp README.md thunderstore_package/
           cp icon.png thunderstore_package/
           cp manifest.json thunderstore_package/
+          cp thunderstore.toml thunderstore_package/
           
           # Verify all required files exist
           echo "Package contents:"
