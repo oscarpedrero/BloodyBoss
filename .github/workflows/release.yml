@@ -1,46 +1,119 @@
 name: Release
 
 on:
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
-      tag_name:
+      version:
+        description: 'Version to release (e.g., 2.1.3)'
         required: true
-        description: The tag to release.
         type: string
+      release_notes:
+        description: 'Release notes (optional)'
+        required: false
+        type: string
+        default: ''
 
 jobs:
-  release_on_thunderstore:
-    env:
-      RELEASE_TAG: ${{ github.event.inputs.tag_name || github.event.release.tag_name }}
+  release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
         with:
           dotnet-version: 6.0.x
-      - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v0.9.7
-        with:
-          versionSpec: "5.x"
-      - name: Determine Version
-        uses: gittools/actions/gitversion/execute@v0.9.7
-        with:
-          additionalArguments: '/overrideconfig "mode=Mainline"'
-      - name: Download Release
-        run: gh release download ${{ env.RELEASE_TAG }} -D ./dist
+
+      - name: Update version in files
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          
+          # Update .csproj
+          sed -i "s/<Version>.*<\/Version>/<Version>$VERSION<\/Version>/" BloodyBoss.csproj
+          
+          # Update manifest.json
+          sed -i "s/\"version_number\": \".*\"/\"version_number\": \"$VERSION\"/" manifest.json
+          
+          # Update thunderstore.toml
+          sed -i "s/versionNumber = \".*\"/versionNumber = \"$VERSION\"/" thunderstore.toml
+          
+          # Update README.md header
+          sed -i "s/# BloodyBoss v.*/# BloodyBoss v$VERSION/" README.md
+          
+          # Update README.md footer
+          sed -i "s/\*BloodyBoss v.* -/\*BloodyBoss v$VERSION -/" README.md
+
+      - name: Build project
+        run: |
+          dotnet restore
+          dotnet build --configuration Release -p:Version=${{ github.event.inputs.version }}
+
+      - name: Create release package
+        run: |
+          mkdir -p dist
+          cp bin/Release/net6.0/BloodyBoss.dll dist/
+          cp README.md dist/
+          cp CHANGELOG.md dist/ 2>/dev/null || true
+          cp icon.png dist/
+          cp manifest.json dist/
+          
+      - name: Commit version changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add BloodyBoss.csproj manifest.json thunderstore.toml README.md
+          git commit -m "chore: bump version to ${{ github.event.inputs.version }}" || echo "No changes to commit"
+          git push
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          release_name: v${{ github.event.inputs.version }}
+          body: |
+            ${{ github.event.inputs.release_notes }}
+            
+            ## Installation
+            Download `BloodyBoss.dll` and place it in your `BepInEx/plugins` folder.
+            
+            **Full Changelog**: https://github.com/${{ github.repository }}/compare/v${{ github.event.inputs.version }}...v${{ github.event.inputs.version }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./bin/Release/net6.0/BloodyBoss.dll
+          asset_name: BloodyBoss.dll
+          asset_content_type: application/octet-stream
+
+      - name: Prepare Thunderstore package
+        run: |
+          mkdir -p thunderstore_package
+          cp bin/Release/net6.0/BloodyBoss.dll thunderstore_package/
+          cp README.md thunderstore_package/
+          cp icon.png thunderstore_package/
+          cp manifest.json thunderstore_package/
+          cp thunderstore.toml .
+
       - name: Install tcli
         run: dotnet tool install --global tcli
-      - name: Run tcli
-        run: tcli publish --token ${{ secrets.THUNDERSTORE_KEY }} --package-version ${RELEASE_TAG:1}
-      - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          path: ./build
+
+      - name: Publish to Thunderstore
+        run: |
+          cd thunderstore_package
+          tcli publish --token ${{ secrets.THUNDERSTORE_KEY }}
+        continue-on-error: true # Continue even if Thunderstore publish fails
