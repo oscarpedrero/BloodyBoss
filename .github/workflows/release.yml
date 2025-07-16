@@ -107,7 +107,6 @@ jobs:
           cp README.md thunderstore_package/
           cp icon.png thunderstore_package/
           cp manifest.json thunderstore_package/
-          cp thunderstore.toml .
 
       - name: Install tcli
         run: dotnet tool install --global tcli
