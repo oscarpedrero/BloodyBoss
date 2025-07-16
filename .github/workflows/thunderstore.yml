@@ -1,0 +1,66 @@
+name: Publish to Thunderstore
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'GitHub release tag to publish (e.g., v2.1.2)'
+        required: true
+        type: string
+
+jobs:
+  thunderstore_publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.release_tag }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Download release assets
+        run: |
+          mkdir -p thunderstore_package
+          # Download the DLL from the GitHub release
+          gh release download ${{ github.event.inputs.release_tag }} \
+            --pattern "*.dll" \
+            --dir thunderstore_package
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prepare Thunderstore package
+        run: |
+          # Copy required files for Thunderstore
+          cp README.md thunderstore_package/
+          cp icon.png thunderstore_package/
+          cp manifest.json thunderstore_package/
+          
+          # Verify all required files exist
+          echo "Package contents:"
+          ls -la thunderstore_package/
+
+      - name: Install Thunderstore CLI
+        run: dotnet tool install --global tcli
+
+      - name: Publish to Thunderstore
+        run: |
+          cd thunderstore_package
+          # Extract version from tag (remove 'v' prefix)
+          VERSION=${{ github.event.inputs.release_tag }}
+          VERSION=${VERSION#v}
+          
+          echo "Publishing version $VERSION to Thunderstore..."
+          tcli publish --token ${{ secrets.THUNDERSTORE_KEY }}
+        env:
+          TCLI_VERSION: ${{ github.event.inputs.release_tag }}
+
+      - name: Success notification
+        if: success()
+        run: |
+          echo "✅ Successfully published ${{ github.event.inputs.release_tag }} to Thunderstore!"
+          echo "Check it out at: https://thunderstore.io/c/v-rising/p/Trodi/BloodyBoss/"
