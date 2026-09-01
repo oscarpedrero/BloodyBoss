@@ -1,4 +1,4 @@
-# BloodyBoss v2.1.4
+# BloodyBoss v2.1.5
 
 **BloodyBoss** is an advanced mod for V Rising that allows you to create dynamic VBlood world bosses with intelligent scaling, progressive difficulty, and extensive customization options. Create epic encounters that adapt to your player base and provide engaging challenges for solo players and large groups alike.
 
@@ -414,4 +414,4 @@ If you enjoy BloodyBoss and want to support continued development:
 
 ---
 
-*BloodyBoss v2.1.4 - Creating legendary encounters for V Rising servers worldwide* 🧛‍♂️⚔️
+*BloodyBoss v2.1.5 - Creating legendary encounters for V Rising servers worldwide* 🧛‍♂️⚔️

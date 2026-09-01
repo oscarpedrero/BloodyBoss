@@ -24,6 +24,7 @@ namespace BloodyBoss.Configuration
         public static ConfigEntry<bool> BuffAfterKillingEnabled { get; private set; }
         public static ConfigEntry<int> BuffAfterKillingPrefabGUID { get; private set; }
         public static ConfigEntry<bool> TeamBossEnable { get; private set; }
+        public static ConfigEntry<int> StuckBossRecoveryTimeoutSeconds { get; private set; }
 
         // Dynamic Scaling Configuration
         public static ConfigEntry<bool> EnableDynamicScaling { get; private set; }
@@ -111,7 +112,7 @@ namespace BloodyBoss.Configuration
             BuffAfterKillingEnabled = _mainConfig.Bind("Main", "BuffAfterKillingEnabled", true, "Deactivates the buff animation received by players who have participated in the battle for three seconds.");
             BuffAfterKillingPrefabGUID = _mainConfig.Bind("Main", "BuffAfterKillingPrefabGUID", -2061047741, "PrefabGUID of the buff received by players who have participated in the battle for three seconds.");
             TeamBossEnable = _mainConfig.Bind("Main", "TeamBossEnable", false, "If you activate this option, the bosses will not attack each other and will team up if two bosses are summoned together..");
-
+            StuckBossRecoveryTimeoutSeconds = _mainConfig.Bind("Main", "StuckBossRecoveryTimeoutSeconds", 10, "Auto-finalizes a boss at 0 HP after this many seconds if no player kill is detected, keeping the schedule running. Set to 0 to disable.");
             // Dynamic Scaling Configuration
             EnableDynamicScaling = _mainConfig.Bind("Dynamic Scaling", "Enable", false, "Enable dynamic scaling based on online players");
             BaseHealthMultiplier = _mainConfig.Bind("Dynamic Scaling", "BaseHealthMultiplier", 1.0f, "Base health multiplier for all bosses");

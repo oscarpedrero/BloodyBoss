@@ -1,6 +1,6 @@
 ﻿{
   "name": "BloodyBoss",
-  "version_number": "2.1.4",
+  "version_number": "2.1.5",
   "website_url": "https://github.com/oscarpedrero/BloodyBoss",
   "description": "BloodyBoss is an advanced mod for V Rising that allows you to create dynamic VBlood world bosses with intelligent scaling, progressive difficulty, phase announcements, and extensive customization options.",
   "dependencies": [

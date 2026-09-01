@@ -44,6 +44,10 @@ namespace BloodyBoss.Systems
             public bool WasEngaged { get; set; } = false;
             public bool NeedsTeamReferenceSync { get; set; } = false;
             public TeamReference? StoredTeamReference { get; set; } = null;
+
+            // Timestamp of when health first hit 0. Used by HandleBossDeath to force
+            // bossSpawn clear if the game never confirms the kill.
+            public DateTime? DeathDetectedAt { get; set; } = null;
         }
 
         /// <summary>
@@ -61,8 +65,8 @@ namespace BloodyBoss.Systems
                 Entity = entity,
                 Model = model,
                 SpawnTime = DateTime.UtcNow,
-                NextDespawnCheck = DateTime.UtcNow.AddSeconds(5),
-                NextMechanicCheck = DateTime.UtcNow.AddSeconds(1),
+                NextDespawnCheck = DateTime.UtcNow.AddSeconds(5), // Check every 5 seconds
+                NextMechanicCheck = DateTime.UtcNow.AddSeconds(1), // Check mechanics every second
                 NeedsTeamCheck = true,
                 // Seed at 100% so HealthMonitorSystem doesn't see a false 0→100 jump
                 // when it first observes this boss before ModifyBoss has run.
@@ -103,9 +107,9 @@ namespace BloodyBoss.Systems
         }
 
         /// <summary>
-        /// Optimized update - only check what needs checking.
-        /// Schedules work on the main thread via ActionScheduler.
-        /// Use this only if you are NOT already on the main thread.
+        /// Only checks what needs checking, to avoid unnecessary work.
+        /// Schedules the update on the main thread via ActionScheduler.
+        /// Use this only if you're not already on the main thread.
         /// </summary>
         public static void UpdateActiveBosses()
         {
@@ -124,9 +128,9 @@ namespace BloodyBoss.Systems
         }
 
         /// <summary>
-        /// Direct update — call this when already running on the main game thread
-        /// (e.g. from inside BossSystem.bossAction which is wrapped in RunActionOnMainThread).
-        /// Avoids scheduling a second RunActionOnMainThread from within one.
+        /// Call this instead when already running on the main game thread
+        /// (e.g. from inside BossSystem.bossAction, which is already wrapped
+        /// in RunActionOnMainThread), to avoid scheduling a second one.
         /// </summary>
         public static void UpdateActiveBossesOnMainThread()
         {
@@ -186,10 +190,18 @@ namespace BloodyBoss.Systems
                     var health = entity.Read<ProjectM.Health>();
                     if (health.Value <= 0)
                     {
-                        // Boss is dead, clean up minions first
-                        MinionTrackingSystem.OnBossDeathOrDespawn(entity);
-                        entitiesToRemove.Add(entity);
+                        if (HandleBossDeath(entity, tracked, now))
+                        {
+                            entitiesToRemove.Add(entity);
+                        }
                         continue;
+                    }
+
+                    // Health went back above 0 before the kill was confirmed, so clear
+                    // the pending death timer for next time.
+                    if (tracked.DeathDetectedAt.HasValue)
+                    {
+                        tracked.DeathDetectedAt = null;
                     }
 
                     // Calculate current health percentage
@@ -227,9 +239,8 @@ namespace BloodyBoss.Systems
                     tracked.LastHealthPercent = currentHealthPercent;
                 }
 
-                // Despawn check removed - now handled by EntityDestroyHook
-                // The LifeTime component will handle despawn automatically
-                // and our hook will detect it for cleanup
+                // Despawn is handled by EntityDestroyHook now: the LifeTime
+                // component destroys the entity and our hook detects it for cleanup.
 
                 // Mechanic check (every second)
                 if (now >= tracked.NextMechanicCheck)
@@ -312,6 +323,53 @@ namespace BloodyBoss.Systems
             MinionTrackingSystem.UpdateMinions();
         }
 
+        /// <summary>
+        /// Runs while a boss's health sits at 0, waiting for OnDeathNpc or
+        /// OnVBloodConsumed to confirm the kill and clear bossSpawn. If nothing
+        /// confirms it within the timeout, forces the same cleanup so the boss
+        /// doesn't stay "active" and block the schedule.
+        /// </summary>
+        /// <returns>True once the boss is finalized and should be removed from tracking.</returns>
+        private static bool HandleBossDeath(Entity entity, TrackedBoss tracked, DateTime now)
+        {
+            if (tracked.DeathDetectedAt == null)
+            {
+                tracked.DeathDetectedAt = now;
+                // Clean up minions right away, regardless of when the kill gets confirmed.
+                MinionTrackingSystem.OnBossDeathOrDespawn(entity);
+                Plugin.BLogger.Info(LogCategory.Boss, $"[BossTracking] Boss {tracked.Model.name} health reached 0, waiting for kill confirmation");
+            }
+
+            var timeoutSeconds = PluginConfig.StuckBossRecoveryTimeoutSeconds.Value;
+            if (timeoutSeconds > 0 && now - tracked.DeathDetectedAt.Value < TimeSpan.FromSeconds(timeoutSeconds))
+            {
+                // Still within the grace period, keep waiting for a normal kill confirmation.
+                return false;
+            }
+
+            if (tracked.Model.bossSpawn)
+            {
+                Plugin.BLogger.Warning(LogCategory.Boss, $"[BossTracking] Boss {tracked.Model.name} died without a confirmed kill, forcing recovery so the schedule doesn't get stuck");
+
+                try
+                {
+                    BossGameplayEventSystem.UnregisterBoss(entity);
+                    tracked.Model.BuffKillers();
+                    tracked.Model.SendAnnouncementMessage();
+                }
+                catch (Exception ex)
+                {
+                    Plugin.BLogger.Error(LogCategory.Boss, $"[BossTracking] Error force-finalizing stuck boss {tracked.Model.name}: {ex.Message}");
+                    // Fallback in case the cleanup above threw partway through, so
+                    // bossSpawn still gets cleared.
+                    tracked.Model.bossSpawn = false;
+                    tracked.Model.bossEntity = Entity.Null;
+                    Database.saveDatabase();
+                }
+            }
+
+            return true;
+        }
 
         private static void CheckMechanics(Entity entity, TrackedBoss tracked)
         {
@@ -339,10 +397,10 @@ namespace BloodyBoss.Systems
         }
 
         /// <summary>
-        /// BUG FIX #11: Returns the last recorded health percentage for a tracked boss entity.
-        /// Used by BossGameplayEventSystem.ProcessStatChangeEvent to supply a correct previousHpPercent
-        /// to CheckHpThresholdMechanics, instead of always passing the hardcoded 100f default.
-        /// Returns 100f if the entity is not tracked (safe fallback — assumes full health).
+        /// Returns the last recorded health percentage for a tracked boss entity.
+        /// Used by BossGameplayEventSystem.ProcessStatChangeEvent to supply a correct
+        /// previousHpPercent to CheckHpThresholdMechanics instead of a hardcoded 100f.
+        /// Returns 100f if the entity isn't tracked (assumes full health).
         /// </summary>
         public static float GetLastHealthPercent(Entity entity)
         {
